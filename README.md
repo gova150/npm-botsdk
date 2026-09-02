@@ -2,9 +2,9 @@
 
 # 🤖 React Native Kore Bot SDK - Sample App
 
-[![NPM Version](https://img.shields.io/npm/v/rn-kore-bot-sdk-v77.svg?style=flat-square)](https://www.npmjs.com/package/rn-kore-bot-sdk-v77)
-[![Platform](https://img.shields.io/badge/platform-ios%20%7C%20android-lightgrey.svg?style=flat-square)](https://github.com/your-repo/react-native-kore-bot-sdk)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/your-repo/react-native-kore-bot-sdk/blob/main/LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/@govardhanboli/rn-kore-bot-sdk-v79.svg?style=flat-square)](https://www.npmjs.com/package/@govardhanboli/rn-kore-bot-sdk-v79)
+[![Platform](https://img.shields.io/badge/platform-ios%20%7C%20android-lightgrey.svg?style=flat-square)](https://github.com/gova150/npm-botsdk)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/gova150/npm-botsdk/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
 
 *Complete sample implementation demonstrating Kore.ai chatbot integration with selective feature loading*
@@ -69,7 +69,7 @@ Get up and running in minutes:
 ```tsx
 import React from 'react';
 import { View } from 'react-native';
-import KoreChat, { BotConfigModel } from 'rn-kore-bot-sdk-v77';
+import KoreChat, { BotConfigModel } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const App = () => {
   const botConfig: BotConfigModel = {
@@ -100,8 +100,8 @@ export default App;
 ### Step 1: Clone & Install Base
 
 ```bash
-git clone <repository-url>
-cd SampleApp
+git clone https://github.com/gova150/npm-botsdk.git
+cd npm-botsdk/RNKoreBotSDK/SampleApp
 npm install
 ```
 
@@ -236,7 +236,7 @@ Add to `android/app/src/main/AndroidManifest.xml`:
 ```tsx
 import React from 'react';
 import { SafeAreaView, StatusBar } from 'react-native';
-import KoreChat, { BotConfigModel, ThemeProvider } from 'rn-kore-bot-sdk-v77';
+import KoreChat, { BotConfigModel, ThemeProvider } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const App = () => {
   const botConfig: BotConfigModel = {
@@ -282,7 +282,7 @@ export default App;
 ### Theme Customization
 
 ```tsx
-import { ThemeProvider } from 'rn-kore-bot-sdk-v77';
+import { ThemeProvider } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const customTheme = {
   primaryColor: '#007AFF',
@@ -303,7 +303,7 @@ const App = () => (
 ### Custom Templates
 
 ```tsx
-import { CustomTemplate } from 'rn-kore-bot-sdk-v77';
+import { CustomTemplate } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const MyCustomButton = new CustomTemplate({
   templateType: 'custom-button',
@@ -380,7 +380,7 @@ The library implements graceful degradation for native modules:
 ### Error Handling
 
 ```tsx
-import { BotException } from 'rn-kore-bot-sdk-v77';
+import { BotException } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 try {
   // Bot operations
@@ -510,8 +510,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-repo/react-native-kore-bot-sdk.git
-cd react-native-kore-bot-sdk
+git clone https://github.com/gova150/npm-botsdk.git
+cd npm-botsdk
 npm install
 ```
 
@@ -538,12 +538,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Need Help?
 
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/your-repo/react-native-kore-bot-sdk/issues)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-red?style=for-the-badge&logo=github)](https://github.com/gova150/npm-botsdk/issues)
 [![Documentation](https://img.shields.io/badge/Docs-Read%20More-blue?style=for-the-badge&logo=gitbook)](https://docs.kore.ai)
 [![Stack Overflow](https://img.shields.io/badge/Stack%20Overflow-Ask%20Question-orange?style=for-the-badge&logo=stackoverflow)](https://stackoverflow.com/questions/tagged/kore-ai)
 
-**Found a bug?** [Open an issue](https://github.com/your-repo/react-native-kore-bot-sdk/issues/new)
-**Have a question?** [Start a discussion](https://github.com/your-repo/react-native-kore-bot-sdk/discussions)
+**Found a bug?** [Open an issue](https://github.com/gova150/npm-botsdk/issues/new)
+**Have a question?** [Start a discussion](https://github.com/gova150/npm-botsdk/discussions)
 **Need enterprise support?** [Contact Kore.ai](https://kore.ai/contact)
 
 </div>
@@ -571,6 +571,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by the Kore.ai Team**
 
-[![Star this repo](https://img.shields.io/github/stars/your-repo/react-native-kore-bot-sdk?style=social)](https://github.com/your-repo/react-native-kore-bot-sdk)
+[![Star this repo](https://img.shields.io/github/stars/gova150/npm-botsdk?style=social)](https://github.com/gova150/npm-botsdk)
 
 </div>

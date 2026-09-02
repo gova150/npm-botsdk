@@ -108,9 +108,9 @@ export default App;
 ### Step 1: Install the Main Package
 
 ```bash
-npm install rn-kore-bot-sdk-v77
+npm install @govardhanboli/rn-kore-bot-sdk-v79
 # or
-yarn add rn-kore-bot-sdk-v77
+yarn add @govardhanboli/rn-kore-bot-sdk-v79
 ```
 
 ### Step 2: Install Dependencies
@@ -442,7 +442,7 @@ const App = () => (
 ### Custom Templates
 
 ```tsx
-import { CustomTemplate } from 'rn-kore-bot-sdk-v77';
+import { CustomTemplate } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const MyCustomButton = new CustomTemplate({
   templateType: 'custom-button',
@@ -530,7 +530,7 @@ import {
   LazyPopover, useLazyPopover,       // Popover menus
   LazyCommunications,                // Phone/SMS/email
   LazyParsedText,                    // Rich text parsing
-} from 'rn-kore-bot-sdk-v77';
+} from '@govardhanboli/rn-kore-bot-sdk-v79';
 ```
 
 #### Loading States & Fallbacks
@@ -565,7 +565,7 @@ import {
 ### Error Handling
 
 ```tsx
-import { BotException } from 'rn-kore-bot-sdk-v77';
+import { BotException } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 try {
   // Bot operations
