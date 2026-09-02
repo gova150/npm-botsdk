@@ -1,0 +1,82 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins {
+    id("com.facebook.react.settings")
+    id('org.gradle.toolchains.foojay-resolver-convention') version '0.10.0'
+}
+
+// Ensure node/npx are in PATH for Android Studio on macOS
+void fixPathEnvironment() {
+    def extraPaths = ["/opt/homebrew/bin", "/usr/local/bin"]
+    def userHome = System.getProperty("user.home")
+    def nvmDir = new File("${userHome}/.nvm/versions/node")
+    if (nvmDir.exists()) {
+        nvmDir.listFiles()?.each { if (it.isDirectory()) extraPaths.add("${it.absolutePath}/bin") }
+    }
+    
+    def currentPath = System.getenv("PATH") ?: ""
+    def pathsToAdd = extraPaths.findAll { new File(it).exists() && !currentPath.contains(it) }
+    if (!pathsToAdd) return
+
+    def newPath = (pathsToAdd + [currentPath]).join(":")
+    
+    try {
+        def processEnv = Class.forName("java.lang.ProcessEnvironment")
+        def envField = processEnv.getDeclaredField("theEnvironment")
+        envField.setAccessible(true)
+        def envMap = (Map) envField.get(null)
+        envMap.put("PATH", newPath)
+        
+        def unmodField = processEnv.getDeclaredField("theUnmodifiableEnvironment")
+        unmodField.setAccessible(true)
+        def unmodMap = (Map) unmodField.get(null)
+        unmodMap.put("PATH", newPath)
+    } catch (Throwable ignored) {}
+}
+
+fixPathEnvironment()
+
+def findNodeAndCliCommand() {
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("win")) {
+        return ["cmd", "/c", "npx", "@react-native-community/cli", "config"]
+    }
+
+    def userHome = System.getProperty("user.home")
+    def nodeExec = "node"
+    def possibleNodePaths = [
+        "/opt/homebrew/bin/node",
+        "/usr/local/bin/node",
+        "${userHome}/.nvm/versions/node/${System.getenv('NODE_VERSION') ?: ''}/bin/node",
+        "${userHome}/.asdf/shims/node",
+        "${userHome}/.volta/bin/node"
+    ]
+    for (path in possibleNodePaths) {
+        if (new File(path).exists()) {
+            nodeExec = path
+            break
+        }
+    }
+
+    def cliScript = new File(settingsDir, "../node_modules/@react-native-community/cli/build/bin.js")
+    if (cliScript.exists()) {
+        return [nodeExec, cliScript.canonicalPath, "config"]
+    }
+
+    def npxExec = "npx"
+    def possibleNpxPaths = [
+        "/opt/homebrew/bin/npx",
+        "/usr/local/bin/npx"
+    ]
+    for (path in possibleNpxPaths) {
+        if (new File(path).exists()) {
+            npxExec = path
+            break
+        }
+    }
+    return [npxExec, "@react-native-community/cli", "config"]
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand(findNodeAndCliCommand()) }
+rootProject.name = 'SampleUI'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
