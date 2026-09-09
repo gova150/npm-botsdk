@@ -21,16 +21,27 @@ export default class ChatHeader extends React.Component<
 > {
   static contextType = ThemeContext;
 
-  private renderHeaderView = () => {
-    const theme = this.context as IThemeType;
+  componentDidMount() {
+    this.updateStatusBarColor();
+  }
 
-    const type = theme?.v3?.header?.size;
+  componentDidUpdate() {
+    this.updateStatusBarColor();
+  }
 
+  private updateStatusBarColor = () => {
     try {
+      const theme = this.context as IThemeType;
       if (this.props?.statusBarColor && isIOS) {
         this.props?.statusBarColor(theme?.v3?.header?.bg_color || '#EAECF0');
       }
     } catch (error) {}
+  };
+
+  private renderHeaderView = () => {
+    const theme = this.context as IThemeType;
+
+    const type = theme?.v3?.header?.size;
 
     //console.log('type ----->:', type);
 

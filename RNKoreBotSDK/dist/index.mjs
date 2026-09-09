@@ -18367,6 +18367,21 @@ var InputToolbar = class extends React84.Component {
       this.initVoiceHelper();
     }
   }
+  componentDidUpdate(prevProps) {
+    if (this.props.isMediaAddedToSend && !prevProps.isMediaAddedToSend && this.state.isSTTViewShow) {
+      this.setState(
+        {
+          isRecordingstart: false,
+          isSTTViewShow: false,
+          recordState: RECORD_STATE.onSpeechStop
+        },
+        () => {
+          this.stopRecognizing();
+          this.fadeInToBottomRef?.startAnimation?.();
+        }
+      );
+    }
+  }
   isVoiceEnabled = () => {
     const theme = this.context;
     return theme?.v3?.footer?.buttons?.microphone?.show !== false;
@@ -18479,19 +18494,6 @@ var InputToolbar = class extends React84.Component {
     }
     if (this.props?.isMediaAddedToSend) {
       disabled = false;
-      if (this.state.isSTTViewShow) {
-        this.setState(
-          {
-            isRecordingstart: false,
-            isSTTViewShow: false,
-            recordState: RECORD_STATE.onSpeechStop
-          },
-          () => {
-            this.stopRecognizing();
-            this.fadeInToBottomRef?.startAnimation?.();
-          }
-        );
-      }
     }
     const theme = this.context;
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
@@ -20168,7 +20170,9 @@ var MessageContainer = class extends PureComponent {
     const height = e?.nativeEvent?.layout?.height;
     if (typeof height === "number" && height > 0 && height !== this.listLayoutHeight) {
       this.listLayoutHeight = height;
-      this.setState({ isListScrollable: this.isListScrollable() });
+      requestAnimationFrame(() => {
+        this.setState({ isListScrollable: this.isListScrollable() });
+      });
     }
     if (!this.props.inverted && !!this.props.messages && this.props.messages?.length) {
       setTimeout(
@@ -20322,7 +20326,9 @@ var MessageContainer = class extends PureComponent {
           onContentSizeChange: (w, h) => {
             if (typeof h === "number" && h > 0 && h !== this.listContentHeight) {
               this.listContentHeight = h;
-              this.setState({ isListScrollable: this.isListScrollable() });
+              requestAnimationFrame(() => {
+                this.setState({ isListScrollable: this.isListScrollable() });
+              });
             }
           }
         }
@@ -21575,15 +21581,24 @@ var styles78 = StyleSheet76.create({
 init_PlatformCheck();
 var ChatHeader = class extends React99.Component {
   static contextType = ThemeContext;
-  renderHeaderView = () => {
-    const theme = this.context;
-    const type = theme?.v3?.header?.size;
+  componentDidMount() {
+    this.updateStatusBarColor();
+  }
+  componentDidUpdate() {
+    this.updateStatusBarColor();
+  }
+  updateStatusBarColor = () => {
     try {
+      const theme = this.context;
       if (this.props?.statusBarColor && isIOS) {
         this.props?.statusBarColor(theme?.v3?.header?.bg_color || "#EAECF0");
       }
     } catch (error) {
     }
+  };
+  renderHeaderView = () => {
+    const theme = this.context;
+    const type = theme?.v3?.header?.size;
     switch (type) {
       case ChatHeaderType.REGULAR:
         return /* @__PURE__ */ React99.createElement(MediumHeader, { ...this.props, theme });
@@ -23766,6 +23781,12 @@ var KoreChat = class _KoreChat extends React110.Component {
     if (text !== prevProps.text) {
       this.setTextFromProp(text);
     }
+    if (this.state.wlcomeModalVisible && !prevState.wlcomeModalVisible) {
+      if (this.props.statusBarColor && isIOS) {
+        const color = this.state.activetheme?.v3?.welcome_screen?.background?.color || "#4B4EDE";
+        this.props.statusBarColor(color);
+      }
+    }
   }
   setBotClientListeners = () => {
     const botClient = KoreBotClient3.getInstance();
@@ -25299,11 +25320,6 @@ var KoreChat = class _KoreChat extends React110.Component {
     return /* @__PURE__ */ React110.createElement(React110.Fragment, null);
   };
   renderWelcomeComponent = () => {
-    if (this.props.statusBarColor && isIOS) {
-      this.props.statusBarColor(
-        this.state.activetheme?.v3?.welcome_screen?.background?.color || "#4B4EDE"
-      );
-    }
     return /* @__PURE__ */ React110.createElement(
       Welcome,
       {

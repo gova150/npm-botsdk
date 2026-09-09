@@ -376,7 +376,9 @@ export default class MessageContainer extends PureComponent<
       height !== this.listLayoutHeight
     ) {
       this.listLayoutHeight = height;
-      this.setState({ isListScrollable: this.isListScrollable() });
+      requestAnimationFrame(() => {
+        this.setState({ isListScrollable: this.isListScrollable() });
+      });
     }
     if (
       !this.props.inverted &&
@@ -559,7 +561,9 @@ export default class MessageContainer extends PureComponent<
               h !== this.listContentHeight
             ) {
               this.listContentHeight = h;
-              this.setState({ isListScrollable: this.isListScrollable() });
+              requestAnimationFrame(() => {
+                this.setState({ isListScrollable: this.isListScrollable() });
+              });
             }
           }}
         />

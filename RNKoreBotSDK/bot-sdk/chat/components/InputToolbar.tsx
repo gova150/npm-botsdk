@@ -185,6 +185,26 @@ export default class InputToolbar extends React.Component<
     }
   }
 
+  componentDidUpdate(prevProps: InputToolbarProps) {
+    if (
+      this.props.isMediaAddedToSend &&
+      !prevProps.isMediaAddedToSend &&
+      this.state.isSTTViewShow
+    ) {
+      this.setState(
+        {
+          isRecordingstart: false,
+          isSTTViewShow: false,
+          recordState: RECORD_STATE.onSpeechStop,
+        },
+        () => {
+          this.stopRecognizing();
+          this.fadeInToBottomRef?.startAnimation?.();
+        },
+      );
+    }
+  }
+
   private isVoiceEnabled = () => {
     const theme = this.context as IThemeType;
     return theme?.v3?.footer?.buttons?.microphone?.show !== false;
@@ -313,19 +333,6 @@ export default class InputToolbar extends React.Component<
     }
     if (this.props?.isMediaAddedToSend) {
       disabled = false;
-      if (this.state.isSTTViewShow) {
-        this.setState(
-          {
-            isRecordingstart: false,
-            isSTTViewShow: false,
-            recordState: RECORD_STATE.onSpeechStop,
-          },
-          () => {
-            this.stopRecognizing();
-            this.fadeInToBottomRef?.startAnimation?.();
-          },
-        );
-      }
     }
     const theme = this.context as IThemeType;
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;

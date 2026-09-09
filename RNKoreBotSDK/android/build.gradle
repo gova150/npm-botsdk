@@ -1,9 +1,9 @@
 buildscript {
     ext {
-        buildToolsVersion = "35.0.0"
+        buildToolsVersion = "36.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 35
-        targetSdkVersion = 35
+        compileSdkVersion = 36
+        targetSdkVersion = 36
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.0.21"
     }
@@ -29,12 +29,12 @@ def reactNativeVersion = safeExtGet('reactNativeVersion', '0.79.0')
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk safeExtGet('compileSdkVersion', 35)
+    compileSdk safeExtGet('compileSdkVersion', 36)
     namespace 'com.rnkorebotsdk'
 
     defaultConfig {
         minSdk safeExtGet('minSdkVersion', 24)
-        targetSdk safeExtGet('targetSdkVersion', 35)
+        targetSdk safeExtGet('targetSdkVersion', 36)
     }
 
     compileOptions {

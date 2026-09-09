@@ -700,6 +700,15 @@ export default class KoreChat extends React.Component<
     if (text !== prevProps.text) {
       this.setTextFromProp(text);
     }
+
+    if (this.state.wlcomeModalVisible && !prevState.wlcomeModalVisible) {
+      if (this.props.statusBarColor && isIOS) {
+        const color =
+          this.state.activetheme?.v3?.welcome_screen?.background?.color ||
+          '#4B4EDE';
+        this.props.statusBarColor(color);
+      }
+    }
   }
 
   private setBotClientListeners = () => {
@@ -2495,12 +2504,6 @@ export default class KoreChat extends React.Component<
   };
 
   private renderWelcomeComponent = () => {
-    if (this.props.statusBarColor && isIOS) {
-      this.props.statusBarColor(
-        this.state.activetheme?.v3?.welcome_screen?.background?.color ||
-          '#4B4EDE',
-      );
-    }
     return (
       <Welcome
         activetheme={this.state.activetheme}

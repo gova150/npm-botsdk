@@ -1039,6 +1039,7 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     private voiceHelper;
     constructor(props: InputToolbarProps);
     componentDidMount(): void;
+    componentDidUpdate(prevProps: InputToolbarProps): void;
     private isVoiceEnabled;
     private initVoiceHelper;
     private getVoiceHelper;
