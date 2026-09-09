@@ -44,7 +44,6 @@ const config = {
     nodeModulesPaths: [appNodeModules, sdkNodeModules],
     extraNodeModules: {
       '@govardhanboli/rn-kore-bot-sdk-v79': sdkRoot,
-      'rn-kore-bot-sdk-v79': sdkRoot,
       // The SDK is watched from outside the app directory. Pin these shared
       // runtimes to the app copies so SDK and app components use the same
       // React dispatcher and native module registry.

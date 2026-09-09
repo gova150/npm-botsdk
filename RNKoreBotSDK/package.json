@@ -1,6 +1,6 @@
 {
     "name": "@govardhanboli/rn-kore-bot-sdk-v79",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "React Native Kore Bot SDK for building chatbot interfaces",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",

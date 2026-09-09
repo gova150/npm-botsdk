@@ -1082,6 +1082,62 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     render(): React.JSX.Element;
 }
 
+declare const _default: {
+    defaultColor: string;
+    backgroundTransparent: string;
+    transparent: string;
+    defaultBlue: string;
+    leftBubbleBackground: string;
+    carrot: string;
+    emerald: string;
+    peterRiver: string;
+    wisteria: string;
+    alizarin: string;
+    midnightBlue: string;
+    optionTintColor: string;
+    timeTextColor: string;
+    bot_blue: string;
+    red: string;
+    green: string;
+    blue: string;
+    cyan: string;
+    magenta: string;
+    yellow: string;
+    black: string;
+    white: string;
+    gray: string;
+    silver: string;
+    maroon: string;
+    olive: string;
+    navy: string;
+    purple: string;
+    teal: string;
+    indigo: string;
+    orange: string;
+    pink: string;
+    violet: string;
+    peach: string;
+    lavender: string;
+    coral: string;
+    turquoise: string;
+    chocolate: string;
+    lime: string;
+    gold: string;
+    crimson: string;
+    plum: string;
+    slate: string;
+    khaki: string;
+    aquamarine: string;
+    bisque: string;
+    cornsilk: string;
+    firebrick: string;
+    midnightblue: string;
+    text_color: string;
+    sub_text_color: string;
+    button_blue: string;
+    header_blue: string;
+};
+
 /**
  * Custom UUID utility to replace react-native-uuid dependency
  * Generates RFC4122 version 4 UUIDs
@@ -1288,4 +1344,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, onListItemClickProps, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, onListItemClickProps, useLazyCommunications, useLazySound };

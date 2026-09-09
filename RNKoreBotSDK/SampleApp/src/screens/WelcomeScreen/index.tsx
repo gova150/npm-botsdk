@@ -21,7 +21,7 @@ import {
 
 import { BotConfigModel } from 'rn-kore-bot-socket-lib-v79';
 import { ROUTE_NAMES } from '../../navigation/RouteNames';
-import Color from 'rn-kore-bot-sdk-v79';
+import { Color } from '@govardhanboli/rn-kore-bot-sdk-v79';
 import WAKeyboardAvoidingView from '../../components/WAKeyboardAvoidingView';
 
 interface State {
@@ -45,11 +45,11 @@ class WelcomeScreen extends Component<any, State> {
     super(props);
     this.state = {
       botName: 'Kore.ai Bot',
-      botId: 'st-f08b57c9-2bdc-5265-af92-d104ea049d2d',
-      clientId: 'cs-2ca86148-2a8f-59ec-915a-7401f999bb31',
-      clientSecret: 'iGsHapQ8W0G29Hegs2RHa0/zcnM4tiI7CfPk26jPOF8=',
-      botUrl: 'https://platform.kore.ai',
-      jwtServerUrl: 'https://mk2r2rmj21.execute-api.us-east-1.amazonaws.com/dev/',
+      botId: 'PLEASE_ENTER_BOT_ID',
+      clientId: 'PLEASE_ENTER_CLIENT_ID',
+      clientSecret: 'PLEASE_ENTER_CLIENT_SECRET',
+      botUrl: 'https://bots.kore.ai',
+      jwtServerUrl: 'PLEASE_ENTER_JWT_SERVER_URL',
       permissionsGranted: {
         camera: false,
         microphone: false,
@@ -64,7 +64,7 @@ class WelcomeScreen extends Component<any, State> {
   }
 
   handleChange = (field: keyof State, value: string) => {
-    this.setState({ [field]: value } as Pick<State, keyof State>);
+    this.setState({ [field]: value } as unknown as Pick<State, keyof State>);
   };
 
   private getPermissionsToCheck = (): Permission[] => {

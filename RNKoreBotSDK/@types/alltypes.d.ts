@@ -1,8 +1,8 @@
-declare module '@govardhanboli/rn-kore-bot-sdk-v79' {
-  export * from 'rn-kore-bot-sdk-v79';
+declare module 'rn-kore-bot-sdk-v79' {
+  export * from '@govardhanboli/rn-kore-bot-sdk-v79';
 }
 
-declare module 'rn-kore-bot-sdk-v79' {
+declare module '@govardhanboli/rn-kore-bot-sdk-v79' {
   import { ReactNode } from 'react';
   import { ViewStyle } from 'react-native';
 

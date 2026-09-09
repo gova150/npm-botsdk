@@ -25849,6 +25849,7 @@ export {
   BRANDING_RESPONSE_FILE,
   BotTemplate,
   ChatHeaderType,
+  Color_default as Color,
   CustomTemplate_default as CustomTemplate,
   CustomVoiceRecognition_default as CustomVoiceRecognition,
   DATE_FORMAT,

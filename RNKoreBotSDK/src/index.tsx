@@ -25,6 +25,8 @@ export {default as CustomTemplate} from '../bot-sdk/templates/CustomTemplate';
 
 export {default as InputToolbar} from '../bot-sdk/chat/components/InputToolbar';
 
+export {default as Color} from '../bot-sdk/theme/Color';
+
 export { UUID } from '../bot-sdk/utils/uuid';
 
 // Lazy loading components

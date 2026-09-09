@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {NavigationContainer, Theme} from '@react-navigation/native';
+import {NavigationContainer, Theme, DefaultTheme} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import SplashScreen from '../screens/splash/SplashScreen';
@@ -25,14 +25,11 @@ const AppContainer = React.memo(() => {
   // Create a custom theme object based on the state
   const theme = useMemo(
     (): Theme => ({
+      ...DefaultTheme,
       dark: false,
       colors: {
+        ...DefaultTheme.colors,
         background: backgroundColor,
-        primary: '',
-        card: '',
-        text: '',
-        border: '',
-        notification: '',
       },
     }),
     [backgroundColor],
