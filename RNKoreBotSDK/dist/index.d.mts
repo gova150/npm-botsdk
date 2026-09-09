@@ -1,6 +1,8 @@
 import * as React from 'react';
 import React__default, { Component, RefObject } from 'react';
 import { BotConfigModel } from 'rn-kore-bot-socket-lib-v79';
+export { APP_STATE, BotConfigModel, default as KoreBotClient, RTM_EVENT } from 'rn-kore-bot-socket-lib-v79';
+import * as react_native_sound from 'react-native-sound';
 
 declare const MAX_SOURCE_LIMIT = 1;
 declare const LIMIT_MESSAGE: string;
@@ -353,6 +355,7 @@ interface ThemeType {
                 user_icon?: boolean;
                 bot_icon?: boolean;
                 agent_icon?: boolean;
+                avatar_position?: 'top' | 'bottom';
             };
             buttons?: {
                 bg_color?: string;
@@ -609,6 +612,7 @@ interface IThemeType extends ThemeType {
                 user_icon?: boolean;
                 bot_icon?: boolean;
                 agent_icon?: boolean;
+                avatar_position?: 'top' | 'bottom';
             };
             buttons?: {
                 bg_color?: string;
@@ -757,6 +761,8 @@ interface KoraChatProps {
     renderQuickRepliesView?: any;
     renderChatHeader?: any;
     onHeaderActionsClick?: any;
+    /** Called after the default Close action sends its bot-side close event. */
+    onClose?: () => void;
     navigation?: any;
     route?: any;
     statusBarColor?: (colorCode: any) => void;
@@ -788,6 +794,8 @@ interface KoraChatState {
     wlcomeModalVisible?: boolean;
     currentTemplateHeading?: any;
     themeData?: IThemeType;
+    /** Keeps the default UI from rendering before branding is resolved. */
+    isThemeLoaded?: boolean;
     isTTSenable?: boolean;
     isReconnecting?: boolean;
     showBackButtonDialog?: boolean;
@@ -984,7 +992,7 @@ interface QuickProps extends BaseViewProps {
     itemClick?: any;
     isVertical?: boolean;
     quick_container_style?: any;
-    quick_text_style?: any;
+    quck_text_style?: any;
     quick_image_style?: any;
 }
 interface QuickState extends BaseViewState {
@@ -1085,7 +1093,7 @@ declare class UUID {
 }
 
 interface CommunicationsModule {
-    phonecall: (phoneNumber: string, prompt?: boolean) => void;
+    phonecall: (phoneNumber: string, isPrompt: boolean) => void;
     email: (to?: string[], cc?: string[], bcc?: string[], subject?: string, body?: string) => void;
     text: (phoneNumber?: string, body?: string) => void;
     web: (url: string) => void;
@@ -1113,7 +1121,12 @@ declare class LazyCommunications extends Component<LazyCommunicationsProps, Lazy
     constructor(props: LazyCommunicationsProps);
     componentDidMount(): void;
     componentWillUnmount(): void;
-    loadCommunications(): Promise<CommunicationsModule>;
+    loadCommunications(): Promise<{
+        phonecall: (phoneNumber: string, prompt?: boolean) => void;
+        email: (to?: string[], cc?: string[], bcc?: string[], subject?: string, body?: string) => void;
+        text: (phoneNumber?: string, body?: string) => void;
+        web: (url: string) => void;
+    }>;
     phonecall(phoneNumber: string, prompt?: boolean): Promise<void>;
     email(to?: string[], cc?: string[], bcc?: string[], subject?: string, body?: string): Promise<void>;
     text(phoneNumber?: string, body?: string): Promise<void>;
@@ -1127,7 +1140,12 @@ declare const useLazyCommunications: () => {
     CommunicationsModule: CommunicationsModule;
     isLoading: boolean;
     loadError: string;
-    loadCommunications: () => Promise<CommunicationsModule>;
+    loadCommunications: () => Promise<{
+        phonecall: (phoneNumber: string, prompt?: boolean) => void;
+        email: (to?: string[], cc?: string[], bcc?: string[], subject?: string, body?: string) => void;
+        text: (phoneNumber?: string, body?: string) => void;
+        web: (url: string) => void;
+    }>;
     phonecall: (phoneNumber: string, prompt?: boolean) => Promise<void>;
     email: (to?: string[], cc?: string[], bcc?: string[], subject?: string, body?: string) => Promise<void>;
     text: (phoneNumber?: string, body?: string) => Promise<void>;
@@ -1147,13 +1165,9 @@ interface SoundModule {
     DOCUMENT: string;
     LIBRARY: string;
     CACHES: string;
-    setCategory: (category: string, mixWithOthers?: boolean) => void;
-    getCategory: (callback: (category: string, mixWithOthers: boolean) => void) => void;
-    setMode: (mode: string) => void;
-    getMode: (callback: (mode: string) => void) => void;
-    setSpeakerphoneOn: (speaker: boolean) => void;
+    setCategory: (category: any, mixWithOthers?: boolean) => void;
+    setMode: (mode: any) => void;
     setActive: (active: boolean) => void;
-    isWiredHeadsetPluggedIn: (callback: (pluggedIn: boolean) => void) => void;
 }
 interface SoundInstance {
     play: (callback?: (success: boolean) => void) => void;
@@ -1198,15 +1212,11 @@ declare class LazySound extends Component<LazySoundProps, LazySoundState> {
     constructor(props: LazySoundProps);
     componentDidMount(): void;
     componentWillUnmount(): void;
-    loadSound(): Promise<SoundModule>;
+    loadSound(): Promise<SoundModule | typeof react_native_sound>;
     createSound(filename: string, basePath?: string, onError?: (error: any) => void, options?: any): Promise<SoundInstance | null>;
     setCategory(category: string, mixWithOthers?: boolean): Promise<void>;
-    getCategory(callback: (category: string, mixWithOthers: boolean) => void): Promise<void>;
     setMode(mode: string): Promise<void>;
-    getMode(callback: (mode: string) => void): Promise<void>;
-    setSpeakerphoneOn(speaker: boolean): Promise<void>;
     setActive(active: boolean): Promise<void>;
-    isWiredHeadsetPluggedIn(callback: (pluggedIn: boolean) => void): Promise<void>;
     render(): React__default.JSX.Element;
 }
 /**
@@ -1216,15 +1226,11 @@ declare const useLazySound: () => {
     SoundModule: SoundModule;
     isLoading: boolean;
     loadError: string;
-    loadSound: () => Promise<SoundModule | null>;
+    loadSound: () => Promise<SoundModule | typeof react_native_sound>;
     createSound: (filename: string, basePath?: string, onError?: (error: any) => void, options?: any) => Promise<SoundInstance | null>;
     setCategory: (category: string, mixWithOthers?: boolean) => Promise<void>;
-    getCategory: (callback: (category: string, mixWithOthers: boolean) => void) => Promise<void>;
     setMode: (mode: string) => Promise<void>;
-    getMode: (callback: (mode: string) => void) => Promise<void>;
-    setSpeakerphoneOn: (speaker: boolean) => Promise<void>;
     setActive: (active: boolean) => Promise<void>;
-    isWiredHeadsetPluggedIn: (callback: (pluggedIn: boolean) => void) => Promise<void>;
 };
 /**
  * Simple fallback Sound using basic alert notifications
@@ -1235,12 +1241,47 @@ declare const FallbackSound: React__default.FC<{
 declare const FallbackSoundAPI: {
     createSound: (filename: string, basePath?: string, onError?: (error: any) => void) => Promise<null>;
     setCategory: (category: string, mixWithOthers?: boolean) => Promise<void>;
-    getCategory: (callback: (category: string, mixWithOthers: boolean) => void) => Promise<void>;
     setMode: (mode: string) => Promise<void>;
-    getMode: (callback: (mode: string) => void) => Promise<void>;
-    setSpeakerphoneOn: (speaker: boolean) => Promise<void>;
     setActive: (active: boolean) => Promise<void>;
-    isWiredHeadsetPluggedIn: (callback: (pluggedIn: boolean) => void) => Promise<void>;
 };
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, CustomTemplate, CustomViewProps, CustomViewState, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, onListItemClickProps, useLazyCommunications, useLazySound };
+interface VoiceRecognitionEvents {
+    onSpeechStart?: () => void;
+    onSpeechRecognized?: () => void;
+    onSpeechEnd?: () => void;
+    onSpeechError?: (error: {
+        error: string;
+        code: number;
+    }) => void;
+    onSpeechResults?: (results: {
+        value: string[];
+    }) => void;
+    onSpeechPartialResults?: (results: {
+        value: string[];
+    }) => void;
+    onSpeechVolumeChanged?: (volume: {
+        value: number;
+    }) => void;
+}
+declare class CustomVoiceRecognition {
+    private eventEmitter;
+    private listeners;
+    private isInitialized;
+    constructor();
+    private initializeEventEmitter;
+    isAvailable(): Promise<boolean>;
+    start(language?: string, options?: any): Promise<string>;
+    stop(): Promise<string>;
+    cancel(): Promise<string>;
+    destroy(): Promise<string>;
+    setEventListeners(events: VoiceRecognitionEvents): void;
+    removeAllListeners(): void;
+    getModuleInfo(): {
+        available: boolean;
+        initialized: boolean;
+        platform: string;
+    };
+}
+declare const customVoiceRecognition: CustomVoiceRecognition;
+
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, onListItemClickProps, useLazyCommunications, useLazySound };
