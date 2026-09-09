@@ -18587,19 +18587,38 @@ var styles67 = import_react_native82.StyleSheet.create({
 });
 var InputToolbar = class extends React86.Component {
   static contextType = ThemeContext;
-  voiceHelper;
+  voiceHelper = null;
   constructor(props) {
     super(props);
-    this.voiceHelper = new VoiceRecorder_default(
-      this.onSpeechStart,
-      this.onSpeechRecognized,
-      this.onSpeechEnd,
-      this.onSpeechError,
-      this.onSpeechResults,
-      this.onSpeechPartialResults,
-      this.onSpeechVolumeChanged
-    );
   }
+  componentDidMount() {
+    if (this.isVoiceEnabled()) {
+      this.initVoiceHelper();
+    }
+  }
+  isVoiceEnabled = () => {
+    const theme = this.context;
+    return theme?.v3?.footer?.buttons?.microphone?.show !== false;
+  };
+  initVoiceHelper = () => {
+    if (!this.voiceHelper) {
+      this.voiceHelper = new VoiceRecorder_default(
+        this.onSpeechStart,
+        this.onSpeechRecognized,
+        this.onSpeechEnd,
+        this.onSpeechError,
+        this.onSpeechResults,
+        this.onSpeechPartialResults,
+        this.onSpeechVolumeChanged
+      );
+    }
+  };
+  getVoiceHelper = () => {
+    if (this.isVoiceEnabled()) {
+      this.initVoiceHelper();
+    }
+    return this.voiceHelper;
+  };
   state = {
     position: "absolute",
     isSTTViewShow: false,
@@ -18704,8 +18723,9 @@ var InputToolbar = class extends React86.Component {
       }
     }
     const theme = this.context;
+    const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
     const height = normalize(36);
-    return /* @__PURE__ */ React86.createElement(Send, { ...props }, disabled ? /* @__PURE__ */ React86.createElement(
+    return /* @__PURE__ */ React86.createElement(Send, { ...props }, disabled ? isMicVisible ? /* @__PURE__ */ React86.createElement(
       import_react_native82.View,
       {
         pointerEvents: this.props.isMediaLoading ? "none" : "auto",
@@ -18727,6 +18747,28 @@ var InputToolbar = class extends React86.Component {
             color: theme?.v3?.footer?.buttons?.attachment?.icon_color || theme?.v3?.footer?.icons_color || "#697586"
           }
         )
+      )
+    ) : /* @__PURE__ */ React86.createElement(
+      import_react_native82.View,
+      {
+        pointerEvents: "none",
+        style: [
+          styles67.send_container1,
+          {
+            backgroundColor: "#CCCCCC",
+            width: normalize(height),
+            height: normalize(height)
+          }
+        ]
+      },
+      /* @__PURE__ */ React86.createElement(
+        SvgIcon,
+        {
+          name: "SendIcon",
+          width: normalize(16),
+          height: normalize(16),
+          color: Color_default.white
+        }
       )
     ) : /* @__PURE__ */ React86.createElement(
       import_react_native82.View,
@@ -18797,7 +18839,7 @@ var InputToolbar = class extends React86.Component {
     });
     console.log("onSpeechError --->:", e?.error);
     try {
-      await this.voiceHelper.resetVoiceState();
+      await this.voiceHelper?.resetVoiceState();
     } catch (resetError) {
       console.warn("Failed to reset voice state after error:", String(resetError));
     }
@@ -18823,7 +18865,7 @@ var InputToolbar = class extends React86.Component {
     });
   };
   onSpeechPartialResults = (e) => {
-    this.voiceHelper.resetCounter();
+    this.voiceHelper?.resetCounter();
     if (e?.value?.length > 0) {
       if (import_react_native82.Platform.OS !== "android")
         this.props?.onSTTValue?.(e.value[0]);
@@ -18834,6 +18876,9 @@ var InputToolbar = class extends React86.Component {
   onSpeechVolumeChanged = (_e) => {
   };
   handleVoiceTextSwitch = () => {
+    if (!this.isVoiceEnabled()) {
+      return;
+    }
     const newSTTViewState = !this.state.isSTTViewShow;
     this.setState(
       {
@@ -18848,7 +18893,7 @@ var InputToolbar = class extends React86.Component {
             this.props.onSendSTTClick(true);
           }
         } else {
-          this.voiceHelper.resetVoiceState().catch(() => {
+          this.voiceHelper?.resetVoiceState().catch(() => {
           });
         }
         setTimeout(() => {
@@ -18858,27 +18903,31 @@ var InputToolbar = class extends React86.Component {
     );
   };
   startRecognizing = async () => {
+    const helper = this.getVoiceHelper();
+    if (!helper) {
+      return;
+    }
     try {
       if (!isIOS) {
-        await this.voiceHelper.debugVoiceRecognition();
+        await helper.debugVoiceRecognition();
       }
-      await this.voiceHelper.resetVoiceState();
+      await helper.resetVoiceState();
       setTimeout(() => {
-        this.voiceHelper.startRecognizing();
+        helper.startRecognizing();
       }, 100);
     } catch (error) {
       console.warn("Failed to reset voice state before start:", String(error));
-      this.voiceHelper.startRecognizing();
+      helper.startRecognizing();
     }
   };
   stopRecognizing = () => {
-    this.voiceHelper.stopRecognizing();
+    this.voiceHelper?.stopRecognizing();
   };
   cancelRecognizing = () => {
-    this.voiceHelper.cancelRecognizing();
+    this.voiceHelper?.cancelRecognizing();
   };
   destroyRecognizer = () => {
-    this.voiceHelper.destroyRecognizer();
+    this.voiceHelper?.destroyRecognizer();
   };
   handleVoiceToTextSwitch = () => {
     this.setState(

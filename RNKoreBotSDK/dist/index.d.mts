@@ -1038,6 +1038,10 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     static contextType: React.Context<ThemeType>;
     private voiceHelper;
     constructor(props: InputToolbarProps);
+    componentDidMount(): void;
+    private isVoiceEnabled;
+    private initVoiceHelper;
+    private getVoiceHelper;
     state: {
         position: string;
         isSTTViewShow: boolean;

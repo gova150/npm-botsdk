@@ -173,20 +173,43 @@ export default class InputToolbar extends React.Component<
   InputToolbarStates
 > {
   static contextType = ThemeContext;
-  private voiceHelper: VoiceHelper;
+  private voiceHelper: VoiceHelper | null = null;
 
   constructor(props: InputToolbarProps) {
     super(props);
-    this.voiceHelper = new VoiceHelper(
-      this.onSpeechStart,
-      this.onSpeechRecognized,
-      this.onSpeechEnd,
-      this.onSpeechError,
-      this.onSpeechResults,
-      this.onSpeechPartialResults,
-      this.onSpeechVolumeChanged,
-    );
   }
+
+  componentDidMount() {
+    if (this.isVoiceEnabled()) {
+      this.initVoiceHelper();
+    }
+  }
+
+  private isVoiceEnabled = () => {
+    const theme = this.context as IThemeType;
+    return theme?.v3?.footer?.buttons?.microphone?.show !== false;
+  };
+
+  private initVoiceHelper = () => {
+    if (!this.voiceHelper) {
+      this.voiceHelper = new VoiceHelper(
+        this.onSpeechStart,
+        this.onSpeechRecognized,
+        this.onSpeechEnd,
+        this.onSpeechError,
+        this.onSpeechResults,
+        this.onSpeechPartialResults,
+        this.onSpeechVolumeChanged,
+      );
+    }
+  };
+
+  private getVoiceHelper = (): VoiceHelper | null => {
+    if (this.isVoiceEnabled()) {
+      this.initVoiceHelper();
+    }
+    return this.voiceHelper;
+  };
 
   state = {
     position: 'absolute',
@@ -305,29 +328,50 @@ export default class InputToolbar extends React.Component<
       }
     }
     const theme = this.context as IThemeType;
+    const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
     const height = normalize(36);
     return (
       <Send {...props}>
         {disabled ? (
-          <View
-            pointerEvents={this.props.isMediaLoading ? 'none' : 'auto'}
-            style={[styles.send_container]}>
-            <TouchableOpacity
-              onPress={() => {
-                this.handleVoiceTextSwitch();
-              }}>
+          isMicVisible ? (
+            <View
+              pointerEvents={this.props.isMediaLoading ? 'none' : 'auto'}
+              style={[styles.send_container]}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.handleVoiceTextSwitch();
+                }}>
+                <SvgIcon
+                  name={this.state.isSTTViewShow ? 'KeyboardIcon' : 'MicIcon'}
+                  width={normalize(22)}
+                  height={normalize(22)}
+                  color={
+                    theme?.v3?.footer?.buttons?.attachment?.icon_color ||
+                    theme?.v3?.footer?.icons_color ||
+                    '#697586'
+                  }
+                />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View
+              pointerEvents={'none'}
+              style={[
+                styles.send_container1,
+                {
+                  backgroundColor: '#CCCCCC',
+                  width: normalize(height),
+                  height: normalize(height),
+                },
+              ]}>
               <SvgIcon
-                name={this.state.isSTTViewShow ? 'KeyboardIcon' : 'MicIcon'}
-                width={normalize(22)}
-                height={normalize(22)}
-                color={
-                  theme?.v3?.footer?.buttons?.attachment?.icon_color ||
-                  theme?.v3?.footer?.icons_color ||
-                  '#697586'
-                }
+                name={'SendIcon'}
+                width={normalize(16)}
+                height={normalize(16)}
+                color={Color.white}
               />
-            </TouchableOpacity>
-          </View>
+            </View>
+          )
         ) : (
           <View
             pointerEvents={disabled ? 'none' : 'auto'}
@@ -411,7 +455,7 @@ export default class InputToolbar extends React.Component<
     console.log('onSpeechError --->:', e?.error);
     
     try {
-      await this.voiceHelper.resetVoiceState();
+      await this.voiceHelper?.resetVoiceState();
     } catch (resetError) {
       console.warn('Failed to reset voice state after error:', String(resetError));
     }
@@ -440,7 +484,7 @@ export default class InputToolbar extends React.Component<
   };
 
   onSpeechPartialResults = (e: any) => {
-    this.voiceHelper.resetCounter();
+    this.voiceHelper?.resetCounter();
     if (e?.value?.length > 0) {
       if (Platform.OS !== 'android')
         this.props?.onSTTValue?.(e.value[0]);
@@ -454,6 +498,9 @@ export default class InputToolbar extends React.Component<
   };
 
   handleVoiceTextSwitch = () => {
+    if (!this.isVoiceEnabled()) {
+      return;
+    }
     const newSTTViewState = !this.state.isSTTViewShow;
     
     this.setState(
@@ -469,7 +516,7 @@ export default class InputToolbar extends React.Component<
             this.props.onSendSTTClick(true);
           }
         } else {
-          this.voiceHelper.resetVoiceState().catch(() => {
+          this.voiceHelper?.resetVoiceState().catch(() => {
           });
         }
         
@@ -481,32 +528,36 @@ export default class InputToolbar extends React.Component<
   };
 
   startRecognizing = async () => {
+    const helper = this.getVoiceHelper();
+    if (!helper) {
+      return;
+    }
     try {
       // Debug voice recognition on Android
       if (!isIOS) {
-        await this.voiceHelper.debugVoiceRecognition();
+        await helper.debugVoiceRecognition();
       }
       
-      await this.voiceHelper.resetVoiceState();
+      await helper.resetVoiceState();
       setTimeout(() => {
-        this.voiceHelper.startRecognizing();
+        helper.startRecognizing();
       }, 100);
     } catch (error) {
       console.warn('Failed to reset voice state before start:', String(error));
-      this.voiceHelper.startRecognizing();
+      helper.startRecognizing();
     }
   };
 
   stopRecognizing = () => {
-    this.voiceHelper.stopRecognizing();
+    this.voiceHelper?.stopRecognizing();
   };
 
   cancelRecognizing = () => {
-    this.voiceHelper.cancelRecognizing();
+    this.voiceHelper?.cancelRecognizing();
   };
 
   destroyRecognizer = () => {
-    this.voiceHelper.destroyRecognizer();
+    this.voiceHelper?.destroyRecognizer();
   };
 
   handleVoiceToTextSwitch = () => {

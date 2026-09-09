@@ -1,6 +1,6 @@
 {
     "name": "@govardhanboli/rn-kore-bot-sdk-v79",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "description": "React Native Kore Bot SDK for building chatbot interfaces",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
@@ -43,7 +43,13 @@
     },
     "peerDependencies": {
         "react": "19.0.0",
-        "react-native": "^0.79.0"
+        "react-native": "^0.79.0",
+        "@react-native-voice/voice": "^3.2.4"
+    },
+    "peerDependenciesMeta": {
+        "@react-native-voice/voice": {
+            "optional": true
+        }
     },
     "dependencies": {
         "@react-native-async-storage/async-storage": "^2.2.0",
@@ -52,7 +58,6 @@
         "@react-native-community/slider": "^5.0.1",
         "@react-native-documents/picker": "^10.1.5",
         "@react-native-picker/picker": "^2.11.0",
-        "@react-native-voice/voice": "^3.2.4",
         "@react-navigation/native": "^7.1.14",
         "@react-navigation/stack": "^7.4.2",
         "axios": "^1.10.0",
