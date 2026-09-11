@@ -19801,6 +19801,22 @@ var Message = class extends React90.Component {
     }
     return {};
   };
+  componentDidMount() {
+    const iconUrl = this.props.currentMessage?.icon || this.props.fallbackBotIcon;
+    if (iconUrl && this.botIconUrl !== iconUrl) {
+      this.botIconUrl = iconUrl;
+      AsyncStorage2.setItem(BOT_ICON_URL, iconUrl);
+    }
+  }
+  componentDidUpdate(prevProps) {
+    const prevIcon = prevProps.currentMessage?.icon || prevProps.fallbackBotIcon;
+    const currIcon = this.props.currentMessage?.icon || this.props.fallbackBotIcon;
+    if (currIcon && currIcon !== prevIcon) {
+      this.botIconUrl = currIcon;
+      this.setState({ imageLoadFailed: false });
+      AsyncStorage2.setItem(BOT_ICON_URL, currIcon);
+    }
+  }
   setBotIconUrl = async (url) => {
     if (this.botIconUrl !== url) {
       this.botIconUrl = url;
@@ -19811,9 +19827,6 @@ var Message = class extends React90.Component {
   renderDefaultBotAvatar = (avatarProps) => {
     const currentMessage = avatarProps.currentMessage || this.props.currentMessage;
     const iconUrl = currentMessage?.icon || this.props.fallbackBotIcon || null;
-    if (iconUrl) {
-      this.setBotIconUrl(iconUrl);
-    }
     return /* @__PURE__ */ React90.createElement(
       View75,
       {
