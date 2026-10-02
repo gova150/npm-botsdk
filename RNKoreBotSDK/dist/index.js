@@ -24052,6 +24052,42 @@ var KoreChat = class _KoreChat extends React112.Component {
   processMessage = (newMessages) => {
     let modifiedMessages = null;
     const itemId = getItemId();
+    const isStreamChunk = newMessages?.sM === true && newMessages?.type === "bot_response";
+    const streamText = isStreamChunk && newMessages?.message?.[0]?.component?.payload?.text;
+    const endChunk = isStreamChunk && newMessages?.endChunk === true;
+    const completeResponse = newMessages?.completeResponse;
+    if (isStreamChunk && (streamText != null || endChunk)) {
+      const messageId = newMessages.messageId;
+      this.setMessages((prevMessages) => {
+        const messages = prevMessages || [];
+        const idx = messages.findIndex((m) => m.messageId === messageId && m.type === "bot_response");
+        if (idx >= 0) {
+          const prev = messages[idx];
+          const prevPayload = prev?.message?.[0]?.component?.payload;
+          const prevText = (prevPayload?.text ?? "") || "";
+          const prevCInfo = prev?.message?.[0]?.cInfo;
+          const prevBody = (prevCInfo?.body ?? "") || "";
+          const nextMessages = messages.slice();
+          const nextMessage = { ...prev };
+          const nextMsgEntry = nextMessage.message?.[0] ? { ...nextMessage.message[0] } : null;
+          if (nextMsgEntry?.component?.payload) {
+            nextMsgEntry.component = { ...nextMsgEntry.component, payload: { ...nextMsgEntry.component.payload, text: prevText + (streamText ?? "") } };
+            if (nextMsgEntry.cInfo)
+              nextMsgEntry.cInfo = { ...nextMsgEntry.cInfo, body: prevBody + (streamText ?? "") };
+            nextMessage.message = [nextMsgEntry];
+            nextMessages[idx] = nextMessage;
+            return nextMessages;
+          }
+        }
+        const modifiedMessages2 = [{ ...newMessages, itemId }];
+        return _KoreChat.append(messages, modifiedMessages2);
+      });
+      if (endChunk && completeResponse != null) {
+        const ttsPayload = { ...newMessages, message: [{ component: { payload: { payload: { text: completeResponse }, text: completeResponse } } }] };
+        setTimeout(() => this.textToSpeech(ttsPayload), 1e3);
+      }
+      return;
+    }
     const hasRealAttachments = newMessages?.message?.[0]?.component?.payload?.attachments && newMessages?.message?.[0]?.component?.payload?.attachments !== "attachments" && newMessages?.message?.[0]?.component?.payload?.attachments !== "";
     if (hasRealAttachments) {
       let attachmentTemplate = {
@@ -24095,9 +24131,11 @@ var KoreChat = class _KoreChat extends React112.Component {
       }
     }
     this.setMessages(_KoreChat.append(this.state.messages, modifiedMessages));
-    setTimeout(() => {
-      this.textToSpeech(newMessages);
-    }, 1e3);
+    if (!isStreamChunk) {
+      setTimeout(() => {
+        this.textToSpeech(newMessages);
+      }, 1e3);
+    }
   };
   stopTTS = async () => {
     if (!this.ttsModule || !this.isTTSAvailable) {
@@ -24227,9 +24265,12 @@ var KoreChat = class _KoreChat extends React112.Component {
     }
     return this.props.text;
   };
-  setMessages = (messages) => {
-    historyMessages = messages.length;
-    this.setState({ messages });
+  setMessages = (messagesOrUpdater) => {
+    this.setState((prevState) => {
+      const nextMessages = typeof messagesOrUpdater === "function" ? messagesOrUpdater(prevState.messages || []) : messagesOrUpdater;
+      historyMessages = nextMessages.length;
+      return { messages: nextMessages };
+    });
   };
   getMessages = () => {
     return this.state.messages;
@@ -24501,6 +24542,9 @@ var KoreChat = class _KoreChat extends React112.Component {
           if (item?.renderMsg) {
             message = item?.renderMsg;
           }
+          if (item?.payload !== void 0 && item?.payload !== null) {
+            message = typeof item.payload === "string" ? item.payload : item.payload?.name ?? message;
+          }
         }
         let data_type = "";
         let data;
@@ -24605,6 +24649,7 @@ var KoreChat = class _KoreChat extends React112.Component {
       case TEMPLATE_TYPES.RESET_PIN_TEMPLATE:
       case TEMPLATE_TYPES.LISTWIDGET_TEMPLATE:
       case TEMPLATE_TYPES.IMAGE_MESSAGE:
+      case TEMPLATE_TYPES.DIGITALFORM_TEMPLATE:
         if (!isFromViewMore) {
           this.computePostBack(item, template_type);
         }
