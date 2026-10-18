@@ -1,0 +1,66 @@
+{
+  "name": "SampleUI",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/netinfo": "^11.4.1",
+    "@react-native-community/slider": "^5.1.1",
+    "@react-native-documents/picker": "^10.1.5",
+    "@react-native-picker/picker": "^2.11.4",
+    "@react-navigation/elements": "^2.5.2",
+    "@react-navigation/stack": "^7.4.2",
+    "axios": "^1.13.2",
+    "react-native-bootsplash": "^6.3.9",
+    "react-native-fs": "^2.20.0",
+    "react-native-gesture-handler": "^2.26.0",
+    "react-native-permissions": "^5.4.1",
+    "react-native-reanimated": "3.18.2",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "4.18.0",
+    "react-native-sound": "^0.13.0",
+    "react-native-svg": "^15.12.1",
+    "react-native-video": "^6.18.0",
+    "rn-kore-bot-sdk-v79": "file:.."
+  },
+  "peerDependencies": {
+    "react": "19.0.0",
+    "react-native": "^0.79.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "18.0.0",
+    "@react-native-community/cli-platform-android": "18.0.0",
+    "@react-native-community/cli-platform-ios": "18.0.0",
+    "@react-native/babel-preset": "0.79.0",
+    "@react-native/eslint-config": "0.79.0",
+    "@react-native/metro-config": "0.79.0",
+    "@react-native/typescript-config": "0.79.0",
+    "@types/react": "19.0.0",
+    "eslint": "^8.19.0",
+    "prettier": "2.8.8",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "react": "19.0.0",
+    "@types/react": "19.0.0",
+    "react-native-renderer": "19.0.0"
+  },
+  "resolutions": {
+    "react": "19.0.0",
+    "@types/react": "19.0.0",
+    "react-native-renderer": "19.0.0"
+  }
+}
