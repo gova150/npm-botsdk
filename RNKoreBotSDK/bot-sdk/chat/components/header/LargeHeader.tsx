@@ -152,16 +152,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     //justifyContent: 'center',
   },
-  title_text: {
-    fontWeight: '600',
-    letterSpacing: 0.3,
-    fontSize: normalize(15),
-  },
-
   sub_title_text: {
-    fontWeight: 'normal',
-    fontSize: normalize(12),
-    opacity: 0.5,
+    fontWeight: '700',
+    fontSize: normalize(15),
+    fontStyle: 'normal',
+    lineHeight: 22.5,
+  },
+  title_sub_text: {
+    fontWeight: '700',
+    fontSize: normalize(15),
+    fontStyle: 'normal',
+    lineHeight: 22.5,
+  },
+  title_text: {
+    fontWeight: '500',
+    fontSize: normalize(10), 
+    fontStyle: 'normal',
+    lineHeight: 15,
+    letterSpacing: 0.5,
   },
   render_icon: {
     paddingHorizontal: 0,
@@ -178,11 +186,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     marginStart: 10,
-  },
-  title_sub_text: {
-    fontWeight: 'normal',
-    fontSize: normalize(12),
-    opacity: 0.5,
   },
   title_sub_con1: {
     flex: 1,

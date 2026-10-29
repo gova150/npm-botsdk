@@ -31,27 +31,11 @@ export default abstract class BaseHeader<
   static contextType = ThemeContext;
 
   protected renderBackIcon(
-    styleProps?: any,
-    stylePropsMain?: any,
-    colorIcon?: any,
+    _styleProps?: any,
+    _stylePropsMain?: any,
+    _colorIcon?: any,
   ): React.ReactNode {
-    return (
-      <View
-        style={
-          stylePropsMain
-            ? stylePropsMain
-            : [styles.back_icon_container, styleProps]
-        }>
-        {this.renderIcon(
-          HeaderIconsId.BACK,
-          'HeaderLeft',
-          22,
-          22,
-          styleProps,
-          colorIcon,
-        )}
-      </View>
-    );
+    return null;
   }
   private getIconName = (theme: ThemeType) => {
     let iconName = 'IcIcon_1';
@@ -316,6 +300,14 @@ export default abstract class BaseHeader<
             styleProps,
             iconColor,
           )}
+        {this.renderIcon(
+          HeaderIconsId.MINIMISE,
+          'HeaderMenu',
+          17,
+          17,
+          styleProps,
+          iconColor,
+        )}
         {buttons?.close?.show &&
           this.renderIcon(
             HeaderIconsId.CLOSE,
@@ -347,7 +339,7 @@ export default abstract class BaseHeader<
     if (theme?.v3?.header?.buttons?.expand?.show) {
       count++;
     }
-    if (theme?.v3?.header?.buttons?.minimise?.show) {
+    if (theme?.v3?.header?.buttons?.minimise?.show !== false) {
       count++;
     }
 

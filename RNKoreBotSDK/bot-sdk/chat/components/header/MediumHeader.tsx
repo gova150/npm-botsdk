@@ -120,17 +120,24 @@ const styles = StyleSheet.create({
     //backgroundColor: 'yellow',
     //marginStart: 10,
   },
-  title_sub_text: {
-    fontWeight: 'normal',
-    fontSize: normalize(12),
-    opacity: 0.5,
-  },
   title_sub_con1: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  title_text: {fontWeight: '500', fontSize: normalize(14)},
+    title_sub_text: {
+    fontWeight: '700',
+    fontSize: normalize(15),
+    fontStyle: 'normal',
+    lineHeight: 22.5,
+  },
+  title_text: {
+    fontWeight: '500',
+    fontSize: normalize(10), 
+    fontStyle: 'normal',
+    lineHeight: 15,
+    letterSpacing: 0.5,
+  },
   title_sub_con: {
     alignItems: 'center',
     justifyContent: 'flex-start',

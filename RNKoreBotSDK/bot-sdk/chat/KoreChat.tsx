@@ -157,6 +157,12 @@ interface KoraChatProps {
   navigation?: any;
   route?: any;
   statusBarColor?: (colorCode: any) => void;
+  leaveChatTitle?: string;
+  leaveChatDescription?: string;
+  leaveChatConfirmText?: string;
+  leaveChatCancelText?: string;
+  leaveChatPrimaryColor?: string;
+  leaveChatTextAlign?: 'left' | 'center';
   templateInjection?: Map<
     string,
     CustomTemplate<CustomViewProps, CustomViewState>
@@ -565,8 +571,19 @@ export default class KoreChat extends React.Component<
   }
 
   private handleBackPress = (): boolean => {
-    if (!this.state.showBackButtonDialog) {
-      this.setState({ showBackButtonDialog: true });
+    if (this.state.showBackButtonDialog) {
+      this.handleDialogCancel();
+      return true;
+    }
+    try {
+      if (this.props.navigation?.canGoBack?.()) {
+        this.allowNavigation = true;
+        this.props.navigation?.goBack?.();
+      } else {
+        BackHandler.exitApp();
+      }
+    } catch (error) {
+      BackHandler.exitApp();
     }
     return true;
   };
@@ -644,17 +661,7 @@ export default class KoreChat extends React.Component<
       this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     }
 
-    if (this.props.navigation) {
-      this.unsubscribeNavigation = this.props.navigation.addListener('beforeRemove', (e: any) => {
-        if (this.allowNavigation) {
-          this.allowNavigation = false;
-          return; 
-        }
-        
-        e.preventDefault();
-        this.setState({ showBackButtonDialog: true });
-      });
-    }
+    // Back navigation now navigates without confirmation; dialog is shown on Close button
 
     const {text} = this.props;
     this.setisChatMounted(true);
@@ -2484,6 +2491,7 @@ export default class KoreChat extends React.Component<
       case HeaderIconsId.BACK:
         try {
           if (this.props.navigation?.canGoBack?.()) {
+            this.allowNavigation = true;
             this.props.navigation?.goBack?.();
           } else {
             BackHandler.exitApp();
@@ -2494,8 +2502,15 @@ export default class KoreChat extends React.Component<
 
         break;
 
+      case HeaderIconsId.MINIMISE:
+        this.handleDialogMinimize();
+        break;
+
       case HeaderIconsId.CLOSE:
-        this.handleDialogClose();
+        Keyboard.dismiss();
+        this.setState(prevState => ({
+          showBackButtonDialog: !prevState.showBackButtonDialog,
+        }));
         break;
 
       case HeaderIconsId.HELP:
@@ -2602,88 +2617,66 @@ export default class KoreChat extends React.Component<
   };
 
   private renderBackButtonDialog = () => {
+    if (!this.state.showBackButtonDialog) {
+      return null;
+    }
+
+    const title =
+      this.props.leaveChatTitle ||
+      this.getLocalizedString('leave_chat_title') ||
+      'Do you really want to leave this chat?';
+    const description =
+      this.props.leaveChatDescription ||
+      this.getLocalizedString('leave_chat_description') ||
+      "Chat history isn't saved, but if you would like to download a transcript, select the chat icon in the header before closing.";
+    const confirmText =
+      this.props.leaveChatConfirmText ||
+      this.getLocalizedString('yes_leave_chat') ||
+      'Yes, leave chat';
+    const cancelText =
+      this.props.leaveChatCancelText ||
+      this.getLocalizedString('no_stay_in_chat') ||
+      'No, stay in chat';
+
+    const primaryColor =
+      this.props.leaveChatPrimaryColor || '#1B365D';
+    const textAlign = this.props.leaveChatTextAlign || 'left';
+
     return (
-      <Modal
-        visible={this.state.showBackButtonDialog || false}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={this.handleDialogCancel}>
-        <View style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }}>
-          <View style={{
-            backgroundColor: '#fff',
-            padding: 20,
-            borderRadius: 15,
-            marginHorizontal: 20,
-            minWidth: 320,
-            maxWidth: 400,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            elevation: 10,
-          }}>
-            <Text style={{
-              fontSize: 18,
-              marginBottom: 15,
-              textAlign: 'left',
-              color: '#333'
-            }}>
-              {this.getLocalizedString('back_dialog_title')}
+      <View style={styles.leave_modal_container}>
+        <View style={styles.leave_modal_card}>
+          <Text style={[styles.leave_modal_title, {textAlign}]}>{title}</Text>
+          <Text style={[styles.leave_modal_desc, {textAlign}]}>{description}</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.leave_modal_btn_primary,
+              {backgroundColor: primaryColor},
+            ]}
+            activeOpacity={0.8}
+            onPress={this.handleDialogClose}>
+            <Text style={styles.leave_modal_btn_primary_text}>
+              {confirmText}
             </Text>
-            
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-              marginTop: 10,
-            }}>
-              <TouchableOpacity
-                style={{
-                  borderRadius: 8,
-                  flex: 1,
-                  marginHorizontal: 5,
-                }}
-                onPress={this.handleDialogCancel}>
-                <Text style={{fontSize: 16, color: '#333', fontWeight: '500'}}>
-                  {this.getLocalizedString('cancel')}
-                </Text>
-              </TouchableOpacity>
+          </TouchableOpacity>
 
-              <TouchableOpacity
-                style={{
-                  borderRadius: 8,
-                  paddingHorizontal: 5,
-                  alignItems: 'center',
-                  marginRight: 15,
-                  flex: 0,
-                }}
-                onPress={this.handleDialogClose}>
-                <Text style={{fontSize: 16, color: '#333', fontWeight: '500'}}>
-                  {this.getLocalizedString('close')}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  borderRadius: 8,
-                  alignItems: 'center',
-                  paddingHorizontal: 5,
-                  flex: 0,
-                }}
-                onPress={this.handleDialogMinimize}>
-                <Text style={{fontSize: 16, color: '#333', fontWeight: '500'}}>
-                  {this.getLocalizedString('minimize')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.leave_modal_btn_secondary,
+              {borderColor: primaryColor},
+            ]}
+            activeOpacity={0.8}
+            onPress={this.handleDialogCancel}>
+            <Text
+              style={[
+                styles.leave_modal_btn_secondary_text,
+                {color: primaryColor},
+              ]}>
+              {cancelText}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </View>
     );
   };
 
@@ -2714,19 +2707,21 @@ export default class KoreChat extends React.Component<
               )}
 
               {this.renderHeader()}
-              {this.openFullScreenDialog()}
-              {this.renderMessages()}
-              {this.renderTypingIndicator()}
-              {this.renderSTTview(this.state?.onSTTValue)}
+              <View style={styles.chat_body_container}>
+                {this.openFullScreenDialog()}
+                {this.renderMessages()}
+                {this.renderTypingIndicator()}
+                {this.renderSTTview(this.state?.onSTTValue)}
 
-              {this.renderInputToolbar()}
-              {this.state.activetheme && this.renderLoader()}
-              {this.renderAttachedBottomSheet()}
-              {this.renderMenuBottomSheet()}
-              {this.renderSeeMoreBottomSheet()}
-              {this.renderWelcomeScreenModel()}
-              {this.renderBackButtonDialog()}
-              <CustomAlertComponent ref={this.alertRef} />
+                {this.renderInputToolbar()}
+                {this.state.activetheme && this.renderLoader()}
+                {this.renderAttachedBottomSheet()}
+                {this.renderMenuBottomSheet()}
+                {this.renderSeeMoreBottomSheet()}
+                {this.renderWelcomeScreenModel()}
+                {this.renderBackButtonDialog()}
+                <CustomAlertComponent ref={this.alertRef} />
+              </View>
             </View>
           </Wrapper>
         </ThemeProvider>
@@ -3029,6 +3024,69 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  chat_body_container: {
+    flex: 1,
+    position: 'relative',
+  },
+  leave_modal_container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    zIndex: 9999,
+    elevation: 20,
+  },
+  leave_modal_card: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: normalize(24),
+    paddingVertical: normalize(16),
+    width: '100%',
+  },
+  leave_modal_title: {
+    fontSize: normalize(22),
+    fontWeight: '700',
+    color: '#101828',
+    lineHeight: normalize(28),
+    marginBottom: normalize(14),
+    textAlign: 'left',
+  },
+  leave_modal_desc: {
+    fontSize: normalize(15),
+    fontWeight: '400',
+    color: '#475467',
+    lineHeight: normalize(22),
+    marginBottom: normalize(28),
+    textAlign: 'left',
+  },
+  leave_modal_btn_primary: {
+    height: normalize(50),
+    borderRadius: normalize(25),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: normalize(12),
+    width: '100%',
+  },
+  leave_modal_btn_primary_text: {
+    color: '#FFFFFF',
+    fontSize: normalize(16),
+    fontWeight: '600',
+  },
+  leave_modal_btn_secondary: {
+    height: normalize(50),
+    borderRadius: normalize(25),
+    borderWidth: 1.5,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  leave_modal_btn_secondary_text: {
+    fontSize: normalize(16),
+    fontWeight: '600',
   },
 });
 

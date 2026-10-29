@@ -150,6 +150,13 @@ export class SvgIcon extends React.Component {
           color={color ? color : '#697586'}
         />
       ),
+      HeaderMinimize: (
+        <HeaderMinimize
+          width={width}
+          height={height}
+          color={color ? color : '#697586'}
+        />
+      ),
       HeaderReconnect: (
         <HeaderReconnect
           width={width}

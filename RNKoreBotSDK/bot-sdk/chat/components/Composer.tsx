@@ -37,6 +37,7 @@ export interface ComposerProps {
   theme: IThemeType;
   onSpeakerClicked?(isSpeek: boolean): void;
   isTTSenable?: boolean;
+  sendButtonBgColor?: string;
 }
 
 export function Composer({
@@ -54,9 +55,11 @@ export function Composer({
   theme,
   onSpeakerClicked = () => {},
   isTTSenable = false,
+  sendButtonBgColor,
 }: ComposerProps): React.ReactElement {
   const dimensionsRef = useRef<{width: number; height: number}>();
   const [isTTS, setTTS] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   //onSpeakerClicked(false);
 
   // Sync local state with parent state when it changes
@@ -93,8 +96,15 @@ export function Composer({
     determineInputSizeChange(contentSize);
   const maxHeight = MAX_TOOL_BAR_HEIGHT || 180;
   const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || Color.white;
-  const outLineColor =
+  const defaultOutlineColor =
     theme?.v3?.footer?.compose_bar?.['outline-color'] || Color.gray;
+  const sendButtonColor =
+    sendButtonBgColor ||
+    theme?.v3?.body?.user_message?.bg_color ||
+    theme?.v3?.general?.colors?.primary ||
+    '#0D6EFD';
+  const outLineColor = isFocused ? sendButtonColor : defaultOutlineColor;
+  const currentBorderWidth = isFocused ? 2 : StyleSheet.hairlineWidth;
   //const bubbleTheme = getBubbleTheme(theme);
   const textColor = invertColor(bgColor, true);
   return (
@@ -106,8 +116,9 @@ export function Composer({
           backgroundColor: Color.transparent,
         },
         isIOS && {
-          borderWidth: StyleSheet.hairlineWidth,
+          borderWidth: currentBorderWidth,
           borderColor: outLineColor,
+          borderStyle: 'solid',
           borderRadius: 4,
           backgroundColor: bgColor,
           minHeight: normalize(composerHeightNew + 16),
@@ -121,8 +132,9 @@ export function Composer({
             flexDirection: 'row',
           },
           isAndroid && {
-            borderWidth: StyleSheet.hairlineWidth,
+            borderWidth: currentBorderWidth,
             borderColor: outLineColor,
+            borderStyle: 'solid',
             borderRadius: 4,
             backgroundColor: bgColor,
             minHeight: normalize(composerHeightNew + 16),
@@ -159,6 +171,14 @@ export function Composer({
           underlineColorAndroid="transparent"
           keyboardAppearance={keyboardAppearance}
           {...textInputProps}
+          onFocus={(e: any) => {
+            setIsFocused(true);
+            textInputProps?.onFocus?.(e);
+          }}
+          onBlur={(e: any) => {
+            setIsFocused(false);
+            textInputProps?.onBlur?.(e);
+          }}
         />
 
         {theme?.v3?.footer?.buttons?.speaker?.show && (

@@ -325,6 +325,14 @@ export default class InputToolbar extends React.Component<
     return this._renderSend(this.props);
   }
 
+  private getSendButtonBgColor = (theme?: IThemeType) => {
+    return (
+      theme?.v3?.body?.user_message?.bg_color ||
+      theme?.v3?.general?.colors?.primary ||
+      '#0D6EFD'
+    );
+  };
+
   private _renderSend = (props: any) => {
     let disabled = true;
     let text = props?.text;
@@ -337,6 +345,7 @@ export default class InputToolbar extends React.Component<
     const theme = this.context as IThemeType;
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
     const height = normalize(36);
+    const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return (
       <Send {...props}>
         {disabled ? (
@@ -387,9 +396,7 @@ export default class InputToolbar extends React.Component<
               {
                 backgroundColor: disabled
                   ? 'grey'
-                  : theme?.v3?.body?.user_message?.bg_color
-                  ? theme?.v3?.body?.user_message?.bg_color
-                  : '#0D6EFD',
+                  : sendButtonBgColor,
                 width: normalize(height),
                 height: normalize(height),
               },
@@ -415,6 +422,7 @@ export default class InputToolbar extends React.Component<
       return this.props.renderComposer(this.props);
     }
     const theme = this.context as IThemeType;
+    const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return (
       <View
         style={{
@@ -424,7 +432,11 @@ export default class InputToolbar extends React.Component<
           getRef={(ref: any) => {
             this.fadeInToBottomRef = ref;
           }}>
-          <Composer theme={theme} {...this.props} />
+          <Composer
+            theme={theme}
+            sendButtonBgColor={sendButtonBgColor}
+            {...this.props}
+          />
         </FadeInToBottom>
       </View>
     );

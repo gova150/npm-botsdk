@@ -45,6 +45,11 @@ const LOCALIZED_STRINGS = {
     cancel: 'CANCEL',
     close: 'CLOSE',
     minimize: 'MINIMIZE',
+    leave_chat_title: 'Do you really want to leave this chat?',
+    leave_chat_description:
+      "Chat history isn't saved, but if you would like to download a transcript, select the chat icon in the header before closing.",
+    yes_leave_chat: 'Yes, leave chat',
+    no_stay_in_chat: 'No, stay in chat',
     view_more: 'View More',
     answered_by_ai: 'Answered by AI',
     did_not_get_code: 'Didn\'t get a code?',
@@ -55,18 +60,33 @@ const LOCALIZED_STRINGS = {
     cancel: 'CANCELAR',
     close: 'CERRAR',
     minimize: 'MINIMIZAR',
+    leave_chat_title: '¿Realmente deseas salir de este chat?',
+    leave_chat_description:
+      'El historial de chat no se guarda, pero si deseas descargar una transcripción, selecciona el icono de chat en el encabezado antes de cerrar.',
+    yes_leave_chat: 'Sí, salir del chat',
+    no_stay_in_chat: 'No, permanecer en el chat',
   },
   fr: {
     back_dialog_title: 'Souhaitez-vous fermer la conversation ou la minimiser?',
     cancel: 'ANNULER',
     close: 'FERMER',
     minimize: 'MINIMISER',
+    leave_chat_title: 'Voulez-vous vraiment quitter ce chat ?',
+    leave_chat_description:
+      "L'historique du chat n'est pas enregistré, mais si vous souhaitez télécharger une transcription, sélectionnez l'icône de chat dans l'en-tête avant de fermer.",
+    yes_leave_chat: 'Oui, quitter le chat',
+    no_stay_in_chat: 'Non, rester dans le chat',
   },
   de: {
     back_dialog_title: 'Möchten Sie das Gespräch schließen oder minimieren?',
     cancel: 'ABBRECHEN',
     close: 'SCHLIEßEN',
     minimize: 'MINIMIEREN',
+    leave_chat_title: 'Möchten Sie diesen Chat wirklich verlassen?',
+    leave_chat_description:
+      'Der Chatverlauf wird nicht gespeichert. Wenn Sie ein Transkript herunterladen möchten, wählen Sie vor dem Schließen das Chat-Symbol in der Kopfzeile aus.',
+    yes_leave_chat: 'Ja, Chat verlassen',
+    no_stay_in_chat: 'Nein, im Chat bleiben',
   },
 };
 
