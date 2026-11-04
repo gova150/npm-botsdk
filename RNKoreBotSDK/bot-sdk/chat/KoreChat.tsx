@@ -265,6 +265,7 @@ export default class KoreChat extends React.Component<
     renderComposer: null;
     renderActions: any;
     renderSend: null;
+    alwaysShowSend: boolean;
     renderAccessory: null;
     isKeyboardInternallyHandled: boolean;
     onPressActionButton: null;
@@ -1764,6 +1765,10 @@ export default class KoreChat extends React.Component<
   private renderInputToolbar = (): ReactNode => {
     const inputToolbarProps = {
       ...this.props,
+      alwaysShowSend:
+        this.props.alwaysShowSend !== undefined
+          ? this.props.alwaysShowSend
+          : true,
       text: this.getTextFromProp(this.state.text),
       composerHeight: Math.max(
         this.props.minComposerHeight || 0,
@@ -3188,6 +3193,7 @@ KoreChat.defaultProps = {
   renderComposer: null,
   renderActions: null,
   renderSend: null,
+  alwaysShowSend: true,
   renderAccessory: null,
   isKeyboardInternallyHandled: true,
   onPressActionButton: null,

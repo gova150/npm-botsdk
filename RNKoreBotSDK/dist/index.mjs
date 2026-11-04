@@ -18096,8 +18096,8 @@ var Send = class extends Component24 {
       children,
       textStyle: textStyle3,
       label = "Send",
-      alwaysShowSend,
-      disabled,
+      alwaysShowSend = true,
+      disabled = false,
       sendButtonProps
     } = this.props;
     if (alwaysShowSend || text && text.trim().length > 0) {
@@ -19189,19 +19189,11 @@ var InputToolbar = class extends React86.Component {
     return theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
   };
   _renderSend = (props) => {
-    let disabled = true;
-    let text = props?.text;
-    if (text && text?.trim().length > 0) {
-      disabled = false;
-    }
-    if (this.props?.isMediaAddedToSend) {
-      disabled = false;
-    }
     const theme = this.context;
-    const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
+    const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show === true && !this.props?.alwaysShowSend && !props?.alwaysShowSend;
     const height = normalize(36);
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
-    return /* @__PURE__ */ React86.createElement(Send, { ...props }, disabled ? isMicVisible ? /* @__PURE__ */ React86.createElement(
+    return /* @__PURE__ */ React86.createElement(Send, { ...props, alwaysShowSend: true, disabled: false }, isMicVisible ? /* @__PURE__ */ React86.createElement(
       View71,
       {
         pointerEvents: this.props.isMediaLoading ? "none" : "auto",
@@ -19227,33 +19219,11 @@ var InputToolbar = class extends React86.Component {
     ) : /* @__PURE__ */ React86.createElement(
       View71,
       {
-        pointerEvents: "none",
+        pointerEvents: "auto",
         style: [
           styles66.send_container1,
           {
-            backgroundColor: "#CCCCCC",
-            width: normalize(height),
-            height: normalize(height)
-          }
-        ]
-      },
-      /* @__PURE__ */ React86.createElement(
-        SvgIcon,
-        {
-          name: "SendIcon",
-          width: normalize(16),
-          height: normalize(16),
-          color: Color_default.white
-        }
-      )
-    ) : /* @__PURE__ */ React86.createElement(
-      View71,
-      {
-        pointerEvents: disabled ? "none" : "auto",
-        style: [
-          styles66.send_container1,
-          {
-            backgroundColor: disabled ? "grey" : sendButtonBgColor,
+            backgroundColor: sendButtonBgColor,
             width: normalize(height),
             height: normalize(height)
           }
@@ -25412,6 +25382,7 @@ var KoreChat = class _KoreChat extends React112.Component {
   renderInputToolbar = () => {
     const inputToolbarProps = {
       ...this.props,
+      alwaysShowSend: this.props.alwaysShowSend !== void 0 ? this.props.alwaysShowSend : true,
       text: this.getTextFromProp(this.state.text),
       composerHeight: Math.max(
         this.props.minComposerHeight || 0,
@@ -26695,6 +26666,7 @@ KoreChat.defaultProps = {
   renderComposer: null,
   renderActions: null,
   renderSend: null,
+  alwaysShowSend: true,
   renderAccessory: null,
   isKeyboardInternallyHandled: true,
   onPressActionButton: null,

@@ -74,8 +74,8 @@ export default class Send extends Component<SendProps> {
       children,
       textStyle,
       label = 'Send',
-      alwaysShowSend,
-      disabled,
+      alwaysShowSend = true,
+      disabled = false,
       sendButtonProps,
     } = this.props;
     if (alwaysShowSend || (text && text.trim().length > 0)) {

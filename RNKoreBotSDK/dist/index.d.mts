@@ -865,6 +865,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
         renderComposer: null;
         renderActions: any;
         renderSend: null;
+        alwaysShowSend: boolean;
         renderAccessory: null;
         isKeyboardInternallyHandled: boolean;
         onPressActionButton: null;
@@ -1099,6 +1100,7 @@ interface InputToolbarProps {
     renderMediaView?: ((props: any) => any) | null;
     isMediaAddedToSend?: boolean;
     isMediaLoading?: boolean;
+    alwaysShowSend?: boolean;
     onSTTValue?: any;
     onSendSTTClick?: any;
 }

@@ -40,6 +40,7 @@ interface InputToolbarProps {
   renderMediaView?: ((props: any) => any) | null;
   isMediaAddedToSend?: boolean;
   isMediaLoading?: boolean;
+  alwaysShowSend?: boolean;
   onSTTValue?: any;
   onSendSTTClick?: any;
 }
@@ -334,69 +335,42 @@ export default class InputToolbar extends React.Component<
   };
 
   private _renderSend = (props: any) => {
-    let disabled = true;
-    let text = props?.text;
-    if (text && text?.trim().length > 0) {
-      disabled = false;
-    }
-    if (this.props?.isMediaAddedToSend) {
-      disabled = false;
-    }
     const theme = this.context as IThemeType;
-    const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
+    const isMicVisible =
+      theme?.v3?.footer?.buttons?.microphone?.show === true &&
+      !this.props?.alwaysShowSend &&
+      !props?.alwaysShowSend;
     const height = normalize(36);
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return (
-      <Send {...props}>
-        {disabled ? (
-          isMicVisible ? (
-            <View
-              pointerEvents={this.props.isMediaLoading ? 'none' : 'auto'}
-              style={[styles.send_container]}>
-              <TouchableOpacity
-                onPress={() => {
-                  this.handleVoiceTextSwitch();
-                }}>
-                <SvgIcon
-                  name={this.state.isSTTViewShow ? 'KeyboardIcon' : 'MicIcon'}
-                  width={normalize(22)}
-                  height={normalize(22)}
-                  color={
-                    theme?.v3?.footer?.buttons?.attachment?.icon_color ||
-                    theme?.v3?.footer?.icons_color ||
-                    '#697586'
-                  }
-                />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View
-              pointerEvents={'none'}
-              style={[
-                styles.send_container1,
-                {
-                  backgroundColor: '#CCCCCC',
-                  width: normalize(height),
-                  height: normalize(height),
-                },
-              ]}>
+      <Send {...props} alwaysShowSend={true} disabled={false}>
+        {isMicVisible ? (
+          <View
+            pointerEvents={this.props.isMediaLoading ? 'none' : 'auto'}
+            style={[styles.send_container]}>
+            <TouchableOpacity
+              onPress={() => {
+                this.handleVoiceTextSwitch();
+              }}>
               <SvgIcon
-                name={'SendIcon'}
-                width={normalize(16)}
-                height={normalize(16)}
-                color={Color.white}
+                name={this.state.isSTTViewShow ? 'KeyboardIcon' : 'MicIcon'}
+                width={normalize(22)}
+                height={normalize(22)}
+                color={
+                  theme?.v3?.footer?.buttons?.attachment?.icon_color ||
+                  theme?.v3?.footer?.icons_color ||
+                  '#697586'
+                }
               />
-            </View>
-          )
+            </TouchableOpacity>
+          </View>
         ) : (
           <View
-            pointerEvents={disabled ? 'none' : 'auto'}
+            pointerEvents={'auto'}
             style={[
               styles.send_container1,
               {
-                backgroundColor: disabled
-                  ? 'grey'
-                  : sendButtonBgColor,
+                backgroundColor: sendButtonBgColor,
                 width: normalize(height),
                 height: normalize(height),
               },
