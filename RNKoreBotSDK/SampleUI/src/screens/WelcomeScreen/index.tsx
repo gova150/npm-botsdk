@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { Component } from 'react';
+import { botConfig } from "../../config/BotConfig";
 import {
   TextInput,
   Text,
@@ -43,12 +44,12 @@ class WelcomeScreen extends Component<any, State> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      botName: 'Kore.ai Bot',
-      botId: 'PLEASE_ENTER_BOT_ID',
-      clientId: 'PLEASE_ENTER_CLIENT_ID',
-      clientSecret: 'PLEASE_ENTER_CLIENT_SECRET',
-      botUrl: 'https://bots.kore.ai',
-      jwtServerUrl: 'PLEASE_ENTER_JWT_SERVER_URL',
+      botName: botConfig.botName,
+      botId: botConfig.botId,
+      clientId: botConfig.clientId,
+      clientSecret: botConfig.clientSecret,
+      botUrl: botConfig.botUrl,
+      jwtServerUrl: botConfig.jwtServerUrl,
       permissionsGranted: {
         camera: false,
         microphone: false,

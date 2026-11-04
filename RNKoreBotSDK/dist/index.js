@@ -3587,6 +3587,14 @@ var SvgIcon = class extends React17.Component {
           color: color ? color : "#697586"
         }
       ),
+      HeaderMinimize: /* @__PURE__ */ React17.createElement(
+        HeaderMinimize,
+        {
+          width: width8,
+          height,
+          color: color ? color : "#697586"
+        }
+      ),
       HeaderReconnect: /* @__PURE__ */ React17.createElement(
         HeaderReconnect,
         {
@@ -16115,6 +16123,10 @@ var LOCALIZED_STRINGS = {
     cancel: "CANCEL",
     close: "CLOSE",
     minimize: "MINIMIZE",
+    leave_chat_title: "Do you really want to leave this chat?",
+    leave_chat_description: "Chat history isn't saved, but if you would like to download a transcript, select the chat icon in the header before closing.",
+    yes_leave_chat: "Yes, leave chat",
+    no_stay_in_chat: "No, stay in chat",
     view_more: "View More",
     answered_by_ai: "Answered by AI",
     did_not_get_code: "Didn't get a code?",
@@ -16124,19 +16136,31 @@ var LOCALIZED_STRINGS = {
     back_dialog_title: "\xBFTe gustar\xEDa cerrar la conversaci\xF3n o minimizar?",
     cancel: "CANCELAR",
     close: "CERRAR",
-    minimize: "MINIMIZAR"
+    minimize: "MINIMIZAR",
+    leave_chat_title: "\xBFRealmente deseas salir de este chat?",
+    leave_chat_description: "El historial de chat no se guarda, pero si deseas descargar una transcripci\xF3n, selecciona el icono de chat en el encabezado antes de cerrar.",
+    yes_leave_chat: "S\xED, salir del chat",
+    no_stay_in_chat: "No, permanecer en el chat"
   },
   fr: {
     back_dialog_title: "Souhaitez-vous fermer la conversation ou la minimiser?",
     cancel: "ANNULER",
     close: "FERMER",
-    minimize: "MINIMISER"
+    minimize: "MINIMISER",
+    leave_chat_title: "Voulez-vous vraiment quitter ce chat ?",
+    leave_chat_description: "L'historique du chat n'est pas enregistr\xE9, mais si vous souhaitez t\xE9l\xE9charger une transcription, s\xE9lectionnez l'ic\xF4ne de chat dans l'en-t\xEAte avant de fermer.",
+    yes_leave_chat: "Oui, quitter le chat",
+    no_stay_in_chat: "Non, rester dans le chat"
   },
   de: {
     back_dialog_title: "M\xF6chten Sie das Gespr\xE4ch schlie\xDFen oder minimieren?",
     cancel: "ABBRECHEN",
     close: "SCHLIE\xDFEN",
-    minimize: "MINIMIEREN"
+    minimize: "MINIMIEREN",
+    leave_chat_title: "M\xF6chten Sie diesen Chat wirklich verlassen?",
+    leave_chat_description: "Der Chatverlauf wird nicht gespeichert. Wenn Sie ein Transkript herunterladen m\xF6chten, w\xE4hlen Sie vor dem Schlie\xDFen das Chat-Symbol in der Kopfzeile aus.",
+    yes_leave_chat: "Ja, Chat verlassen",
+    no_stay_in_chat: "Nein, im Chat bleiben"
   }
 };
 var Localization = class _Localization {
@@ -17430,10 +17454,12 @@ function Composer({
   theme,
   onSpeakerClicked = () => {
   },
-  isTTSenable = false
+  isTTSenable = false,
+  sendButtonBgColor
 }) {
   const dimensionsRef = (0, import_react33.useRef)();
   const [isTTS, setTTS] = (0, import_react33.useState)(false);
+  const [isFocused, setIsFocused] = (0, import_react33.useState)(false);
   (0, import_react33.useEffect)(() => {
     setTTS(isTTSenable);
   }, [isTTSenable]);
@@ -17455,7 +17481,10 @@ function Composer({
   }) => determineInputSizeChange(contentSize);
   const maxHeight = MAX_TOOL_BAR_HEIGHT || 180;
   const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || Color_default.white;
-  const outLineColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || Color_default.gray;
+  const defaultOutlineColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || Color_default.gray;
+  const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
+  const outLineColor = isFocused ? sendButtonColor : defaultOutlineColor;
+  const currentBorderWidth = isFocused ? 2 : import_react_native75.StyleSheet.hairlineWidth;
   const textColor = invertColor(bgColor, true);
   return /* @__PURE__ */ import_react33.default.createElement(
     import_react_native75.View,
@@ -17467,8 +17496,9 @@ function Composer({
           backgroundColor: Color_default.transparent
         },
         isIOS && {
-          borderWidth: import_react_native75.StyleSheet.hairlineWidth,
+          borderWidth: currentBorderWidth,
           borderColor: outLineColor,
+          borderStyle: "solid",
           borderRadius: 4,
           backgroundColor: bgColor,
           minHeight: normalize(composerHeightNew + 16)
@@ -17485,8 +17515,9 @@ function Composer({
             flexDirection: "row"
           },
           isAndroid && {
-            borderWidth: import_react_native75.StyleSheet.hairlineWidth,
+            borderWidth: currentBorderWidth,
             borderColor: outLineColor,
+            borderStyle: "solid",
             borderRadius: 4,
             backgroundColor: bgColor,
             minHeight: normalize(composerHeightNew + 16)
@@ -17523,7 +17554,15 @@ function Composer({
           enablesReturnKeyAutomatically: true,
           underlineColorAndroid: "transparent",
           keyboardAppearance,
-          ...textInputProps
+          ...textInputProps,
+          onFocus: (e) => {
+            setIsFocused(true);
+            textInputProps?.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            textInputProps?.onBlur?.(e);
+          }
         }
       ),
       theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ import_react33.default.createElement(
@@ -18716,6 +18755,9 @@ var InputToolbar = class extends React86.Component {
     }
     return this._renderSend(this.props);
   }
+  getSendButtonBgColor = (theme) => {
+    return theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
+  };
   _renderSend = (props) => {
     let disabled = true;
     let text = props?.text;
@@ -18728,6 +18770,7 @@ var InputToolbar = class extends React86.Component {
     const theme = this.context;
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
     const height = normalize(36);
+    const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return /* @__PURE__ */ React86.createElement(Send, { ...props }, disabled ? isMicVisible ? /* @__PURE__ */ React86.createElement(
       import_react_native82.View,
       {
@@ -18780,7 +18823,7 @@ var InputToolbar = class extends React86.Component {
         style: [
           styles67.send_container1,
           {
-            backgroundColor: disabled ? "grey" : theme?.v3?.body?.user_message?.bg_color ? theme?.v3?.body?.user_message?.bg_color : "#0D6EFD",
+            backgroundColor: disabled ? "grey" : sendButtonBgColor,
             width: normalize(height),
             height: normalize(height)
           }
@@ -18802,6 +18845,7 @@ var InputToolbar = class extends React86.Component {
       return this.props.renderComposer(this.props);
     }
     const theme = this.context;
+    const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return /* @__PURE__ */ React86.createElement(
       import_react_native82.View,
       {
@@ -18816,7 +18860,14 @@ var InputToolbar = class extends React86.Component {
             this.fadeInToBottomRef = ref;
           }
         },
-        /* @__PURE__ */ React86.createElement(Composer, { theme, ...this.props })
+        /* @__PURE__ */ React86.createElement(
+          Composer,
+          {
+            theme,
+            sendButtonBgColor,
+            ...this.props
+          }
+        )
       )
     );
   }
@@ -21063,21 +21114,8 @@ var import_react_native92 = require("react-native");
 var import_rn_kore_bot_socket_lib_v794 = __toESM(require("rn-kore-bot-socket-lib-v79"));
 var BaseHeader = class extends import_react42.default.Component {
   static contextType = ThemeContext;
-  renderBackIcon(styleProps, stylePropsMain, colorIcon) {
-    return /* @__PURE__ */ import_react42.default.createElement(
-      import_react_native92.View,
-      {
-        style: stylePropsMain ? stylePropsMain : [styles77.back_icon_container, styleProps]
-      },
-      this.renderIcon(
-        HeaderIconsId.BACK,
-        "HeaderLeft",
-        22,
-        22,
-        styleProps,
-        colorIcon
-      )
-    );
+  renderBackIcon(_styleProps, _stylePropsMain, _colorIcon) {
+    return null;
   }
   getIconName = (theme) => {
     let iconName = "IcIcon_1";
@@ -21276,6 +21314,13 @@ var BaseHeader = class extends import_react42.default.Component {
       17,
       styleProps,
       iconColor
+    ), this.renderIcon(
+      HeaderIconsId.MINIMISE,
+      "HeaderMenu",
+      17,
+      17,
+      styleProps,
+      iconColor
     ), buttons?.close?.show && this.renderIcon(
       HeaderIconsId.CLOSE,
       "HeaderClose",
@@ -21302,7 +21347,7 @@ var BaseHeader = class extends import_react42.default.Component {
     if (theme?.v3?.header?.buttons?.expand?.show) {
       count++;
     }
-    if (theme?.v3?.header?.buttons?.minimise?.show) {
+    if (theme?.v3?.header?.buttons?.minimise?.show !== false) {
       count++;
     }
     return SHOW_BUTTONS_LIMIT < count;
@@ -21441,17 +21486,24 @@ var styles78 = import_react_native93.StyleSheet.create({
   sub_con1: {
     flex: 1,
     flexDirection: "row",
-    marginStart: 10
+    marginStart: 0
   },
   title_sub_text: {
-    fontWeight: "normal",
-    fontSize: normalize(12),
-    opacity: 0.5
+    fontWeight: "700",
+    fontSize: normalize(15),
+    fontStyle: "normal",
+    lineHeight: 22.5
   },
   title_sub_con1: {
     flex: 1
   },
-  title_text: { fontWeight: "500", fontSize: normalize(14) },
+  title_text: {
+    fontWeight: "500",
+    fontSize: normalize(10),
+    fontStyle: "normal",
+    lineHeight: 15,
+    letterSpacing: 0.5
+  },
   title_sub_con: {
     flex: 1,
     justifyContent: "flex-end"
@@ -21571,17 +21623,24 @@ var styles79 = import_react_native94.StyleSheet.create({
     //backgroundColor: 'yellow',
     //marginStart: 10,
   },
-  title_sub_text: {
-    fontWeight: "normal",
-    fontSize: normalize(12),
-    opacity: 0.5
-  },
   title_sub_con1: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start"
   },
-  title_text: { fontWeight: "500", fontSize: normalize(14) },
+  title_sub_text: {
+    fontWeight: "700",
+    fontSize: normalize(15),
+    fontStyle: "normal",
+    lineHeight: 22.5
+  },
+  title_text: {
+    fontWeight: "500",
+    fontSize: normalize(10),
+    fontStyle: "normal",
+    lineHeight: 15,
+    letterSpacing: 0.5
+  },
   title_sub_con: {
     alignItems: "center",
     justifyContent: "flex-start"
@@ -21726,15 +21785,24 @@ var styles80 = import_react_native95.StyleSheet.create({
     alignSelf: "center"
     //justifyContent: 'center',
   },
-  title_text: {
-    fontWeight: "600",
-    letterSpacing: 0.3,
-    fontSize: normalize(15)
-  },
   sub_title_text: {
-    fontWeight: "normal",
-    fontSize: normalize(12),
-    opacity: 0.5
+    fontWeight: "700",
+    fontSize: normalize(15),
+    fontStyle: "normal",
+    lineHeight: 22.5
+  },
+  title_sub_text: {
+    fontWeight: "700",
+    fontSize: normalize(15),
+    fontStyle: "normal",
+    lineHeight: 22.5
+  },
+  title_text: {
+    fontWeight: "500",
+    fontSize: normalize(10),
+    fontStyle: "normal",
+    lineHeight: 15,
+    letterSpacing: 0.5
   },
   render_icon: {
     paddingHorizontal: 0,
@@ -21749,11 +21817,6 @@ var styles80 = import_react_native95.StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     marginStart: 10
-  },
-  title_sub_text: {
-    fontWeight: "normal",
-    fontSize: normalize(12),
-    opacity: 0.5
   },
   title_sub_con1: {
     flex: 1
@@ -23871,8 +23934,19 @@ var KoreChat = class _KoreChat extends React112.Component {
     return messages.concat(currentMessages);
   }
   handleBackPress = () => {
-    if (!this.state.showBackButtonDialog) {
-      this.setState({ showBackButtonDialog: true });
+    if (this.state.showBackButtonDialog) {
+      this.handleDialogCancel();
+      return true;
+    }
+    try {
+      if (this.props.navigation?.canGoBack?.()) {
+        this.allowNavigation = true;
+        this.props.navigation?.goBack?.();
+      } else {
+        import_react_native107.BackHandler.exitApp();
+      }
+    } catch (error) {
+      import_react_native107.BackHandler.exitApp();
     }
     return true;
   };
@@ -23941,16 +24015,6 @@ var KoreChat = class _KoreChat extends React112.Component {
     botClient.setSessionActive(true);
     if (isAndroid) {
       this.backHandler = import_react_native107.BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
-    }
-    if (this.props.navigation) {
-      this.unsubscribeNavigation = this.props.navigation.addListener("beforeRemove", (e) => {
-        if (this.allowNavigation) {
-          this.allowNavigation = false;
-          return;
-        }
-        e.preventDefault();
-        this.setState({ showBackButtonDialog: true });
-      });
     }
     const { text } = this.props;
     this.setisChatMounted(true);
@@ -25503,6 +25567,7 @@ var KoreChat = class _KoreChat extends React112.Component {
       case HeaderIconsId.BACK:
         try {
           if (this.props.navigation?.canGoBack?.()) {
+            this.allowNavigation = true;
             this.props.navigation?.goBack?.();
           } else {
             import_react_native107.BackHandler.exitApp();
@@ -25511,8 +25576,14 @@ var KoreChat = class _KoreChat extends React112.Component {
           import_react_native107.BackHandler.exitApp();
         }
         break;
+      case HeaderIconsId.MINIMISE:
+        this.handleDialogMinimize();
+        break;
       case HeaderIconsId.CLOSE:
-        this.handleDialogClose();
+        import_react_native107.Keyboard.dismiss();
+        this.setState((prevState) => ({
+          showBackButtonDialog: !prevState.showBackButtonDialog
+        }));
         break;
       case HeaderIconsId.HELP:
         let item2 = {
@@ -25613,79 +25684,47 @@ var KoreChat = class _KoreChat extends React112.Component {
     );
   };
   renderBackButtonDialog = () => {
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    if (!this.state.showBackButtonDialog) {
+      return null;
+    }
+    const title = this.props.leaveChatTitle || this.getLocalizedString("leave_chat_title") || "Do you really want to leave this chat?";
+    const description = this.props.leaveChatDescription || this.getLocalizedString("leave_chat_description") || "Chat history isn't saved, but if you would like to download a transcript, select the chat icon in the header before closing.";
+    const confirmText = this.props.leaveChatConfirmText || this.getLocalizedString("yes_leave_chat") || "Yes, leave chat";
+    const cancelText = this.props.leaveChatCancelText || this.getLocalizedString("no_stay_in_chat") || "No, stay in chat";
+    const primaryColor = this.props.leaveChatPrimaryColor || "#1B365D";
+    const textAlign = this.props.leaveChatTextAlign || "left";
+    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.leave_modal_container }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.leave_modal_card }, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: [styles88.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: [styles88.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React112.createElement(
+      import_react_native107.TouchableOpacity,
       {
-        visible: this.state.showBackButtonDialog || false,
-        animationType: "fade",
-        transparent: true,
-        onRequestClose: this.handleDialogCancel
+        style: [
+          styles88.leave_modal_btn_primary,
+          { backgroundColor: primaryColor }
+        ],
+        activeOpacity: 0.8,
+        onPress: this.handleDialogClose
       },
-      /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)"
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
-        backgroundColor: "#fff",
-        padding: 20,
-        borderRadius: 15,
-        marginHorizontal: 20,
-        minWidth: 320,
-        maxWidth: 400,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-        elevation: 10
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: {
-        fontSize: 18,
-        marginBottom: 15,
-        textAlign: "left",
-        color: "#333"
-      } }, this.getLocalizedString("back_dialog_title")), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        marginTop: 10
-      } }, /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+      /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: styles88.leave_modal_btn_primary_text }, confirmText)
+    ), /* @__PURE__ */ React112.createElement(
+      import_react_native107.TouchableOpacity,
+      {
+        style: [
+          styles88.leave_modal_btn_secondary,
+          { borderColor: primaryColor }
+        ],
+        activeOpacity: 0.8,
+        onPress: this.handleDialogCancel
+      },
+      /* @__PURE__ */ React112.createElement(
+        import_react_native107.Text,
         {
-          style: {
-            borderRadius: 8,
-            flex: 1,
-            marginHorizontal: 5
-          },
-          onPress: this.handleDialogCancel
+          style: [
+            styles88.leave_modal_btn_secondary_text,
+            { color: primaryColor }
+          ]
         },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: { fontSize: 16, color: "#333", fontWeight: "500" } }, this.getLocalizedString("cancel"))
-      ), /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
-        {
-          style: {
-            borderRadius: 8,
-            paddingHorizontal: 5,
-            alignItems: "center",
-            marginRight: 15,
-            flex: 0
-          },
-          onPress: this.handleDialogClose
-        },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: { fontSize: 16, color: "#333", fontWeight: "500" } }, this.getLocalizedString("close"))
-      ), /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
-        {
-          style: {
-            borderRadius: 8,
-            alignItems: "center",
-            paddingHorizontal: 5,
-            flex: 0
-          },
-          onPress: this.handleDialogMinimize
-        },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: { fontSize: 16, color: "#333", fontWeight: "500" } }, this.getLocalizedString("minimize"))
-      ))))
-    );
+        cancelText
+      )
+    )));
   };
   render() {
     if (this.state.isInitialized === true && this.state.isThemeLoaded) {
@@ -25714,18 +25753,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           }
         ),
         this.renderHeader(),
-        this.openFullScreenDialog(),
-        this.renderMessages(),
-        this.renderTypingIndicator(),
-        this.renderSTTview(this.state?.onSTTValue),
-        this.renderInputToolbar(),
-        this.state.activetheme && this.renderLoader(),
-        this.renderAttachedBottomSheet(),
-        this.renderMenuBottomSheet(),
-        this.renderSeeMoreBottomSheet(),
-        this.renderWelcomeScreenModel(),
-        this.renderBackButtonDialog(),
-        /* @__PURE__ */ React112.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+        /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React112.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
       )));
     }
     return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React112.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
@@ -26018,6 +26046,69 @@ var styles88 = import_react_native107.StyleSheet.create({
     backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center"
+  },
+  chat_body_container: {
+    flex: 1,
+    position: "relative"
+  },
+  leave_modal_container: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    zIndex: 9999,
+    elevation: 20
+  },
+  leave_modal_card: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: normalize(24),
+    paddingVertical: normalize(16),
+    width: "100%"
+  },
+  leave_modal_title: {
+    fontSize: normalize(22),
+    fontWeight: "700",
+    color: "#101828",
+    lineHeight: normalize(28),
+    marginBottom: normalize(14),
+    textAlign: "left"
+  },
+  leave_modal_desc: {
+    fontSize: normalize(15),
+    fontWeight: "400",
+    color: "#475467",
+    lineHeight: normalize(22),
+    marginBottom: normalize(28),
+    textAlign: "left"
+  },
+  leave_modal_btn_primary: {
+    height: normalize(50),
+    borderRadius: normalize(25),
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: normalize(12),
+    width: "100%"
+  },
+  leave_modal_btn_primary_text: {
+    color: "#FFFFFF",
+    fontSize: normalize(16),
+    fontWeight: "600"
+  },
+  leave_modal_btn_secondary: {
+    height: normalize(50),
+    borderRadius: normalize(25),
+    borderWidth: 1.5,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%"
+  },
+  leave_modal_btn_secondary_text: {
+    fontSize: normalize(16),
+    fontWeight: "600"
   }
 });
 KoreChat.defaultProps = {

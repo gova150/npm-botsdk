@@ -50,7 +50,18 @@
       # Xcode 26's Clang rejects fmt 11's consteval format-string checks when
       # compiling the fmt headers used by React Native 0.79. Keep C++20 and
       # New Architecture enabled, but use fmt's constexpr fallback instead.
+      # Ensure minimum iOS deployment target across all pod targets (required for Xcode 16/27+)
       installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          current_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+          if current_target.nil? || Gem::Version.new(current_target) < Gem::Version.new('15.1')
+            config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
+          end
+        end
+
+        # Xcode 26's Clang rejects fmt 11's consteval format-string checks when
+        # compiling the fmt headers used by React Native 0.79. Keep C++20 and
+        # New Architecture enabled, but use fmt's constexpr fallback instead.
         next unless %w[fmt Yoga].include?(target.name)
 
         target.build_configurations.each do |build_configuration|

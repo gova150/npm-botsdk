@@ -2,6 +2,7 @@ import * as React from 'react';
 import {SafeAreaView, View} from 'react-native';
 import styles from './styles';
 import KoreChat from 'rn-kore-bot-sdk-v79';
+import {botConfig} from '../../config/BotConfig';
 
 import WAKeyboardAvoidingView from '../../components/WAKeyboardAvoidingView';
 import {
@@ -30,7 +31,7 @@ class Home extends React.Component<HomeProps, homeState> {
   }
 
   render() {
-    let config: any;
+    let config: any = botConfig;
     if (this.props.route?.params?.botConfig) {
       config = this.props.route?.params?.botConfig;
     }
@@ -39,10 +40,6 @@ class Home extends React.Component<HomeProps, homeState> {
         <WAKeyboardAvoidingView style={styles.mainStyle2}>
           <KoreChat
             botConfig={config}
-            // renderInputToolbar={this.renderInputToolbar}
-            //renderComposer={this.renderComposer}
-            //renderSend={this.renderSend}
-            //renderActions={this.renderActions}
             alwaysShowSend={true}
             //onListItemClick={this.onListItemClick}
             //renderTypingIndicator={this.renderTypingIndicator}

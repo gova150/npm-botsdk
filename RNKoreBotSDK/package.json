@@ -44,7 +44,7 @@
     },
     "peerDependencies": {
         "react": "19.0.0",
-        "react-native": "^0.79.0",
+        "react-native": "0.79.7",
         "@react-native-voice/voice": "^3.2.4"
     },
     "peerDependenciesMeta": {
@@ -68,7 +68,7 @@
         "react-native-communications": "^2.2.1",
         "react-native-file-viewer": "^2.1.5",
         "react-native-fs": "^2.20.0",
-        "react-native-gesture-handler": "^2.27.2",
+        "react-native-gesture-handler": "2.32.0",
         "react-native-image-picker": "^8.2.1",
         "react-native-linear-gradient": "^2.8.3",
         "react-native-parsed-text": "^0.0.22",
@@ -81,7 +81,7 @@
         "react-native-screens": "^4.13.1",
         "react-native-shadow-2": "^7.1.0",
         "react-native-sound": "^0.12.0",
-        "react-native-svg": "^15.13.0",
+        "react-native-svg": "15.15.5",
         "react-native-toast-message": "^2.3.0",
         "react-native-tts": "^4.1.1",
         "react-native-user-agent": "^2.3.1",
@@ -97,16 +97,16 @@
         "@react-native-community/cli": "17.0.1",
         "@react-native-community/cli-platform-android": "15.0.1",
         "@react-native-community/cli-platform-ios": "15.0.1",
-        "@react-native/babel-preset": "0.77.0",
-        "@react-native/eslint-config": "0.77.0",
-        "@react-native/metro-config": "0.77.0",
-        "@react-native/typescript-config": "0.77.0",
+        "@react-native/babel-preset": "0.79.0",
+        "@react-native/eslint-config": "0.79.0",
+        "@react-native/metro-config": "0.79.0",
+        "@react-native/typescript-config": "0.79.0",
         "@types/jest": "^30.0.0",
         "@types/node": "^25.1.0",
         "@types/react": "19.0.0",
         "esbuild-plugin-inline-image": "^0.0.9",
         "eslint": "^8.19.0",
-        "react-native": "^0.79.7",
+        "react-native": "0.79.7",
         "tsup": "^7.2.0",
         "typescript": "5.0.4"
     },
@@ -116,11 +116,17 @@
     "overrides": {
         "react": "19.0.0",
         "@types/react": "19.0.0",
-        "react-native-renderer": "19.0.0"
+        "react-native": "0.79.7",
+        "react-native-renderer": "19.0.0",
+        "react-native-gesture-handler": "2.32.0",
+        "react-native-svg": "15.15.5"
     },
     "resolutions": {
         "react": "19.0.0",
         "@types/react": "19.0.0",
-        "react-native-renderer": "19.0.0"
+        "react-native": "0.79.7",
+        "react-native-renderer": "19.0.0",
+        "react-native-gesture-handler": "2.32.0",
+        "react-native-svg": "15.15.5"
     }
 }

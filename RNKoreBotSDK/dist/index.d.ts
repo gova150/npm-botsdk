@@ -766,6 +766,12 @@ interface KoraChatProps {
     navigation?: any;
     route?: any;
     statusBarColor?: (colorCode: any) => void;
+    leaveChatTitle?: string;
+    leaveChatDescription?: string;
+    leaveChatConfirmText?: string;
+    leaveChatCancelText?: string;
+    leaveChatPrimaryColor?: string;
+    leaveChatTextAlign?: 'left' | 'center';
     templateInjection?: Map<string, CustomTemplate<CustomViewProps, CustomViewState>>;
 }
 interface KoraChatState {
@@ -1058,6 +1064,7 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     private renderActions;
     private _renderActions;
     renderSend(): any;
+    private getSendButtonBgColor;
     private _renderSend;
     renderComposer(): any;
     onSpeechStart: () => void;

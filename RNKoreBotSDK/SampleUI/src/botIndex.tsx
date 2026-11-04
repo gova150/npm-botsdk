@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AppContainer from './navigation/AppContainer';
 import {View} from 'react-native';
 import {StatusBar} from 'react-native';
@@ -59,13 +60,15 @@ class App extends React.Component {
     StatusBar.setBarStyle('dark-content');
     return (
       <GestureHandlerRootView style={{flex: 1}}>
-        <View style={{flex: 1}}>
-          <StatusBar
-            barStyle="dark-content" // Sets the text/icons to light color
-            backgroundColor={Color.white} // Sets the status bar background color
-          />
-          <AppContainer />
-        </View>
+        <SafeAreaProvider>
+          <View style={{flex: 1}}>
+            <StatusBar
+              barStyle="dark-content" // Sets the text/icons to light color
+              backgroundColor={Color.white} // Sets the status bar background color
+            />
+            <AppContainer />
+          </View>
+        </SafeAreaProvider>
       </GestureHandlerRootView>
     );
   }
