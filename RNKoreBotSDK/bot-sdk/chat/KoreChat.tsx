@@ -96,6 +96,8 @@ import CustomAlertComponent from '../components/CustomAlertComponent';
 import TemplateBottomSheet from './components/TemplateBottomSheet';
 import ArticleTemplate from '../templates/ArticleTemplate';
 import { LazyLoader } from '../utils/LazyLoader';
+import { hidePdfDownloadLoader } from '../utils/PdfDownloadLoader';
+import { downloadPdfDataResponse } from '../templates/PdfDataResponseTemplate';
 
 let Sound: any = null;
 
@@ -742,6 +744,7 @@ export default class KoreChat extends React.Component<
           return;
         }
         this.setIsBotResponseLoading(false);
+        hidePdfDownloadLoader();
         this.processMessage(data);
         if (isAgentConnect) {
           KoreBotClient.getInstance().sendEvent('message_read');
@@ -800,6 +803,19 @@ export default class KoreChat extends React.Component<
     
     let modifiedMessages: any = null;
     const itemId = getItemId();
+
+    const incomingTemplateType = getTemplateType(newMessages?.message);
+    if (incomingTemplateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      hidePdfDownloadLoader();
+      if (!newMessages?.isHistory && !newMessages?.isFromHistory) {
+        const pdfPayload =
+          newMessages?.message?.[0]?.component?.payload?.payload ||
+          newMessages?.message?.[0]?.component?.payload;
+        const msgId = newMessages?.messageId || newMessages?._id || itemId;
+        downloadPdfDataResponse(pdfPayload, msgId, false);
+      }
+      return;
+    }
 
     const isStreamChunk = newMessages?.sM === true && newMessages?.type === 'bot_response';
     const streamText = isStreamChunk && newMessages?.message?.[0]?.component?.payload?.text;
@@ -1011,6 +1027,9 @@ export default class KoreChat extends React.Component<
         message = component?.payload?.payload?.speech_hint;
       } else {
         let tType = getTemplateType(botResponse.message);
+        if (tType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+          return;
+        }
         const payload = component.payload?.payload || component?.payload;
         if (tType === TEMPLATE_TYPES.TEXT) {
           message = payload?.text;
@@ -1060,10 +1079,16 @@ export default class KoreChat extends React.Component<
 
   private setMessages = (messagesOrUpdater: any[] | ((prev: any[]) => any[])) => {
     this.setState((prevState: KoraChatState) => {
-      const nextMessages =
+      let nextMessages =
         typeof messagesOrUpdater === 'function'
           ? messagesOrUpdater(prevState.messages || [])
           : messagesOrUpdater;
+      if (Array.isArray(nextMessages)) {
+        nextMessages = nextMessages.filter(
+          (m: any) =>
+            getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE,
+        );
+      }
       historyMessages = nextMessages.length;
       return { messages: nextMessages };
     });
@@ -1092,6 +1117,9 @@ export default class KoreChat extends React.Component<
   };
 
   private setIsBotResponseLoading = (value: boolean) => {
+    if (!value) {
+      hidePdfDownloadLoader();
+    }
     this.setState({
       isBotResponseLoading: value,
     });
@@ -1339,7 +1367,14 @@ export default class KoreChat extends React.Component<
     data = undefined,
     shouldResetInputToolbar = true,
     data_type = '',
-  }): void => {
+    isDisplayUserMessage = true,
+  }: {
+    message?: {text: string};
+    data?: any;
+    shouldResetInputToolbar?: boolean;
+    data_type?: string;
+    isDisplayUserMessage?: boolean;
+  } = {}): void => {
     console.log('onSend called with message:', message);
 
     this.clearQuickReplies();
@@ -1356,11 +1391,13 @@ export default class KoreChat extends React.Component<
         data,
         data_type,
       );
-      
-      setTimeout(() => {
-        this.scrollToBottom(true);
-      }, 100);
-      this.processMessage(messageData);
+
+      if (isDisplayUserMessage) {
+        setTimeout(() => {
+          this.scrollToBottom(true);
+        }, 100);
+        this.processMessage(messageData);
+      }
     }
 
     if (shouldResetInputToolbar === true) {
@@ -1524,6 +1561,19 @@ export default class KoreChat extends React.Component<
       case TEMPLATE_TYPES.DIGITALFORM_TEMPLATE:
         if (!isFromViewMore) {
           this.computePostBack(item, template_type);
+        }
+
+        break;
+      case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
+        if (!isFromViewMore) {
+          const title = item?.title?.trim() || '';
+          const msgToSend = `DD_Download, ${title}`;
+          this.onSend({
+            message: {text: msgToSend},
+            data: item,
+            data_type: 'postback',
+            isDisplayUserMessage: false,
+          });
         }
 
         break;
@@ -2735,15 +2785,19 @@ export default class KoreChat extends React.Component<
     );
   }
 
-  private onHistoryLoaded = (historyMessages: any[])=>{
-    let newMessages = this.getMessages().concat(historyMessages);
+  private onHistoryLoaded = (historyMessages: any[]) => {
+    const cleanHistory = (historyMessages || []).filter((msg: any) => {
+      const tType = getTemplateType(msg?.message);
+      return tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE;
+    });
+    let newMessages = this.getMessages().concat(cleanHistory);
     newMessages = newMessages.filter(
       (item, index, self) =>
-        index === self.findIndex(m => m.timeMillis === item.timeMillis)
+        index === self.findIndex(m => m.timeMillis === item.timeMillis),
     );
-    console.log('newMessages '+newMessages.length);
+    console.log('newMessages ' + newMessages.length);
     this.setMessages(newMessages);
-  }
+  };
 
   private loadHistory = async () => {
       const apiService = new ApiService(this.props.botConfig.botUrl, KoreBotClient.getInstance());

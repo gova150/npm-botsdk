@@ -37,6 +37,8 @@ import OTPTemplate from './OTPTemplate';
 import ResetPinTemplate from './ResetPinTemplate';
 import LinkTemplate from './LinkTemplate';
 import DigitalFormTemplate from './DigitalFormTemplate';
+import PdfDownloadTemplate from './PdfDownloadTemplate';
+import PdfDataResponseTemplate from './PdfDataResponseTemplate';
 export interface BotTemplateProps {
   templateType: string;
   textContainerStyle?: any;
@@ -181,6 +183,17 @@ export default class BotTemplate extends React.Component<
               return <LinkTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
       case TEMPLATE_TYPES.DIGITALFORM_TEMPLATE:
           return <DigitalFormTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
+      case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
+          return <PdfDownloadTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
+      case TEMPLATE_TYPES.PDF_DATA_RESPONSE:
+          return (
+            <PdfDataResponseTemplate
+              payload={payload}
+              theme={theme}
+              currentMessage={this.props.currentMessage}
+              onListItemClick={this.props.onListItemClick}
+            />
+          );
     }
     return (
       <Text style={{padding: 10}}>

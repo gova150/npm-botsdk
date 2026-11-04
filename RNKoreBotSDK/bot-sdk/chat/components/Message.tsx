@@ -5,11 +5,11 @@ import { Image, View, StyleSheet, ViewStyle } from 'react-native';
 
 import Avatar, { AvatarProps } from './Avatar';
 import Bubble from './Bubble';
-import { isSameUser, normalize } from '../../utils/helpers';
+import { isSameUser, normalize, getTemplateType } from '../../utils/helpers';
 import { Day } from './Day';
 import { IThemeType } from '../../theme/IThemeType';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BOT_ICON_URL } from '../../constants/Constant';
+import { BOT_ICON_URL, TEMPLATE_TYPES } from '../../constants/Constant';
 import Color from '../../theme/Color';
 import { placeholder } from '../../assets';
 
@@ -293,6 +293,10 @@ export default class Message extends React.Component<MessageProps> {
     const { currentMessage, nextMessage, position, containerStyle } =
       this.props;
     if (currentMessage) {
+      const templateType = getTemplateType(currentMessage?.message);
+      if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+        return null;
+      }
       const sameUser = isSameUser(currentMessage, nextMessage);
       const newPosition = position ? position : 'left';
       return (

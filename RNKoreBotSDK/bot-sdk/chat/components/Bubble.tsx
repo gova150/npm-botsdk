@@ -368,7 +368,28 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
     if (this.isEndOfTask(nextMessage)) {
       return true;
     }
+    if (this.isPdfDataResponse(nextMessage)) {
+      return true;
+    }
     return !nextMessage || Object.keys(nextMessage).length === 0 ? true : false;
+  };
+  private isPdfDataResponse = (data: any) => {
+    if (
+      data &&
+      data.message &&
+      data.message[0] &&
+      data.message[0].component &&
+      data.message[0].component.type === 'template' &&
+      data.message[0].component.payload
+    ) {
+      let payload = data.message[0].component.payload;
+      let templateType =
+        payload.payload?.template_type || payload.template_type;
+      if (TEMPLATE_TYPES.PDF_DATA_RESPONSE === templateType) {
+        return true;
+      }
+    }
+    return false;
   };
   private isHiddenDialog = (data: any) => {
     if (
@@ -485,8 +506,13 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
       this.props.currentMessage?.createdOn ||
       this.props.currentMessage.message?.[0]?.component?.payload?.createdOn;
     if (createdOn) {
-      const {containerStyle, wrapperStyle, textStyle, ...timeProps} =
-        this.props;
+      const {
+        position = 'left',
+        containerStyle,
+        wrapperStyle,
+        textStyle,
+        ...timeProps
+      } = this.props;
       if (this.props.renderTime) {
         return this.props.renderTime(timeProps);
       }
@@ -509,7 +535,12 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
                 fontSize: normalize(10),
                 textAlign: 'center',
                 opacity: 0.8,
-                marginStart: 5,
+                marginStart:
+                  position === 'left'
+                    ? theme?.v3?.body?.icon?.show
+                      ? 5
+                      : 0
+                    : 5,
               },
               isUserMessage && {
                 marginEnd: 10,
@@ -548,6 +579,11 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
   };
 
   render() {
+    let templateType = getTemplateType(this.props.currentMessage?.message);
+    if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      return null;
+    }
+
     const {position, containerStyle, wrapperStyle, bottomContainerStyle} =
       this.props;
     const theme = this.context as ThemeType;
@@ -609,7 +645,7 @@ const styles = {
       alignItems: 'flex-start',
     },
     wrapper: {
-      marginLeft: 8,
+      marginLeft: 0,
     },
     containerToNext: {
       borderBottomLeftRadius: 3,

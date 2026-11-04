@@ -135,6 +135,8 @@ export const TEMPLATE_TYPES = {
   OTP_TEMPLATE: 'otpValidationTemplate',
   RESET_PIN_TEMPLATE: 'resetPinTemplate',
   DIGITALFORM_TEMPLATE: 'digitalform',
+  PDF_DOWNLOAD_TEMPLATE: 'pdf_download',
+  PDF_DATA_RESPONSE: 'pdf_dataResponse',
 };
 
 export const RENDER_KORA_BUBBLE = 'RENDER_KORA_BUBBLE';

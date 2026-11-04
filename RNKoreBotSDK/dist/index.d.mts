@@ -84,6 +84,8 @@ declare const TEMPLATE_TYPES: {
     OTP_TEMPLATE: string;
     RESET_PIN_TEMPLATE: string;
     DIGITALFORM_TEMPLATE: string;
+    PDF_DOWNLOAD_TEMPLATE: string;
+    PDF_DATA_RESPONSE: string;
 };
 declare const RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 declare const KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -1011,6 +1013,74 @@ declare class QuickReplies extends BaseView<QuickProps, QuickState> {
     render(): React.JSX.Element;
 }
 
+declare const showPdfDownloadLoader: () => void;
+declare const hidePdfDownloadLoader: () => void;
+
+interface PdfDownloadButtonItem {
+    type: string;
+    title: string;
+    titleName?: string;
+    url?: string;
+    [key: string]: any;
+}
+interface PdfDownloadPayloadData {
+    template_type?: string;
+    headerMsg?: string;
+    footerMsg?: string;
+    buttons?: PdfDownloadButtonItem[];
+    payload?: any;
+    variation?: string;
+    [key: string]: any;
+}
+interface PdfDownloadTemplateProps extends BaseViewProps {
+    payload?: PdfDownloadPayloadData;
+    onListItemClick?: (type: string, item: any) => void;
+    onBottomSheetClose?: any;
+    theme?: any;
+}
+interface PdfDownloadTemplateState extends BaseViewState {
+    isLoading: boolean;
+    clickedIndices: Set<number>;
+}
+declare class PdfDownloadTemplate extends BaseView<PdfDownloadTemplateProps, PdfDownloadTemplateState> {
+    private unsubscribeLoader?;
+    constructor(props: PdfDownloadTemplateProps);
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    private renderButton;
+    render(): React.JSX.Element;
+}
+
+interface PdfCardItem {
+    PDFData: string;
+    fileName: string;
+}
+interface PdfDataResponseTemplateProps {
+    payload?: any;
+    theme?: IThemeType;
+    currentMessage?: any;
+    messageId?: string;
+    onListItemClick?: (type: any, data: any) => void;
+}
+interface PdfDataResponseTemplateState {
+    hasProcessed: boolean;
+}
+/**
+ * Traverses payload to extract all PDF data items ({ PDFData, fileName }).
+ */
+declare function extractPdfCards(payload: any): PdfCardItem[];
+/**
+ * Downloads and writes base64 PDF(s) to app storage and triggers FileViewer or native Share.
+ * Automatically dismisses the loader. Never runs on history.
+ */
+declare const downloadPdfDataResponse: (payload: any, messageId?: string, isHistory?: boolean) => Promise<string[]>;
+declare class PdfDataResponseTemplate extends React.Component<PdfDataResponseTemplateProps, PdfDataResponseTemplateState> {
+    constructor(props: PdfDataResponseTemplateProps);
+    componentDidMount(): void;
+    componentDidUpdate(): void;
+    render(): any;
+}
+
 type SpeechErrorEvent = any;
 interface InputToolbarProps {
     renderAccessory?: ((props: any) => any) | null;
@@ -1352,4 +1422,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, onListItemClickProps, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };

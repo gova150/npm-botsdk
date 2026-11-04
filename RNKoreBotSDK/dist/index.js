@@ -428,20 +428,20 @@ var init_LazyCommunications = __esm({
 // bot-sdk/utils/PermissionAlert.js
 function showPermissionsAlert(title, on) {
   let message = "It seems you denied the access for " + title + " earlier, To enable access tap Settings and turn on " + on;
-  import_react_native96.Alert.alert(isAndroid ? "" : message, isAndroid ? message : "", [
+  import_react_native98.Alert.alert(isAndroid ? "" : message, isAndroid ? message : "", [
     {
       text: "Cancel",
       onPress: () => console.log("Cancel Pressed"),
       style: "Cancel"
     },
-    { text: "Settings", onPress: () => import_react_native96.Linking.openSettings() }
+    { text: "Settings", onPress: () => import_react_native98.Linking.openSettings() }
   ]);
 }
-var import_react_native96;
+var import_react_native98;
 var init_PermissionAlert = __esm({
   "bot-sdk/utils/PermissionAlert.js"() {
     init_cjs_shims();
-    import_react_native96 = require("react-native");
+    import_react_native98 = require("react-native");
     init_PlatformCheck();
   }
 });
@@ -455,30 +455,30 @@ __export(PermissionsUtils_exports, {
 });
 function documentPickPermission(callback = (isSuccess) => {
 }) {
-  if (import_react_native97.Platform.OS !== "android") {
+  if (import_react_native99.Platform.OS !== "android") {
     callback(false);
     return;
   }
-  const androidVersion = import_react_native97.Platform.Version;
+  const androidVersion = import_react_native99.Platform.Version;
   let permissions = [];
   if (androidVersion >= 33) {
     permissions = [
-      import_react_native97.PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-      import_react_native97.PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO
+      import_react_native99.PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+      import_react_native99.PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO
     ];
   } else {
-    permissions = [import_react_native97.PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE];
+    permissions = [import_react_native99.PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE];
   }
   console.log("Requesting Android permissions:", permissions, "for API level:", androidVersion);
-  import_react_native97.PermissionsAndroid.requestMultiple(permissions).then((result) => {
+  import_react_native99.PermissionsAndroid.requestMultiple(permissions).then((result) => {
     console.log("Permission request result:", result);
     let allGranted = true;
     let hasBlockedPermissions = false;
     for (const permission of permissions) {
       const status = result[permission];
-      if (status !== import_react_native97.PermissionsAndroid.RESULTS.GRANTED) {
+      if (status !== import_react_native99.PermissionsAndroid.RESULTS.GRANTED) {
         allGranted = false;
-        if (status === import_react_native97.PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        if (status === import_react_native99.PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
           hasBlockedPermissions = true;
         }
       }
@@ -490,12 +490,12 @@ function documentPickPermission(callback = (isSuccess) => {
       console.log("Some Android permissions denied");
       callback(false);
       if (hasBlockedPermissions) {
-        import_react_native97.Alert.alert(
+        import_react_native99.Alert.alert(
           "Permission Required",
           "This app needs access to your photos and media files to upload images. Please enable the permissions in your device settings.",
           [
             { text: "Cancel", style: "cancel" },
-            { text: "Settings", onPress: () => import_react_native97.Linking.openSettings() }
+            { text: "Settings", onPress: () => import_react_native99.Linking.openSettings() }
           ]
         );
       } else {
@@ -511,7 +511,7 @@ function documentPickPermission(callback = (isSuccess) => {
 }
 function documentPickIOSPermission(callback = (isSuccess) => {
 }) {
-  if (import_react_native97.Platform.OS !== "ios") {
+  if (import_react_native99.Platform.OS !== "ios") {
     callback(false);
     return;
   }
@@ -580,12 +580,12 @@ async function tryIOSNativePermission(callback) {
   }
 }
 function showPermissionBlockedAlert() {
-  import_react_native97.Alert.alert(
+  import_react_native99.Alert.alert(
     "Permission Required",
     "This app needs access to your photo library to select and share images. Please enable photo library access in your device settings.",
     [
       { text: "Cancel", style: "cancel" },
-      { text: "Settings", onPress: () => import_react_native97.Linking.openSettings() }
+      { text: "Settings", onPress: () => import_react_native99.Linking.openSettings() }
     ]
   );
 }
@@ -596,7 +596,7 @@ function cameraPermission(callback = (isSuccess) => {
     tryNativeCameraPermission(callback);
     return;
   }
-  const permission = import_react_native97.Platform.select({
+  const permission = import_react_native99.Platform.select({
     android: import_react_native_permissions.PERMISSIONS.ANDROID.CAMERA,
     ios: import_react_native_permissions.PERMISSIONS.IOS.CAMERA
   });
@@ -661,20 +661,20 @@ async function tryNativeCameraPermission(callback) {
   }
 }
 function showCameraPermissionBlockedAlert() {
-  import_react_native97.Alert.alert(
+  import_react_native99.Alert.alert(
     "Camera Permission Required",
     "This app needs camera access to take photos. Please enable camera permission in your device settings.",
     [
       { text: "Cancel", style: "cancel" },
-      { text: "Settings", onPress: () => import_react_native97.Linking.openSettings() }
+      { text: "Settings", onPress: () => import_react_native99.Linking.openSettings() }
     ]
   );
 }
-var import_react_native97, import_react_native_permissions;
+var import_react_native99, import_react_native_permissions;
 var init_PermissionsUtils = __esm({
   "bot-sdk/utils/PermissionsUtils.js"() {
     init_cjs_shims();
-    import_react_native97 = require("react-native");
+    import_react_native99 = require("react-native");
     init_PermissionAlert();
     import_react_native_permissions = require("react-native-permissions");
   }
@@ -713,6 +713,8 @@ __export(src_exports, {
   MIN_COMPOSER_HEIGHT: () => MIN_COMPOSER_HEIGHT,
   MIN_HEADER_HEIGHT: () => MIN_HEADER_HEIGHT,
   MIN_TOOL_BAR_HEIGHT: () => MIN_TOOL_BAR_HEIGHT,
+  PdfDataResponseTemplate: () => PdfDataResponseTemplate,
+  PdfDownloadTemplate: () => PdfDownloadTemplate,
   QuickReplies: () => QuickReplies,
   RENDER_KORA_BUBBLE: () => RENDER_KORA_BUBBLE,
   RTM_EVENT: () => import_rn_kore_bot_socket_lib_v798.RTM_EVENT,
@@ -724,6 +726,10 @@ __export(src_exports, {
   WelcomeHeaderConstants: () => WelcomeHeaderConstants,
   attach_menu_buttons: () => attach_menu_buttons,
   default: () => src_default,
+  downloadPdfDataResponse: () => downloadPdfDataResponse,
+  extractPdfCards: () => extractPdfCards,
+  hidePdfDownloadLoader: () => hidePdfDownloadLoader,
+  showPdfDownloadLoader: () => showPdfDownloadLoader,
   useLazyCommunications: () => useLazyCommunications,
   useLazySound: () => useLazySound
 });
@@ -839,7 +845,9 @@ var TEMPLATE_TYPES = {
   ANSWER_TEMPLATE: "answerTemplate",
   OTP_TEMPLATE: "otpValidationTemplate",
   RESET_PIN_TEMPLATE: "resetPinTemplate",
-  DIGITALFORM_TEMPLATE: "digitalform"
+  DIGITALFORM_TEMPLATE: "digitalform",
+  PDF_DOWNLOAD_TEMPLATE: "pdf_download",
+  PDF_DATA_RESPONSE: "pdf_dataResponse"
 };
 var RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 var KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -855,8 +863,8 @@ init_cjs_shims();
 
 // bot-sdk/templates/BotTemplate.tsx
 init_cjs_shims();
-var React80 = __toESM(require("react"));
-var import_react_native74 = require("react-native");
+var React82 = __toESM(require("react"));
+var import_react_native76 = require("react-native");
 
 // bot-sdk/templates/AdvancedListTemplate.tsx
 init_cjs_shims();
@@ -1673,11 +1681,14 @@ function isBlackStatusBar(color) {
   return false;
 }
 function getTemplateType(message) {
-  if (message?.[0]?.component?.type === "template" && message[0].component?.payload?.type === "template" && message[0].component.payload?.payload && message[0].component.payload?.payload?.template_type) {
-    if (message[0].component.payload.payload.template_type === TEMPLATE_TYPES.BUTTON && message[0].component.payload.formData != null) {
+  if (message?.[0]?.component?.type === "template" && (message[0].component?.payload?.type === "template" || message[0].component?.payload?.payload?.template_type || message[0].component?.payload?.template_type)) {
+    const templateType = message[0].component.payload?.payload?.template_type || message[0].component.payload?.template_type;
+    if (templateType === TEMPLATE_TYPES.BUTTON && message[0].component.payload.formData != null) {
       return TEMPLATE_TYPES.DIGITALFORM_TEMPLATE;
     }
-    return message[0].component.payload?.payload?.template_type;
+    if (templateType) {
+      return templateType;
+    }
   }
   if (message?.[0]?.component?.type === "text" && message?.[0]?.component?.payload?.text) {
     return TEMPLATE_TYPES.TEXT;
@@ -17219,8 +17230,645 @@ var styles61 = import_react_native73.StyleSheet.create({
   }
 });
 
+// bot-sdk/templates/PdfDownloadTemplate.tsx
+init_cjs_shims();
+var React80 = __toESM(require("react"));
+var import_react_native74 = require("react-native");
+var import_react_native_svg13 = __toESM(require("react-native-svg"));
+
+// bot-sdk/utils/PdfDownloadLoader.ts
+init_cjs_shims();
+var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
+  static instance;
+  listeners = /* @__PURE__ */ new Set();
+  isLoading = false;
+  constructor() {
+  }
+  static getInstance() {
+    if (!_PdfDownloadLoaderManager.instance) {
+      _PdfDownloadLoaderManager.instance = new _PdfDownloadLoaderManager();
+    }
+    return _PdfDownloadLoaderManager.instance;
+  }
+  showLoader() {
+    this.isLoading = true;
+    this.listeners.forEach((listener) => {
+      try {
+        listener(true);
+      } catch (e) {
+        console.warn("PdfDownloadLoader listener error:", e);
+      }
+    });
+  }
+  hideLoader() {
+    this.isLoading = false;
+    this.listeners.forEach((listener) => {
+      try {
+        listener(false);
+      } catch (e) {
+        console.warn("PdfDownloadLoader listener error:", e);
+      }
+    });
+  }
+  getIsLoading() {
+    return this.isLoading;
+  }
+  subscribe(listener) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+};
+var showPdfDownloadLoader = () => {
+  PdfDownloadLoaderManager.getInstance().showLoader();
+};
+var hidePdfDownloadLoader = () => {
+  PdfDownloadLoaderManager.getInstance().hideLoader();
+};
+if (typeof globalThis !== "undefined") {
+  globalThis.showPdfDownloadLoader = showPdfDownloadLoader;
+  globalThis.hidePdfDownloadLoader = hidePdfDownloadLoader;
+}
+if (typeof global !== "undefined") {
+  global.showPdfDownloadLoader = showPdfDownloadLoader;
+  global.hidePdfDownloadLoader = hidePdfDownloadLoader;
+}
+var PdfDownloadLoader_default = PdfDownloadLoaderManager;
+
+// bot-sdk/templates/PdfDownloadTemplate.tsx
+var DownloadIcon = ({
+  size = 18,
+  color = "#FFFFFF"
+}) => /* @__PURE__ */ React80.createElement(import_react_native_svg13.default, { width: size, height: size, viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ React80.createElement(
+  import_react_native_svg13.Path,
+  {
+    d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
+    stroke: color,
+    strokeWidth: "2.2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }
+), /* @__PURE__ */ React80.createElement(
+  import_react_native_svg13.Path,
+  {
+    d: "M7 10l5 5 5-5",
+    stroke: color,
+    strokeWidth: "2.2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }
+), /* @__PURE__ */ React80.createElement(
+  import_react_native_svg13.Path,
+  {
+    d: "M12 15V3",
+    stroke: color,
+    strokeWidth: "2.2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }
+));
+var PdfDownloadTemplate = class extends BaseView_default {
+  unsubscribeLoader;
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLoading: false,
+      clickedIndices: /* @__PURE__ */ new Set()
+    };
+  }
+  componentDidMount() {
+    this.unsubscribeLoader = PdfDownloadLoader_default.getInstance().subscribe(
+      (loading) => {
+        this.setState({ isLoading: loading });
+      }
+    );
+  }
+  componentWillUnmount() {
+    if (this.unsubscribeLoader) {
+      this.unsubscribeLoader();
+    }
+  }
+  renderButton = (button, index, totalButtons, buttonBgColor, buttonBorderColor, buttonTextColor, titleColor, fontFamily, fontSizeStyle, templateType) => {
+    const title = button?.title || "";
+    const placeholderName = button?.titleName || "Download";
+    const isLastButton = index === totalButtons - 1;
+    const isClicked = this.state.clickedIndices.has(index);
+    const isButtonDisabled = isClicked || this.state.isLoading;
+    return /* @__PURE__ */ React80.createElement(
+      import_react_native74.View,
+      {
+        key: `pdf-btn-${index}`,
+        style: [
+          styles62.buttonItemContainer,
+          isLastButton && styles62.lastButtonItemContainer
+        ]
+      },
+      title ? /* @__PURE__ */ React80.createElement(
+        import_react_native74.Text,
+        {
+          style: [
+            styles62.buttonTitle,
+            {
+              color: titleColor,
+              fontFamily
+            },
+            fontSizeStyle
+          ]
+        },
+        title
+      ) : null,
+      /* @__PURE__ */ React80.createElement(
+        import_react_native74.TouchableOpacity,
+        {
+          disabled: isButtonDisabled,
+          activeOpacity: 0.7,
+          accessibilityRole: "button",
+          accessibilityLabel: title,
+          testID: title,
+          title,
+          "data-title": title,
+          style: [
+            styles62.button,
+            {
+              backgroundColor: buttonBgColor,
+              borderColor: buttonBorderColor,
+              opacity: isClicked ? 0.5 : 1
+            }
+          ],
+          onPress: () => {
+            this.setState((prevState) => {
+              const nextClicked = new Set(prevState.clickedIndices);
+              nextClicked.add(index);
+              return {
+                clickedIndices: nextClicked,
+                isLoading: true
+              };
+            });
+            showPdfDownloadLoader();
+            if (this.props.onListItemClick) {
+              this.props.onListItemClick(
+                templateType || TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE,
+                button
+              );
+            }
+          }
+        },
+        /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: styles62.buttonContent }, /* @__PURE__ */ React80.createElement(DownloadIcon, { size: 18, color: buttonTextColor }), /* @__PURE__ */ React80.createElement(
+          import_react_native74.Text,
+          {
+            style: [
+              styles62.buttonText,
+              {
+                color: buttonTextColor,
+                fontFamily
+              },
+              fontSizeStyle
+            ]
+          },
+          placeholderName
+        ))
+      )
+    );
+  };
+  render() {
+    const rawPayload = this.props?.payload;
+    if (!rawPayload) {
+      return null;
+    }
+    const payload = rawPayload?.payload && typeof rawPayload.payload === "object" ? rawPayload.payload : rawPayload;
+    const headerMsg = payload?.headerMsg || payload?.heading || "";
+    const footerMsg = payload?.footerMsg || payload?.footer || "";
+    const buttons = payload?.buttons || [];
+    const btheme = getButtonTheme(this.props?.theme);
+    const bbtheme = getBubbleTheme(this.props?.theme);
+    const fontFamily = this.props?.theme?.v3?.body?.font?.family || TEMPLATE_STYLE_VALUES.FONT_FAMILY || "Inter";
+    const fontSizeStyle = botStyles[this.props?.theme?.v3?.body?.font?.size || "medium"]?.size || botStyles.medium.size;
+    const botMsgBg = this.props?.theme?.v3?.body?.bot_message?.bg_color;
+    const cardBgColor = botMsgBg && botMsgBg !== "#3F51B5" ? botMsgBg : "#EFF1F5";
+    const botMsgColor = this.props?.theme?.v3?.body?.bot_message?.color;
+    const textColor = botMsgColor && botMsgColor !== "#FFFFFF" ? botMsgColor : TEMPLATE_STYLE_VALUES.TEXT_COLOR || "#1D2939";
+    const isBackgroundInverted = payload?.variation === "backgroundInverted";
+    const isTextInverted = payload?.variation === "textInverted";
+    let buttonBgColor = bbtheme.BUBBLE_RIGHT_BG_COLOR || this.props?.theme?.v3?.body?.buttons?.bg_color || "#205493";
+    let buttonBorderColor = bbtheme.BUBBLE_LEFT_BG_COLOR || bbtheme.BUBBLE_RIGHT_BG_COLOR || "#205493";
+    let buttonTextColor = bbtheme.BUBBLE_RIGHT_TEXT_COLOR || this.props?.theme?.v3?.body?.buttons?.color || Color_default.white;
+    if (isBackgroundInverted) {
+      buttonBgColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonTextColor = bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
+      buttonBorderColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
+    } else if (isTextInverted) {
+      buttonBgColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
+      buttonTextColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonBorderColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
+    }
+    const themeSeparator = this.props?.theme?.v3?.body?.agent_message?.separator;
+    const isValidSeparatorColor = typeof themeSeparator === "string" && themeSeparator.trim() !== "" && themeSeparator !== "line" && themeSeparator !== "2" && (themeSeparator.startsWith("#") || themeSeparator.startsWith("rgb") || themeSeparator.startsWith("hsl"));
+    const dividerColor = isValidSeparatorColor ? themeSeparator : "#D0D5DD";
+    const templateType = rawPayload?.template_type || payload?.template_type || TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE;
+    const cardWidth = Math.min(getWindowWidth() * 0.82, 380);
+    return /* @__PURE__ */ React80.createElement(
+      import_react_native74.View,
+      {
+        pointerEvents: this.state.isLoading ? "none" : "auto",
+        style: [
+          styles62.mainContainer,
+          {
+            width: cardWidth,
+            backgroundColor: cardBgColor
+          }
+        ]
+      },
+      this.state.isLoading && /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: styles62.overlayLoader, pointerEvents: "auto" }, /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: styles62.loaderBox }, /* @__PURE__ */ React80.createElement(import_react_native74.ActivityIndicator, { size: "small", color: buttonBgColor }))),
+      headerMsg ? /* @__PURE__ */ React80.createElement(
+        import_react_native74.Text,
+        {
+          style: [
+            styles62.headerText,
+            {
+              color: textColor,
+              fontFamily
+            },
+            fontSizeStyle
+          ]
+        },
+        headerMsg
+      ) : null,
+      buttons.length > 0 ? /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: styles62.buttonsContainer }, buttons.map(
+        (btn, index) => this.renderButton(
+          btn,
+          index,
+          buttons.length,
+          buttonBgColor,
+          buttonBorderColor,
+          buttonTextColor,
+          textColor,
+          fontFamily,
+          fontSizeStyle,
+          templateType
+        )
+      )) : null,
+      footerMsg ? /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: styles62.footerContainer }, /* @__PURE__ */ React80.createElement(import_react_native74.View, { style: [styles62.divider, { backgroundColor: dividerColor }] }), /* @__PURE__ */ React80.createElement(
+        import_react_native74.Text,
+        {
+          style: [
+            styles62.footerText,
+            {
+              color: textColor,
+              fontFamily
+            },
+            fontSizeStyle
+          ]
+        },
+        footerMsg
+      )) : null
+    );
+  }
+};
+var styles62 = import_react_native74.StyleSheet.create({
+  mainContainer: {
+    borderRadius: 14,
+    padding: 14,
+    marginVertical: 4,
+    marginLeft: 0,
+    marginRight: 0,
+    position: "relative",
+    overflow: "hidden"
+  },
+  overlayLoader: {
+    ...import_react_native74.StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.75)",
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999
+  },
+  loaderBox: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  headerText: {
+    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    lineHeight: 20,
+    marginBottom: 14
+  },
+  buttonsContainer: {
+    width: "100%"
+  },
+  buttonItemContainer: {
+    width: "100%",
+    marginBottom: 14
+  },
+  lastButtonItemContainer: {
+    marginBottom: 6
+  },
+  buttonTitle: {
+    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    fontWeight: "500",
+    lineHeight: 20,
+    marginBottom: 8
+  },
+  button: {
+    width: "100%",
+    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  buttonText: {
+    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    fontWeight: "600",
+    marginLeft: 8,
+    textAlign: "center"
+  },
+  footerContainer: {
+    width: "100%",
+    marginTop: 6
+  },
+  divider: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#D0D5DD",
+    marginTop: 6,
+    marginBottom: 12
+  },
+  footerText: {
+    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    lineHeight: 20
+  }
+});
+
+// bot-sdk/templates/PdfDataResponseTemplate.tsx
+init_cjs_shims();
+var React81 = __toESM(require("react"));
+var import_react_native75 = require("react-native");
+var import_react_native_toast_message3 = __toESM(require("react-native-toast-message"));
+var processedKeys = /* @__PURE__ */ new Set();
+var cachedRNFS = null;
+var cachedFileViewer = null;
+var cachedBlobUtil = null;
+var getNativeFileModules = () => {
+  if (!cachedRNFS) {
+    try {
+      const nm = import_react_native75.NativeModules;
+      if (nm && (nm.RNFSManager || import_react_native75.Platform.OS === "android")) {
+        const mod = require("react-native-fs");
+        cachedRNFS = mod?.default || mod;
+      }
+    } catch (e) {
+    }
+  }
+  if (!cachedBlobUtil) {
+    try {
+      const nm = import_react_native75.NativeModules;
+      if (nm && nm.ReactNativeBlobUtil) {
+        const mod = require("react-native-blob-util");
+        cachedBlobUtil = mod?.default || mod;
+      }
+    } catch (e) {
+    }
+  }
+  if (!cachedFileViewer) {
+    try {
+      const nm = import_react_native75.NativeModules;
+      if (nm && nm.RNFileViewer) {
+        const mod = require("react-native-file-viewer");
+        cachedFileViewer = mod?.default || mod;
+      }
+    } catch (e) {
+    }
+  }
+  return {
+    RNFS: cachedRNFS,
+    RNBlobUtil: cachedBlobUtil,
+    FileViewer: cachedFileViewer
+  };
+};
+var getDocumentDirectory = () => {
+  const { RNFS: RNFS5, RNBlobUtil: RNBlobUtil2 } = getNativeFileModules();
+  if (RNFS5 && RNFS5.DocumentDirectoryPath) {
+    return RNFS5.DocumentDirectoryPath;
+  }
+  if (RNBlobUtil2 && RNBlobUtil2.fs?.dirs?.DocumentDir) {
+    return RNBlobUtil2.fs.dirs.DocumentDir;
+  }
+  return null;
+};
+var writeBase64ToFile = async (filePath, base64Data) => {
+  const { RNFS: RNFS5, RNBlobUtil: RNBlobUtil2 } = getNativeFileModules();
+  if (RNFS5 && typeof RNFS5.writeFile === "function") {
+    await RNFS5.writeFile(filePath, base64Data, "base64");
+    return true;
+  }
+  if (RNBlobUtil2 && RNBlobUtil2.fs && typeof RNBlobUtil2.fs.writeFile === "function") {
+    await RNBlobUtil2.fs.writeFile(filePath, base64Data, "base64");
+    return true;
+  }
+  console.warn(
+    "PdfDataResponseTemplate: Neither react-native-fs nor react-native-blob-util is available to write file"
+  );
+  return false;
+};
+var openOrSharePdf = async (filePath, fileName) => {
+  const { FileViewer: FileViewer2 } = getNativeFileModules();
+  if (FileViewer2 && typeof FileViewer2.open === "function") {
+    try {
+      await FileViewer2.open(filePath, {
+        showOpenWithDialog: true,
+        showAppsSuggestions: true
+      });
+      console.log("PdfDataResponseTemplate: PDF opened with FileViewer");
+      return;
+    } catch (openErr) {
+      console.log(
+        "PdfDataResponseTemplate: FileViewer.open error, falling back to Share:",
+        openErr
+      );
+    }
+  }
+  try {
+    const fileUri = import_react_native75.Platform.OS === "android" && !filePath.startsWith("file://") ? `file://${filePath}` : filePath;
+    await import_react_native75.Share.share(
+      import_react_native75.Platform.OS === "ios" ? {
+        url: fileUri,
+        title: fileName
+      } : {
+        title: fileName,
+        message: `PDF Downloaded: ${fileName}`,
+        url: fileUri
+      },
+      {
+        dialogTitle: `Open ${fileName}`
+      }
+    );
+  } catch (shareErr) {
+    console.log("PdfDataResponseTemplate: Share fallback error:", shareErr);
+  }
+};
+function cleanBase64(raw) {
+  if (!raw || typeof raw !== "string") {
+    return "";
+  }
+  let cleaned = raw.trim();
+  if (cleaned.includes("base64,")) {
+    cleaned = cleaned.split("base64,")[1] || cleaned;
+  }
+  return cleaned.replace(/[\r\n\s]+/g, "");
+}
+function formatFileName(rawName) {
+  let name = (rawName || "downloaded_document").trim();
+  name = name.replace(/[/\\?%*:|"<>]/g, "_");
+  if (!name.toLowerCase().endsWith(".pdf")) {
+    name += ".pdf";
+  }
+  return name;
+}
+function extractPdfCards(payload) {
+  if (!payload) {
+    return [];
+  }
+  let data = payload;
+  if (data?.payload && (data.payload.pdfData || data.payload.cards || data.payload.PDFData)) {
+    data = data.payload;
+  }
+  let rawCards = [];
+  if (Array.isArray(data?.pdfData?.body?.cards)) {
+    rawCards = data.pdfData.body.cards;
+  } else if (data?.pdfData?.body?.cards && typeof data.pdfData.body.cards === "object") {
+    rawCards = [data.pdfData.body.cards];
+  } else if (Array.isArray(data?.body?.cards)) {
+    rawCards = data.body.cards;
+  } else if (data?.body?.cards && typeof data.body.cards === "object") {
+    rawCards = [data.body.cards];
+  } else if (Array.isArray(data?.pdfData?.cards)) {
+    rawCards = data.pdfData.cards;
+  } else if (Array.isArray(data?.cards)) {
+    rawCards = data.cards;
+  } else if (data?.cards && typeof data.cards === "object") {
+    rawCards = [data.cards];
+  } else if (data?.PDFData || data?.pdfData?.PDFData) {
+    const rawPdf = data?.PDFData || data?.pdfData?.PDFData;
+    if (typeof rawPdf === "string") {
+      rawCards = [
+        {
+          PDFData: rawPdf,
+          fileName: data?.fileName || data?.pdfData?.fileName || "document"
+        }
+      ];
+    }
+  }
+  const result = [];
+  for (const card of rawCards) {
+    if (!card)
+      continue;
+    const pdf = card.PDFData || card.pdfData || card.pdf_data || card.data || card.fileData;
+    const name = card.fileName || card.filename || card.FileName || card.name || "document";
+    if (typeof pdf === "string" && pdf.trim().length > 0) {
+      result.push({
+        PDFData: pdf.trim(),
+        fileName: String(name).trim()
+      });
+    }
+  }
+  return result;
+}
+var downloadPdfDataResponse = async (payload, messageId, isHistory) => {
+  hidePdfDownloadLoader();
+  if (isHistory === true || payload?.isHistory === true || payload?.isFromHistory === true || payload?.payload?.isHistory === true) {
+    console.log("PdfDataResponseTemplate: Skipping download on history");
+    return [];
+  }
+  const cards = extractPdfCards(payload);
+  if (!cards || cards.length === 0) {
+    console.warn("PdfDataResponseTemplate: No PDF cards found in payload");
+    return [];
+  }
+  const destDir = getDocumentDirectory();
+  if (!destDir) {
+    console.warn("PdfDataResponseTemplate: No document directory available");
+    return [];
+  }
+  const savedPaths = [];
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    const fileName = formatFileName(card.fileName);
+    const base64Data = cleanBase64(card.PDFData);
+    if (!base64Data) {
+      continue;
+    }
+    const dedupKey = messageId ? `${messageId}_${fileName}_${i}` : `${fileName}_${base64Data.slice(0, 40)}`;
+    if (processedKeys.has(dedupKey)) {
+      console.log(
+        "PdfDataResponseTemplate: File already processed, skipping duplicate:",
+        fileName
+      );
+      continue;
+    }
+    processedKeys.add(dedupKey);
+    try {
+      const filePath = `${destDir}/${fileName}`;
+      console.log("PdfDataResponseTemplate: Saving PDF file to:", filePath);
+      const success = await writeBase64ToFile(filePath, base64Data);
+      if (!success) {
+        continue;
+      }
+      savedPaths.push(filePath);
+      try {
+        import_react_native_toast_message3.default.show({
+          type: "success",
+          text1: "PDF Downloaded",
+          text2: fileName
+        });
+      } catch (toastErr) {
+      }
+      await openOrSharePdf(filePath, fileName);
+    } catch (error) {
+      console.error("PdfDataResponseTemplate: Error writing PDF file:", error);
+      try {
+        import_react_native_toast_message3.default.show({
+          type: "error",
+          text1: "Download Failed",
+          text2: fileName
+        });
+      } catch (tErr) {
+      }
+    }
+  }
+  return savedPaths;
+};
+var PdfDataResponseTemplate = class extends React81.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasProcessed: false
+    };
+  }
+  componentDidMount() {
+    hidePdfDownloadLoader();
+  }
+  componentDidUpdate() {
+    hidePdfDownloadLoader();
+  }
+  render() {
+    return null;
+  }
+};
+
 // bot-sdk/templates/BotTemplate.tsx
-var BotTemplate = class extends React80.Component {
+var BotTemplate = class extends React82.Component {
   static defaultProps;
   renderBubbleViews = (templateType, payload, theme, onListItemClick, onSeeMoreClick) => {
     if (onListItemClick) {
@@ -17241,78 +17889,90 @@ var BotTemplate = class extends React80.Component {
       case TEMPLATE_TYPES.SYSTEM_TEMPLATE:
         return this.renderMessageText(payload, theme, templateType);
       case TEMPLATE_TYPES.BUTTON:
-        return /* @__PURE__ */ React80.createElement(Button2, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(Button2, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CARD_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(CardTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(CardTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.IMAGE_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(ImageTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ImageTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.TABLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(TableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(TableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.QUICK_REPLIES:
         return this.renderBotText(payload, templateType, theme);
       case TEMPLATE_TYPES.ERROR_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ErrorTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ErrorTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CAROUSEL_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(CarouselTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(CarouselTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ADVANCED_LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AdvancedListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(AdvancedListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.MINI_TABLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(MiniTableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(MiniTableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.BAR_CHART_TEMPLATE:
         if (payload?.stacked) {
-          return /* @__PURE__ */ React80.createElement(StackBarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+          return /* @__PURE__ */ React82.createElement(StackBarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
         }
-        return /* @__PURE__ */ React80.createElement(BarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(BarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.PIE_CHART_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(PieChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(PieChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LINE_CHART_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(LineChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(LineChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DATE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DATE_RANGE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.TABLE_LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(TableListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(TableListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ADVANCED_MULTI_SELECT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AdvanceMultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(AdvanceMultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.MULTI_SELECT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(MultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(MultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.RADIO_OPTION_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(RadioOptionTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(RadioOptionTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LIST_VIEW_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListViewTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ListViewTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DROPDOWN_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DropdownTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(DropdownTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.FEEDBACK_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(FeedbackTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(FeedbackTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.FORM_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(FormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(FormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CLOCK_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ClockTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ClockTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LISTWIDGET_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListWidgetTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ListWidgetTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.AUDIO_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(AudioTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(AudioTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.VIDEO_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(VideoTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(VideoTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.USER_ATTACHEMENT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(Attachements, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(Attachements, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ARTICLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ArticleTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ArticleTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ANSWER_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AnswerTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(AnswerTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.OTP_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(OTPTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(OTPTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.RESET_PIN_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ResetPinTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(ResetPinTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LINK_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(LinkTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(LinkTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DIGITALFORM_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DigitalFormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React82.createElement(DigitalFormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+      case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
+        return /* @__PURE__ */ React82.createElement(PdfDownloadTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+      case TEMPLATE_TYPES.PDF_DATA_RESPONSE:
+        return /* @__PURE__ */ React82.createElement(
+          PdfDataResponseTemplate,
+          {
+            payload,
+            theme,
+            currentMessage: this.props.currentMessage,
+            onListItemClick: this.props.onListItemClick
+          }
+        );
     }
-    return /* @__PURE__ */ React80.createElement(import_react_native74.Text, { style: { padding: 10 } }, "This template is under development...");
+    return /* @__PURE__ */ React82.createElement(import_react_native76.Text, { style: { padding: 10 } }, "This template is under development...");
   };
   renderMessageText = (payload, theme, template_type) => {
     if (payload) {
@@ -17320,7 +17980,7 @@ var BotTemplate = class extends React80.Component {
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps);
       }
-      return /* @__PURE__ */ React80.createElement(
+      return /* @__PURE__ */ React82.createElement(
         MessageText_default,
         {
           ...messageTextProps?.messageTextProps,
@@ -17352,9 +18012,9 @@ var BotTemplate = class extends React80.Component {
     }
     if (typeof text !== "string") {
       console.log("value is not a string type   : ", text);
-      return /* @__PURE__ */ React80.createElement(React80.Fragment, null);
+      return /* @__PURE__ */ React82.createElement(React82.Fragment, null);
     }
-    return /* @__PURE__ */ React80.createElement(
+    return /* @__PURE__ */ React82.createElement(
       BotText,
       {
         text,
@@ -17387,8 +18047,8 @@ var CustomTemplate_default = CustomTemplate;
 
 // bot-sdk/chat/KoreChat.tsx
 init_cjs_shims();
-var React112 = __toESM(require("react"));
-var import_react_native107 = require("react-native");
+var React114 = __toESM(require("react"));
+var import_react_native109 = require("react-native");
 
 // bot-sdk/utils/uuid.ts
 init_cjs_shims();
@@ -17429,13 +18089,13 @@ var import_localizedFormat = __toESM(require("dayjs/plugin/localizedFormat"));
 
 // bot-sdk/chat/components/InputToolbar.tsx
 init_cjs_shims();
-var React86 = __toESM(require("react"));
-var import_react_native82 = require("react-native");
+var React88 = __toESM(require("react"));
+var import_react_native84 = require("react-native");
 
 // bot-sdk/chat/components/Composer.tsx
 init_cjs_shims();
 var import_react33 = __toESM(require("react"));
-var import_react_native75 = require("react-native");
+var import_react_native77 = require("react-native");
 init_PlatformCheck();
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
@@ -17484,10 +18144,10 @@ function Composer({
   const defaultOutlineColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || Color_default.gray;
   const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
   const outLineColor = isFocused ? sendButtonColor : defaultOutlineColor;
-  const currentBorderWidth = isFocused ? 2 : import_react_native75.StyleSheet.hairlineWidth;
+  const currentBorderWidth = isFocused ? 2 : import_react_native77.StyleSheet.hairlineWidth;
   const textColor = invertColor(bgColor, true);
   return /* @__PURE__ */ import_react33.default.createElement(
-    import_react_native75.View,
+    import_react_native77.View,
     {
       style: [
         {
@@ -17506,7 +18166,7 @@ function Composer({
       ]
     },
     /* @__PURE__ */ import_react33.default.createElement(
-      import_react_native75.View,
+      import_react_native77.View,
       {
         style: [
           {
@@ -17525,7 +18185,7 @@ function Composer({
         ]
       },
       /* @__PURE__ */ import_react33.default.createElement(
-        import_react_native75.TextInput,
+        import_react_native77.TextInput,
         {
           testID: placeholder2,
           accessible: true,
@@ -17539,7 +18199,7 @@ function Composer({
           onContentSizeChange: handleContentSizeChange,
           onChangeText: onTextChanged,
           style: [
-            styles62.textInput,
+            styles63.textInput,
             {
               minHeight: normalize(composerHeightNew),
               paddingRight: theme?.v3?.footer?.buttons?.emoji?.show ? 4 : 8
@@ -17566,7 +18226,7 @@ function Composer({
         }
       ),
       theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ import_react33.default.createElement(
-        import_react_native75.TouchableOpacity,
+        import_react_native77.TouchableOpacity,
         {
           onPress: () => {
             const spacker = !isTTS;
@@ -17593,7 +18253,7 @@ function Composer({
     )
   );
 }
-var styles62 = import_react_native75.StyleSheet.create({
+var styles63 = import_react_native77.StyleSheet.create({
   emoji_main: {
     justifyContent: "center",
     alignItems: "center",
@@ -17625,10 +18285,10 @@ var styles62 = import_react_native75.StyleSheet.create({
 
 // bot-sdk/chat/components/Send.tsx
 init_cjs_shims();
-var React82 = __toESM(require("react"));
+var React84 = __toESM(require("react"));
 var import_react34 = require("react");
-var import_react_native76 = require("react-native");
-var styles63 = import_react_native76.StyleSheet.create({
+var import_react_native78 = require("react-native");
+var styles64 = import_react_native78.StyleSheet.create({
   container: {
     width: normalize(38),
     height: normalize(38),
@@ -17671,32 +18331,32 @@ var Send = class extends import_react34.Component {
       sendButtonProps
     } = this.props;
     if (alwaysShowSend || text && text.trim().length > 0) {
-      return /* @__PURE__ */ React82.createElement(
-        import_react_native76.TouchableOpacity,
+      return /* @__PURE__ */ React84.createElement(
+        import_react_native78.TouchableOpacity,
         {
           testID: "send",
           accessible: true,
           accessibilityLabel: "send",
-          style: [styles63.container],
+          style: [styles64.container],
           onPress: this.handleOnPress,
           accessibilityRole: "button",
           disabled,
           ...sendButtonProps
         },
-        /* @__PURE__ */ React82.createElement(import_react_native76.View, null, children || /* @__PURE__ */ React82.createElement(import_react_native76.Text, { style: [styles63.text, textStyle3] }, label))
+        /* @__PURE__ */ React84.createElement(import_react_native78.View, null, children || /* @__PURE__ */ React84.createElement(import_react_native78.Text, { style: [styles64.text, textStyle3] }, label))
       );
     }
-    return /* @__PURE__ */ React82.createElement(import_react_native76.View, null);
+    return /* @__PURE__ */ React84.createElement(import_react_native78.View, null);
   }
 };
 
 // bot-sdk/animation/FadeInToBottom.tsx
 init_cjs_shims();
 var import_react35 = __toESM(require("react"));
-var import_react_native77 = require("react-native");
+var import_react_native79 = require("react-native");
 var FadeInToBottom = class extends import_react35.Component {
-  fadeAnim = new import_react_native77.Animated.Value(0);
-  translateAnim = new import_react_native77.Animated.Value(100);
+  fadeAnim = new import_react_native79.Animated.Value(0);
+  translateAnim = new import_react_native79.Animated.Value(100);
   // Initial position is off-screen
   animation;
   constructor(props) {
@@ -17711,13 +18371,13 @@ var FadeInToBottom = class extends import_react35.Component {
       this.props.getRef(this);
     }
     const { duration = 500 } = this.props;
-    this.animation = import_react_native77.Animated.parallel([
-      import_react_native77.Animated.timing(this.fadeAnim, {
+    this.animation = import_react_native79.Animated.parallel([
+      import_react_native79.Animated.timing(this.fadeAnim, {
         toValue: 1,
         duration,
         useNativeDriver: true
       }),
-      import_react_native77.Animated.timing(this.translateAnim, {
+      import_react_native79.Animated.timing(this.translateAnim, {
         toValue: 0,
         // Adjust this value to control how far the element moves down
         duration,
@@ -17737,10 +18397,10 @@ var FadeInToBottom = class extends import_react35.Component {
       return this.props.children;
     }
     return /* @__PURE__ */ import_react35.default.createElement(
-      import_react_native77.Animated.View,
+      import_react_native79.Animated.View,
       {
         style: [
-          styles64.container,
+          styles65.container,
           {
             opacity: this.fadeAnim,
             transform: [{ translateY: this.translateAnim }]
@@ -17751,7 +18411,7 @@ var FadeInToBottom = class extends import_react35.Component {
     );
   }
 };
-var styles64 = import_react_native77.StyleSheet.create({
+var styles65 = import_react_native79.StyleSheet.create({
   container: {
     //flex: 1,
     // position: 'absolute',
@@ -17766,21 +18426,21 @@ var FadeInToBottom_default = FadeInToBottom;
 // bot-sdk/animation/FadeInToTop.tsx
 init_cjs_shims();
 var import_react36 = __toESM(require("react"));
-var import_react_native78 = require("react-native");
+var import_react_native80 = require("react-native");
 var FadeInToTop = class extends import_react36.Component {
-  fadeAnim = new import_react_native78.Animated.Value(0);
-  translateAnim = new import_react_native78.Animated.Value(200);
+  fadeAnim = new import_react_native80.Animated.Value(0);
+  translateAnim = new import_react_native80.Animated.Value(200);
   // Initial position is off-screen
   componentDidMount() {
     const { duration = 500 } = this.props;
-    const animation = import_react_native78.Animated.parallel([
-      import_react_native78.Animated.timing(this.translateAnim, {
+    const animation = import_react_native80.Animated.parallel([
+      import_react_native80.Animated.timing(this.translateAnim, {
         toValue: 0,
         // Adjust this value to control how far the element moves up
         duration,
         useNativeDriver: true
       }),
-      import_react_native78.Animated.timing(this.fadeAnim, {
+      import_react_native80.Animated.timing(this.fadeAnim, {
         toValue: 1,
         duration,
         useNativeDriver: true
@@ -17794,10 +18454,10 @@ var FadeInToTop = class extends import_react36.Component {
   }
   render() {
     return /* @__PURE__ */ import_react36.default.createElement(
-      import_react_native78.Animated.View,
+      import_react_native80.Animated.View,
       {
         style: [
-          styles65.container,
+          styles66.container,
           {
             opacity: this.fadeAnim,
             transform: [{ translateY: this.translateAnim }]
@@ -17808,7 +18468,7 @@ var FadeInToTop = class extends import_react36.Component {
     );
   }
 };
-var styles65 = import_react_native78.StyleSheet.create({
+var styles66 = import_react_native80.StyleSheet.create({
   container: {
     flex: 1
     // position: 'absolute',
@@ -17823,37 +18483,37 @@ var FadeInToTop_default = FadeInToTop;
 // bot-sdk/components/WaveFormView.tsx
 init_cjs_shims();
 var import_react37 = __toESM(require("react"));
-var import_react_native79 = require("react-native");
-var dotAnimations = Array.from({ length: 4 }).map(() => new import_react_native79.Animated.Value(1));
+var import_react_native81 = require("react-native");
+var dotAnimations = Array.from({ length: 4 }).map(() => new import_react_native81.Animated.Value(1));
 var keyframes1 = [0, 1, 0.8, 0.5, 0, 0.5, 0.8, 1, 0];
 var keyframes3 = [0, 1, 0.5, 0.2, 0, 0.2, 0.5, 0.8, 1, 0];
 var keyFramesList = [keyframes3, keyframes1];
 var AnimatedSoundBars = ({ barColor = "white" }) => {
   const loopAnimation = (node, index) => {
-    const loop = import_react_native79.Animated.sequence(
+    const loop = import_react_native81.Animated.sequence(
       keyFramesList[index % keyFramesList.length].map((toValue) => {
-        return import_react_native79.Animated.timing(node, {
+        return import_react_native81.Animated.timing(node, {
           toValue,
-          easing: import_react_native79.Easing.ease,
+          easing: import_react_native81.Easing.ease,
           useNativeDriver: true
         });
       })
     );
     return loop;
   };
-  const loadAnimation = (nodes) => import_react_native79.Animated.loop(import_react_native79.Animated.stagger(200, nodes.map(loopAnimation)))?.start?.();
+  const loadAnimation = (nodes) => import_react_native81.Animated.loop(import_react_native81.Animated.stagger(200, nodes.map(loopAnimation)))?.start?.();
   import_react37.default.useEffect(() => {
     setTimeout(() => {
       loadAnimation(dotAnimations);
     }, 1);
   }, []);
-  return /* @__PURE__ */ import_react37.default.createElement(import_react_native79.View, { style: styles66.row }, dotAnimations.map((animation, index) => {
+  return /* @__PURE__ */ import_react37.default.createElement(import_react_native81.View, { style: styles67.row }, dotAnimations.map((animation, index) => {
     return /* @__PURE__ */ import_react37.default.createElement(
-      import_react_native79.Animated.View,
+      import_react_native81.Animated.View,
       {
         key: `${index}`,
         style: [
-          styles66.bar,
+          styles67.bar,
           { backgroundColor: barColor },
           {
             transform: [
@@ -17872,7 +18532,7 @@ var WaveFormView = class extends import_react37.Component {
     return /* @__PURE__ */ import_react37.default.createElement(AnimatedSoundBars, { barColor: this.props.barColor || "white" });
   }
 };
-var styles66 = import_react_native79.StyleSheet.create({
+var styles67 = import_react_native81.StyleSheet.create({
   row: {
     // flex: 1,
     flexDirection: "row",
@@ -17891,8 +18551,8 @@ init_cjs_shims();
 
 // bot-sdk/utils/CustomVoiceRecognition.tsx
 init_cjs_shims();
-var import_react_native80 = require("react-native");
-var { VoiceRecognitionModule } = import_react_native80.NativeModules;
+var import_react_native82 = require("react-native");
+var { VoiceRecognitionModule } = import_react_native82.NativeModules;
 var CustomVoiceRecognition = class {
   eventEmitter = null;
   listeners = {};
@@ -17902,8 +18562,8 @@ var CustomVoiceRecognition = class {
   }
   initializeEventEmitter() {
     try {
-      if (import_react_native80.Platform.OS === "android" && VoiceRecognitionModule) {
-        this.eventEmitter = new import_react_native80.NativeEventEmitter(VoiceRecognitionModule);
+      if (import_react_native82.Platform.OS === "android" && VoiceRecognitionModule) {
+        this.eventEmitter = new import_react_native82.NativeEventEmitter(VoiceRecognitionModule);
         this.isInitialized = true;
         console.log("[CustomVoiceRecognition] Initialized successfully");
       } else {
@@ -18037,7 +18697,7 @@ var CustomVoiceRecognition = class {
     return {
       available: !!VoiceRecognitionModule,
       initialized: this.isInitialized,
-      platform: import_react_native80.Platform.OS
+      platform: import_react_native82.Platform.OS
     };
   }
 };
@@ -18045,7 +18705,7 @@ var customVoiceRecognition = new CustomVoiceRecognition();
 var CustomVoiceRecognition_default = customVoiceRecognition;
 
 // bot-sdk/utils/VoiceRecorder.tsx
-var import_react_native81 = require("react-native");
+var import_react_native83 = require("react-native");
 var Voice = null;
 var Permissions = null;
 var modulesInitialized = false;
@@ -18056,7 +18716,7 @@ var loadNativeModules2 = () => {
   Voice = null;
   Permissions = null;
   try {
-    if (import_react_native81.Platform.OS === "android") {
+    if (import_react_native83.Platform.OS === "android") {
       try {
         const customVoiceInfo = CustomVoiceRecognition_default.getModuleInfo();
         if (customVoiceInfo.available && customVoiceInfo.initialized) {
@@ -18069,7 +18729,7 @@ var loadNativeModules2 = () => {
         console.error("[VoiceRecorder] CustomVoiceRecognition error:", androidError.message || androidError);
         Voice = null;
       }
-    } else if (import_react_native81.Platform.OS === "ios") {
+    } else if (import_react_native83.Platform.OS === "ios") {
       try {
         const VoiceModule = require("@react-native-voice/voice");
         Voice = VoiceModule?.default || VoiceModule;
@@ -18082,7 +18742,7 @@ var loadNativeModules2 = () => {
         Voice = null;
       }
     } else {
-      console.error("[VoiceRecorder] \u274C Unsupported platform:", import_react_native81.Platform.OS);
+      console.error("[VoiceRecorder] \u274C Unsupported platform:", import_react_native83.Platform.OS);
       Voice = null;
     }
     try {
@@ -18169,8 +18829,8 @@ var VoiceHelper = class {
   }
   initializeNativeModules() {
     try {
-      this.isAndroid = import_react_native81.Platform.OS === "android";
-      this.isIOS = import_react_native81.Platform.OS === "ios";
+      this.isAndroid = import_react_native83.Platform.OS === "android";
+      this.isIOS = import_react_native83.Platform.OS === "ios";
       const modules = loadNativeModules2();
       this.Voice = modules.Voice;
       this.Permissions = modules.Permissions;
@@ -18519,7 +19179,7 @@ var RECORD_STATE = {
   onSpeechError: "onSpeechError",
   onSpeechStop: "onSpeechStop"
 };
-var styles67 = import_react_native82.StyleSheet.create({
+var styles68 = import_react_native84.StyleSheet.create({
   handle_container: {
     alignItems: "center",
     height: 26,
@@ -18625,7 +19285,7 @@ var styles67 = import_react_native82.StyleSheet.create({
     height: 44
   }
 });
-var InputToolbar = class extends React86.Component {
+var InputToolbar = class extends React88.Component {
   static contextType = ThemeContext;
   voiceHelper = null;
   constructor(props) {
@@ -18707,8 +19367,8 @@ var InputToolbar = class extends React86.Component {
   };
   _renderActions = (_props) => {
     const theme = this.context;
-    return /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: { flexDirection: "row" } }, theme?.v3?.footer?.buttons?.menu?.show && /* @__PURE__ */ React86.createElement(
-      import_react_native82.TouchableOpacity,
+    return /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: { flexDirection: "row" } }, theme?.v3?.footer?.buttons?.menu?.show && /* @__PURE__ */ React88.createElement(
+      import_react_native84.TouchableOpacity,
       {
         onPress: () => {
           if (this.props.onMenuItemClick) {
@@ -18719,7 +19379,7 @@ var InputToolbar = class extends React86.Component {
         },
         style: { padding: 5, marginLeft: 5 }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         SvgIcon,
         {
           name: "MenuIcon",
@@ -18728,8 +19388,8 @@ var InputToolbar = class extends React86.Component {
           color: theme?.v3?.footer?.buttons?.menu?.icon_color || theme?.v3?.footer?.icons_color || "#697586"
         }
       )
-    ), theme?.v3?.footer?.buttons?.attachment?.show && /* @__PURE__ */ React86.createElement(
-      import_react_native82.TouchableOpacity,
+    ), theme?.v3?.footer?.buttons?.attachment?.show && /* @__PURE__ */ React88.createElement(
+      import_react_native84.TouchableOpacity,
       {
         onPress: () => {
           if (this.props.onAttachedItemClick) {
@@ -18738,7 +19398,7 @@ var InputToolbar = class extends React86.Component {
         },
         style: { padding: 5 }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         SvgIcon,
         {
           name: "AttachmentIcon",
@@ -18771,20 +19431,20 @@ var InputToolbar = class extends React86.Component {
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show !== false;
     const height = normalize(36);
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
-    return /* @__PURE__ */ React86.createElement(Send, { ...props }, disabled ? isMicVisible ? /* @__PURE__ */ React86.createElement(
-      import_react_native82.View,
+    return /* @__PURE__ */ React88.createElement(Send, { ...props }, disabled ? isMicVisible ? /* @__PURE__ */ React88.createElement(
+      import_react_native84.View,
       {
         pointerEvents: this.props.isMediaLoading ? "none" : "auto",
-        style: [styles67.send_container]
+        style: [styles68.send_container]
       },
-      /* @__PURE__ */ React86.createElement(
-        import_react_native82.TouchableOpacity,
+      /* @__PURE__ */ React88.createElement(
+        import_react_native84.TouchableOpacity,
         {
           onPress: () => {
             this.handleVoiceTextSwitch();
           }
         },
-        /* @__PURE__ */ React86.createElement(
+        /* @__PURE__ */ React88.createElement(
           SvgIcon,
           {
             name: this.state.isSTTViewShow ? "KeyboardIcon" : "MicIcon",
@@ -18794,12 +19454,12 @@ var InputToolbar = class extends React86.Component {
           }
         )
       )
-    ) : /* @__PURE__ */ React86.createElement(
-      import_react_native82.View,
+    ) : /* @__PURE__ */ React88.createElement(
+      import_react_native84.View,
       {
         pointerEvents: "none",
         style: [
-          styles67.send_container1,
+          styles68.send_container1,
           {
             backgroundColor: "#CCCCCC",
             width: normalize(height),
@@ -18807,7 +19467,7 @@ var InputToolbar = class extends React86.Component {
           }
         ]
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         SvgIcon,
         {
           name: "SendIcon",
@@ -18816,12 +19476,12 @@ var InputToolbar = class extends React86.Component {
           color: Color_default.white
         }
       )
-    ) : /* @__PURE__ */ React86.createElement(
-      import_react_native82.View,
+    ) : /* @__PURE__ */ React88.createElement(
+      import_react_native84.View,
       {
         pointerEvents: disabled ? "none" : "auto",
         style: [
-          styles67.send_container1,
+          styles68.send_container1,
           {
             backgroundColor: disabled ? "grey" : sendButtonBgColor,
             width: normalize(height),
@@ -18829,7 +19489,7 @@ var InputToolbar = class extends React86.Component {
           }
         ]
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         SvgIcon,
         {
           name: "SendIcon",
@@ -18846,21 +19506,21 @@ var InputToolbar = class extends React86.Component {
     }
     const theme = this.context;
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
-    return /* @__PURE__ */ React86.createElement(
-      import_react_native82.View,
+    return /* @__PURE__ */ React88.createElement(
+      import_react_native84.View,
       {
         style: {
           flex: 1
         }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         FadeInToBottom_default,
         {
           getRef: (ref) => {
             this.fadeInToBottomRef = ref;
           }
         },
-        /* @__PURE__ */ React86.createElement(
+        /* @__PURE__ */ React88.createElement(
           Composer,
           {
             theme,
@@ -18921,7 +19581,7 @@ var InputToolbar = class extends React86.Component {
   onSpeechPartialResults = (e) => {
     this.voiceHelper?.resetCounter();
     if (e?.value?.length > 0) {
-      if (import_react_native82.Platform.OS !== "android")
+      if (import_react_native84.Platform.OS !== "android")
         this.props?.onSTTValue?.(e.value[0]);
       else
         this.props?.onSTTValue?.(e.value[0] + " ...");
@@ -19003,8 +19663,8 @@ var InputToolbar = class extends React86.Component {
     );
   };
   renderSTTView() {
-    return /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: { flex: 1 } }, /* @__PURE__ */ React86.createElement(FadeInToTop_default, null, /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: styles67.stt_sub }, /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: styles67.stt_sub2 }, this.state.isRecordingstart ? /* @__PURE__ */ React86.createElement(WaveFormView, null) : /* @__PURE__ */ React86.createElement(
-      import_react_native82.TouchableOpacity,
+    return /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: { flex: 1 } }, /* @__PURE__ */ React88.createElement(FadeInToTop_default, null, /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: styles68.stt_sub }, /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: styles68.stt_sub2 }, this.state.isRecordingstart ? /* @__PURE__ */ React88.createElement(WaveFormView, null) : /* @__PURE__ */ React88.createElement(
+      import_react_native84.TouchableOpacity,
       {
         onPress: () => {
           if (this.state.recordState === RECORD_STATE.onSpeechEnd) {
@@ -19030,9 +19690,9 @@ var InputToolbar = class extends React86.Component {
             this.voiceHelper.startRecognizing();
           }
         },
-        style: styles67.stt_mic_main
+        style: styles68.stt_mic_main
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React88.createElement(
         SvgIcon,
         {
           name: this.state.recordState === RECORD_STATE.onSpeechEnd ? "SendIcon" : "MicIcon",
@@ -19041,8 +19701,8 @@ var InputToolbar = class extends React86.Component {
           color: Color_default.white
         }
       )
-    )), /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: {} }, /* @__PURE__ */ React86.createElement(import_react_native82.Text, { style: styles67.stt_title }, this.getRecordTitle()), this.state.recordState !== RECORD_STATE.onSpeechStop && /* @__PURE__ */ React86.createElement(
-      import_react_native82.TouchableOpacity,
+    )), /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: {} }, /* @__PURE__ */ React88.createElement(import_react_native84.Text, { style: styles68.stt_title }, this.getRecordTitle()), this.state.recordState !== RECORD_STATE.onSpeechStop && /* @__PURE__ */ React88.createElement(
+      import_react_native84.TouchableOpacity,
       {
         style: {
           backgroundColor: Color_default.transparent,
@@ -19067,8 +19727,8 @@ var InputToolbar = class extends React86.Component {
           );
         }
       },
-      /* @__PURE__ */ React86.createElement(
-        import_react_native82.Text,
+      /* @__PURE__ */ React88.createElement(
+        import_react_native84.Text,
         {
           style: {
             color: "#4B4EDE"
@@ -19098,7 +19758,7 @@ var InputToolbar = class extends React86.Component {
   }
   renderAccessory() {
     if (this.props.renderAccessory) {
-      return /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: [styles67.accessory, this.props.accessoryStyle] }, this.props.renderAccessory(this.props));
+      return /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: [styles68.accessory, this.props.accessoryStyle] }, this.props.renderAccessory(this.props));
     }
     return null;
   }
@@ -19123,11 +19783,11 @@ var InputToolbar = class extends React86.Component {
   render() {
     const theme = this.context;
     const minHeight = this.state.isSTTViewShow && this.state.recordState === RECORD_STATE.onSpeechStop ? 52 : MIN_TOOL_BAR_HEIGHT || 72;
-    return /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: [styles67.container, this.props.containerStyle] }, /* @__PURE__ */ React86.createElement(import_react_native82.View, { style: { flexDirection: "column" } }, this.renderSuggestionsView(), this.renderMediaView(), this.renderQuickRepliesView(theme), /* @__PURE__ */ React86.createElement(
-      import_react_native82.View,
+    return /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: [styles68.container, this.props.containerStyle] }, /* @__PURE__ */ React88.createElement(import_react_native84.View, { style: { flexDirection: "column" } }, this.renderSuggestionsView(), this.renderMediaView(), this.renderQuickRepliesView(theme), /* @__PURE__ */ React88.createElement(
+      import_react_native84.View,
       {
         style: [
-          styles67.primary,
+          styles68.primary,
           this.props.primaryStyle,
           {
             minHeight: normalize(minHeight),
@@ -19144,19 +19804,19 @@ var InputToolbar = class extends React86.Component {
 
 // bot-sdk/chat/components/MessageContainer.tsx
 init_cjs_shims();
-var React93 = __toESM(require("react"));
+var React95 = __toESM(require("react"));
 var import_react39 = require("react");
-var import_react_native88 = require("react-native");
+var import_react_native90 = require("react-native");
 
 // bot-sdk/chat/components/Message.tsx
 init_cjs_shims();
-var React92 = __toESM(require("react"));
-var import_react_native87 = require("react-native");
+var React94 = __toESM(require("react"));
+var import_react_native89 = require("react-native");
 
 // bot-sdk/chat/components/Avatar.tsx
 init_cjs_shims();
 var import_react38 = __toESM(require("react"));
-var import_react_native83 = require("react-native");
+var import_react_native85 = require("react-native");
 var Avatar = class extends import_react38.Component {
   constructor(props) {
     super(props);
@@ -19190,7 +19850,7 @@ var Avatar = class extends import_react38.Component {
         UserAvatar,
         {
           avatarStyle: [
-            styles68[this.props.position].image,
+            styles69[this.props.position].image,
             this.props.imageStyle && this.props.imageStyle[this.props.position]
           ],
           textStyle: this.props.textStyle ? this.props.textStyle : {},
@@ -19221,19 +19881,19 @@ var Avatar = class extends import_react38.Component {
     }
     if (!showAvatarForEveryMessage && currentMessage && messageToCompare && isSameUser(currentMessage, messageToCompare) && isSameDay(currentMessage, messageToCompare)) {
       return /* @__PURE__ */ import_react38.default.createElement(
-        import_react_native83.View,
+        import_react_native85.View,
         {
           style: [
-            styles68[position].container,
-            styles68[position][computedStyle],
+            styles69[position].container,
+            styles69[position][computedStyle],
             containerStyle2 && containerStyle2[position]
           ]
         },
         renderAvatar ? /* @__PURE__ */ import_react38.default.createElement(
-          import_react_native83.View,
+          import_react_native85.View,
           {
             style: [
-              styles68[position].image,
+              styles69[position].image,
               imageStyle && imageStyle[position]
             ]
           }
@@ -19241,7 +19901,7 @@ var Avatar = class extends import_react38.Component {
           UserAvatar,
           {
             avatarStyle: [
-              styles68[position].image,
+              styles69[position].image,
               imageStyle && imageStyle[position]
             ]
           }
@@ -19249,11 +19909,11 @@ var Avatar = class extends import_react38.Component {
       );
     }
     return /* @__PURE__ */ import_react38.default.createElement(
-      import_react_native83.View,
+      import_react_native85.View,
       {
         style: [
-          styles68[position].container,
-          styles68[position][computedStyle],
+          styles69[position].container,
+          styles69[position][computedStyle],
           containerStyle2 && containerStyle2[position]
         ]
       },
@@ -19261,8 +19921,8 @@ var Avatar = class extends import_react38.Component {
     );
   }
 };
-var styles68 = {
-  left: import_react_native83.StyleSheet.create({
+var styles69 = {
+  left: import_react_native85.StyleSheet.create({
     container: {
       marginRight: 8
     },
@@ -19278,7 +19938,7 @@ var styles68 = {
       borderRadius: 18
     }
   }),
-  center: import_react_native83.StyleSheet.create({
+  center: import_react_native85.StyleSheet.create({
     container: {
       marginRight: 8
     },
@@ -19294,7 +19954,7 @@ var styles68 = {
       borderRadius: 18
     }
   }),
-  right: import_react_native83.StyleSheet.create({
+  right: import_react_native85.StyleSheet.create({
     container: {
       marginLeft: 8
     },
@@ -19314,13 +19974,13 @@ var styles68 = {
 
 // bot-sdk/chat/components/Bubble.tsx
 init_cjs_shims();
-var React90 = __toESM(require("react"));
-var import_react_native85 = require("react-native");
+var React92 = __toESM(require("react"));
+var import_react_native87 = require("react-native");
 
 // bot-sdk/chat/components/Time.tsx
 init_cjs_shims();
-var React88 = __toESM(require("react"));
-var import_react_native84 = require("react-native");
+var React90 = __toESM(require("react"));
+var import_react_native86 = require("react-native");
 var import_dayjs8 = __toESM(require("dayjs"));
 var import_en6 = require("dayjs/locale/en");
 var import_en7 = require("dayjs/locale/en");
@@ -19341,7 +20001,7 @@ var textStyle2 = {
   marginTop: 5,
   opacity: 0.8
 };
-var styles69 = {
+var styles70 = {
   main_con: {
     flexDirection: "row",
     backgroundColor: "transparent",
@@ -19349,7 +20009,7 @@ var styles69 = {
     justifyContent: "center",
     alignItems: "center"
   },
-  left: import_react_native84.StyleSheet.create({
+  left: import_react_native86.StyleSheet.create({
     container: {
       ...containerStyle,
       marginTop: 1
@@ -19359,7 +20019,7 @@ var styles69 = {
       ...textStyle2
     }
   }),
-  center: import_react_native84.StyleSheet.create({
+  center: import_react_native86.StyleSheet.create({
     container: {
       ...containerStyle
     },
@@ -19368,7 +20028,7 @@ var styles69 = {
       ...textStyle2
     }
   }),
-  right: import_react_native84.StyleSheet.create({
+  right: import_react_native86.StyleSheet.create({
     container: {
       ...containerStyle,
       marginTop: 0
@@ -19408,15 +20068,15 @@ var Time = class extends BaseView_default {
   render() {
     const { position, createdOn } = this.props;
     if (createdOn && position) {
-      return /* @__PURE__ */ React88.createElement(
-        import_react_native84.View,
+      return /* @__PURE__ */ React90.createElement(
+        import_react_native86.View,
         {
           style: [
-            styles69[position].container
+            styles70[position].container
           ]
         },
-        /* @__PURE__ */ React88.createElement(
-          import_react_native84.Text,
+        /* @__PURE__ */ React90.createElement(
+          import_react_native86.Text,
           {
             style: [
               {
@@ -19439,26 +20099,26 @@ var Time = class extends BaseView_default {
         )
       );
     }
-    return /* @__PURE__ */ React88.createElement(React88.Fragment, null);
+    return /* @__PURE__ */ React90.createElement(React90.Fragment, null);
   }
 };
 
 // bot-sdk/chat/BotChatContext.tsx
 init_cjs_shims();
-var React89 = __toESM(require("react"));
-var BotChatContext = React89.createContext({
+var React91 = __toESM(require("react"));
+var BotChatContext = React91.createContext({
   getLocale: () => "en",
   actionSheet: () => ({
     showActionSheetWithOptions: () => {
     }
   })
 });
-var useChatContext = () => React89.useContext(BotChatContext);
+var useChatContext = () => React91.useContext(BotChatContext);
 
 // bot-sdk/chat/components/Bubble.tsx
 var import_rn_kore_bot_socket_lib_v79 = __toESM(require("rn-kore-bot-socket-lib-v79"));
 init_PlatformCheck();
-var Bubble = class extends React90.Component {
+var Bubble = class extends React92.Component {
   static contextType = ThemeContext;
   actionSheet;
   static Bubble;
@@ -19466,9 +20126,9 @@ var Bubble = class extends React90.Component {
     super(props);
     this.actionSheet = BotChatContext;
     this.state = {
-      shakeAnim: new import_react_native85.Animated.Value(0),
+      shakeAnim: new import_react_native87.Animated.Value(0),
       // Initial X position
-      shakeInterpolate: new import_react_native85.Animated.Value(0)
+      shakeInterpolate: new import_react_native87.Animated.Value(0)
     };
   }
   static defaultProps;
@@ -19496,8 +20156,8 @@ var Bubble = class extends React90.Component {
   };
   shake = () => {
     this.state.shakeAnim.setValue(0);
-    import_react_native85.Animated.sequence([
-      import_react_native85.Animated.timing(this.state.shakeAnim, {
+    import_react_native87.Animated.sequence([
+      import_react_native87.Animated.timing(this.state.shakeAnim, {
         toValue: 1,
         duration: 500,
         // Duration of the shake
@@ -19527,12 +20187,12 @@ var Bubble = class extends React90.Component {
     } else {
       try {
         if (isAndroid) {
-          const androidVersion = parseInt(import_react_native85.Platform.Version, 10);
+          const androidVersion = parseInt(import_react_native87.Platform.Version, 10);
           if (androidVersion < 33) {
-            import_react_native85.ToastAndroid.showWithGravity(
+            import_react_native87.ToastAndroid.showWithGravity(
               "Copied",
-              import_react_native85.ToastAndroid.SHORT,
-              import_react_native85.ToastAndroid.BOTTOM
+              import_react_native87.ToastAndroid.SHORT,
+              import_react_native87.ToastAndroid.BOTTOM
             );
           }
         }
@@ -19545,7 +20205,7 @@ var Bubble = class extends React90.Component {
     const { currentMessage, nextMessage, position, containerToNextStyle } = this.props;
     if (currentMessage && nextMessage && position && isSameUser(currentMessage, nextMessage) && isSameDay(currentMessage, nextMessage)) {
       return [
-        styles70[position].containerToNext,
+        styles71[position].containerToNext,
         containerToNextStyle && containerToNextStyle[position]
       ];
     }
@@ -19560,7 +20220,7 @@ var Bubble = class extends React90.Component {
     } = this.props;
     if (currentMessage && previousMessage && position && isSameUser(currentMessage, previousMessage) && isSameDay(currentMessage, previousMessage)) {
       return [
-        styles70[position].containerToPrevious,
+        styles71[position].containerToPrevious,
         containerToPreviousStyle && containerToPreviousStyle[position]
       ];
     }
@@ -19588,11 +20248,11 @@ var Bubble = class extends React90.Component {
       console.log("\u26A0\uFE0F  Bot text value is not a string type:", text);
       console.log("\u26A0\uFE0F  Type of text:", typeof text);
       console.log("\u26A0\uFE0F  Full message data:", JSON.stringify(this.props.currentMessage, null, 2));
-      return /* @__PURE__ */ React90.createElement(React90.Fragment, null);
+      return /* @__PURE__ */ React92.createElement(React92.Fragment, null);
     }
     console.log("\u2705 Rendering bot text:", text);
     const theme = this.context;
-    return /* @__PURE__ */ React90.createElement(
+    return /* @__PURE__ */ React92.createElement(
       BotText,
       {
         text,
@@ -19608,7 +20268,7 @@ var Bubble = class extends React90.Component {
         return this.props.renderMessageText(messageTextProps);
       }
       const theme = this.context;
-      return /* @__PURE__ */ React90.createElement(MessageText_default, { ...messageTextProps, theme });
+      return /* @__PURE__ */ React92.createElement(MessageText_default, { ...messageTextProps, theme });
     }
     return null;
   };
@@ -19617,7 +20277,7 @@ var Bubble = class extends React90.Component {
   };
   renderBubbleViews = (templateType, payload, theme) => {
     const { containerStyle: containerStyle2, wrapperStyle, optionTitles, ...messageTextProps } = this.props;
-    return /* @__PURE__ */ React90.createElement(
+    return /* @__PURE__ */ React92.createElement(
       BotTemplate,
       {
         templateType,
@@ -19637,7 +20297,20 @@ var Bubble = class extends React90.Component {
     if (this.isEndOfTask(nextMessage)) {
       return true;
     }
+    if (this.isPdfDataResponse(nextMessage)) {
+      return true;
+    }
     return !nextMessage || Object.keys(nextMessage).length === 0 ? true : false;
+  };
+  isPdfDataResponse = (data) => {
+    if (data && data.message && data.message[0] && data.message[0].component && data.message[0].component.type === "template" && data.message[0].component.payload) {
+      let payload = data.message[0].component.payload;
+      let templateType = payload.payload?.template_type || payload.template_type;
+      if (TEMPLATE_TYPES.PDF_DATA_RESPONSE === templateType) {
+        return true;
+      }
+    }
+    return false;
   };
   isHiddenDialog = (data) => {
     if (data && data.message && data.message[0] && data.message[0].component && data.message[0].component.type === "template" && data.message[0].component.payload) {
@@ -19684,7 +20357,7 @@ var Bubble = class extends React90.Component {
       let CustomView = templateInjection?.get?.(templateType);
       if (CustomView) {
         try {
-          return /* @__PURE__ */ React90.createElement(
+          return /* @__PURE__ */ React92.createElement(
             CustomView,
             {
               payload,
@@ -19698,7 +20371,7 @@ var Bubble = class extends React90.Component {
         }
       }
     }
-    return /* @__PURE__ */ React90.createElement(import_react_native85.View, { style: { marginTop: normalize(0) } }, this.renderBubbleViews(templateType, payload, theme));
+    return /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { marginTop: normalize(0) } }, this.renderBubbleViews(templateType, payload, theme));
   };
   renderUsername = () => {
     return null;
@@ -19706,28 +20379,34 @@ var Bubble = class extends React90.Component {
   renderTime = () => {
     let createdOn = this.props.currentMessage?.createdOn || this.props.currentMessage.message?.[0]?.component?.payload?.createdOn;
     if (createdOn) {
-      const { containerStyle: containerStyle2, wrapperStyle, textStyle: textStyle3, ...timeProps } = this.props;
+      const {
+        position = "left",
+        containerStyle: containerStyle2,
+        wrapperStyle,
+        textStyle: textStyle3,
+        ...timeProps
+      } = this.props;
       if (this.props.renderTime) {
         return this.props.renderTime(timeProps);
       }
       const theme = this.context;
       const isUserMessage = this.props.currentMessage?.type === "user_message";
-      return /* @__PURE__ */ React90.createElement(import_react_native85.View, { style: { flexDirection: "row" } }, isUserMessage && /* @__PURE__ */ React90.createElement(
+      return /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { flexDirection: "row" } }, isUserMessage && /* @__PURE__ */ React92.createElement(
         Time,
         {
           createdOn,
           ...timeProps,
           theme
         }
-      ), /* @__PURE__ */ React90.createElement(
-        import_react_native85.Text,
+      ), /* @__PURE__ */ React92.createElement(
+        import_react_native87.Text,
         {
           style: [
             {
               fontSize: normalize(10),
               textAlign: "center",
               opacity: 0.8,
-              marginStart: 5
+              marginStart: position === "left" ? theme?.v3?.body?.icon?.show ? 5 : 0 : 5
             },
             isUserMessage && {
               marginEnd: 10
@@ -19745,7 +20424,7 @@ var Bubble = class extends React90.Component {
           ]
         },
         isUserMessage ? "You" : import_rn_kore_bot_socket_lib_v79.default.getInstance().getBotName()
-      ), !isUserMessage && /* @__PURE__ */ React90.createElement(
+      ), !isUserMessage && /* @__PURE__ */ React92.createElement(
         Time,
         {
           createdOn,
@@ -19754,54 +20433,58 @@ var Bubble = class extends React90.Component {
         }
       ));
     }
-    return /* @__PURE__ */ React90.createElement(React90.Fragment, null);
+    return /* @__PURE__ */ React92.createElement(React92.Fragment, null);
   };
   isBotTextMessage = () => {
     return this.props.currentMessage?.type === "bot_response" && getTemplateType(this.props.currentMessage?.message) === TEMPLATE_TYPES.TEXT;
   };
   render() {
+    let templateType = getTemplateType(this.props.currentMessage?.message);
+    if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      return null;
+    }
     const { position, containerStyle: containerStyle2, wrapperStyle, bottomContainerStyle } = this.props;
     const theme = this.context;
-    return /* @__PURE__ */ React90.createElement(
-      import_react_native85.View,
+    return /* @__PURE__ */ React92.createElement(
+      import_react_native87.View,
       {
         style: [
-          styles70[position].container,
+          styles71[position].container,
           containerStyle2 && containerStyle2[position]
         ]
       },
       theme?.v3?.body?.time_stamp?.show && theme?.v3?.body?.time_stamp?.position === "top" && this.renderTime(),
-      /* @__PURE__ */ React90.createElement(
-        import_react_native85.View,
+      /* @__PURE__ */ React92.createElement(
+        import_react_native87.View,
         {
           style: [
-            styles70[position].wrapper,
+            styles71[position].wrapper,
             this.styledBubbleToNext(),
             this.styledBubbleToPrevious(),
             wrapperStyle && wrapperStyle[position],
             theme?.v3?.body?.icon?.show && position === "left" && { marginLeft: 5 }
           ]
         },
-        /* @__PURE__ */ React90.createElement(
-          import_react_native85.TouchableWithoutFeedback,
+        /* @__PURE__ */ React92.createElement(
+          import_react_native87.TouchableWithoutFeedback,
           {
             onLongPress: (event) => this.onLongPress(event, position === "right"),
             accessibilityRole: "text",
             ...this.props.touchableProps
           },
-          /* @__PURE__ */ React90.createElement(
-            import_react_native85.Animated.View,
+          /* @__PURE__ */ React92.createElement(
+            import_react_native87.Animated.View,
             {
               style: [
                 { transform: [{ translateX: this.state.shakeInterpolate }] }
               ]
             },
             this.renderBubbleContent(),
-            /* @__PURE__ */ React90.createElement(
-              import_react_native85.View,
+            /* @__PURE__ */ React92.createElement(
+              import_react_native87.View,
               {
                 style: [
-                  styles70[position].bottom,
+                  styles71[position].bottom,
                   bottomContainerStyle && bottomContainerStyle[position]
                 ]
               },
@@ -19815,14 +20498,14 @@ var Bubble = class extends React90.Component {
     );
   }
 };
-var styles70 = {
-  left: import_react_native85.StyleSheet.create({
+var styles71 = {
+  left: import_react_native87.StyleSheet.create({
     container: {
       flex: 1,
       alignItems: "flex-start"
     },
     wrapper: {
-      marginLeft: 8
+      marginLeft: 0
     },
     containerToNext: {
       borderBottomLeftRadius: 3
@@ -19835,7 +20518,7 @@ var styles70 = {
       justifyContent: "flex-start"
     }
   }),
-  right: import_react_native85.StyleSheet.create({
+  right: import_react_native87.StyleSheet.create({
     container: {
       flex: 1,
       alignItems: "flex-end"
@@ -19854,7 +20537,7 @@ var styles70 = {
       justifyContent: "flex-end"
     }
   }),
-  content: import_react_native85.StyleSheet.create({
+  content: import_react_native87.StyleSheet.create({
     tick: {
       fontSize: normalize(10),
       backgroundColor: Color_default.backgroundTransparent,
@@ -19876,7 +20559,7 @@ var styles70 = {
       marginHorizontal: 10
     }
   }),
-  center: import_react_native85.StyleSheet.create({
+  center: import_react_native87.StyleSheet.create({
     containerToNext: {},
     containerToPrevious: {},
     container: {},
@@ -19890,15 +20573,15 @@ Bubble.defaultProps = {
 
 // bot-sdk/chat/components/Day.tsx
 init_cjs_shims();
-var React91 = __toESM(require("react"));
-var import_react_native86 = require("react-native");
+var React93 = __toESM(require("react"));
+var import_react_native88 = require("react-native");
 var import_dayjs9 = __toESM(require("dayjs"));
 var import_en8 = require("dayjs/locale/en");
 var import_advancedFormat5 = __toESM(require("dayjs/plugin/advancedFormat"));
 var import_customParseFormat5 = __toESM(require("dayjs/plugin/customParseFormat"));
 import_dayjs9.default.extend(import_advancedFormat5.default);
 import_dayjs9.default.extend(import_customParseFormat5.default);
-var styles71 = import_react_native86.StyleSheet.create({
+var styles72 = import_react_native88.StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
@@ -19930,11 +20613,11 @@ function Day({
       return null;
     }
   }
-  return /* @__PURE__ */ React91.createElement(import_react_native86.View, { style: [styles71.container, containerStyle2] }, /* @__PURE__ */ React91.createElement(import_react_native86.View, { style: wrapperStyle }, /* @__PURE__ */ React91.createElement(
-    import_react_native86.Text,
+  return /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: [styles72.container, containerStyle2] }, /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: wrapperStyle }, /* @__PURE__ */ React93.createElement(
+    import_react_native88.Text,
     {
       style: [
-        styles71.text,
+        styles72.text,
         textStyle3,
         {
           color: theme?.v3?.body?.time_stamp?.color,
@@ -19954,7 +20637,7 @@ var TIMESTAMP_OFFSET_TRIM = normalize(7);
 var effectiveTimestampAvatarOffset = () => Math.max(0, TIMESTAMP_ROW_OFFSET - TIMESTAMP_OFFSET_TRIM);
 var effectiveTimestampAvatarOffsetWhenTsBelow = () => TIMESTAMP_ROW_OFFSET;
 var AVATAR_MARGIN_BOTTOM_TS_TOP_ICON_BOTTOM = normalize(6);
-var styles72 = {
+var styles73 = {
   bot_icon: {
     height: normalize(23),
     width: normalize(23),
@@ -19975,7 +20658,7 @@ var styles72 = {
     resizeMode: "stretch",
     margin: 0
   },
-  left: import_react_native87.StyleSheet.create({
+  left: import_react_native89.StyleSheet.create({
     container: {
       flexDirection: "row",
       alignItems: "flex-end",
@@ -19984,7 +20667,7 @@ var styles72 = {
       marginRight: 0
     }
   }),
-  center: import_react_native87.StyleSheet.create({
+  center: import_react_native89.StyleSheet.create({
     container: {
       flexDirection: "row",
       alignItems: "stretch",
@@ -19993,7 +20676,7 @@ var styles72 = {
       marginRight: 0
     }
   }),
-  right: import_react_native87.StyleSheet.create({
+  right: import_react_native89.StyleSheet.create({
     container: {
       flexDirection: "row",
       alignItems: "flex-end",
@@ -20003,7 +20686,7 @@ var styles72 = {
     }
   })
 };
-var Message = class extends React92.Component {
+var Message = class extends React94.Component {
   botIconUrl = null;
   state = {
     imageLoadFailed: false
@@ -20088,11 +20771,11 @@ var Message = class extends React92.Component {
   renderDefaultBotAvatar = (avatarProps) => {
     const currentMessage = avatarProps.currentMessage || this.props.currentMessage;
     const iconUrl = currentMessage?.icon || this.props.fallbackBotIcon || null;
-    return /* @__PURE__ */ React92.createElement(
-      import_react_native87.View,
+    return /* @__PURE__ */ React94.createElement(
+      import_react_native89.View,
       {
         style: [
-          styles72.bot_icon_con2,
+          styles73.bot_icon_con2,
           {
             backgroundColor: Color_default.transparent,
             alignItems: "center",
@@ -20100,14 +20783,14 @@ var Message = class extends React92.Component {
           }
         ]
       },
-      /* @__PURE__ */ React92.createElement(
-        import_react_native87.Image,
+      /* @__PURE__ */ React94.createElement(
+        import_react_native89.Image,
         {
           source: this.state.imageLoadFailed || !iconUrl ? placeholder.default_bot_icon : {
             uri: iconUrl
           },
           resizeMode: "cover",
-          style: [styles72.bot_icon, { alignSelf: "center" }],
+          style: [styles73.bot_icon, { alignSelf: "center" }],
           onError: () => {
             this.setState({ imageLoadFailed: true });
           }
@@ -20118,16 +20801,16 @@ var Message = class extends React92.Component {
   renderBotAvatarSlot() {
     const { currentMessage, theme, position } = this.props;
     if (currentMessage?.type !== "bot_response" || !theme?.v3?.body?.icon?.show) {
-      return /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { width: normalize(5) } });
+      return /* @__PURE__ */ React94.createElement(import_react_native89.View, { style: { width: normalize(5) } });
     }
     if (!theme?.v3?.body?.icon?.bot_icon) {
-      return /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { width: normalize(5) } });
+      return /* @__PURE__ */ React94.createElement(import_react_native89.View, { style: { width: normalize(5) } });
     }
     const newPosition = position ? position : "left";
     const customRender = this.props.renderAvatar;
     const renderFn = customRender != null ? customRender : this.renderDefaultBotAvatar;
     const containerOffset = this.getTimestampAvatarOffset();
-    return /* @__PURE__ */ React92.createElement(
+    return /* @__PURE__ */ React94.createElement(
       Avatar,
       {
         renderAvatar: renderFn,
@@ -20140,7 +20823,7 @@ var Message = class extends React92.Component {
         onPressAvatar: this.props.onPressAvatar,
         onLongPressAvatar: this.props.onLongPressAvatar,
         containerStyle: {
-          [newPosition]: [styles72.bot_icon_con, containerOffset]
+          [newPosition]: [styles73.bot_icon_con, containerOffset]
         }
       }
     );
@@ -20151,7 +20834,7 @@ var Message = class extends React92.Component {
       if (this.props.renderDay) {
         return this.props.renderDay(props);
       }
-      return /* @__PURE__ */ React92.createElement(Day, { ...props });
+      return /* @__PURE__ */ React94.createElement(Day, { ...props });
     }
     return null;
   }
@@ -20162,18 +20845,22 @@ var Message = class extends React92.Component {
       onListItemClick: this.props.onListItemClick,
       onSendText: this.props.onSendText
     };
-    return /* @__PURE__ */ React92.createElement(Bubble, { ...newProps });
+    return /* @__PURE__ */ React94.createElement(Bubble, { ...newProps });
   }
   render() {
     const { currentMessage, nextMessage, position, containerStyle: containerStyle2 } = this.props;
     if (currentMessage) {
+      const templateType = getTemplateType(currentMessage?.message);
+      if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+        return null;
+      }
       const sameUser = isSameUser(currentMessage, nextMessage);
       const newPosition = position ? position : "left";
-      return /* @__PURE__ */ React92.createElement(import_react_native87.View, null, /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { flexDirection: "column" } }, this.renderDay(), /* @__PURE__ */ React92.createElement(import_react_native87.View, { style: { flexDirection: "row", marginBottom: normalize(5) } }, this.renderBotAvatarSlot(), /* @__PURE__ */ React92.createElement(
-        import_react_native87.View,
+      return /* @__PURE__ */ React94.createElement(import_react_native89.View, null, /* @__PURE__ */ React94.createElement(import_react_native89.View, { style: { flexDirection: "column" } }, this.renderDay(), /* @__PURE__ */ React94.createElement(import_react_native89.View, { style: { flexDirection: "row", marginBottom: normalize(5) } }, this.renderBotAvatarSlot(), /* @__PURE__ */ React94.createElement(
+        import_react_native89.View,
         {
           style: [
-            styles72[newPosition].container,
+            styles73[newPosition].container,
             { marginBottom: sameUser ? 2 : 10 },
             !this.props.inverted && { marginBottom: 2 },
             containerStyle2 && containerStyle2[position ? position : "left"],
@@ -20189,13 +20876,13 @@ var Message = class extends React92.Component {
         this.renderBubble()
       ))));
     }
-    return /* @__PURE__ */ React92.createElement(React92.Fragment, null);
+    return /* @__PURE__ */ React94.createElement(React94.Fragment, null);
   }
 };
 
 // bot-sdk/chat/components/MessageContainer.tsx
 var import_rn_kore_bot_socket_lib_v792 = __toESM(require("rn-kore-bot-socket-lib-v79"));
-var styles73 = import_react_native88.StyleSheet.create({
+var styles74 = import_react_native90.StyleSheet.create({
   container: {
     flex: 1
   },
@@ -20405,7 +21092,7 @@ var MessageContainer = class extends import_react39.PureComponent {
         return this.props.renderMessage(messageProps);
       }
       const theme = this.context;
-      return /* @__PURE__ */ React93.createElement(Message, { ...messageProps, theme });
+      return /* @__PURE__ */ React95.createElement(Message, { ...messageProps, theme });
     }
     return null;
   };
@@ -20417,22 +21104,22 @@ var MessageContainer = class extends import_react39.PureComponent {
   };
   renderChatEmpty = () => {
     if (this.props.renderChatEmpty) {
-      return this.props.inverted ? this.props.renderChatEmpty() : /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: styles73.emptyChatContainer }, this.props.renderChatEmpty());
+      return this.props.inverted ? this.props.renderChatEmpty() : /* @__PURE__ */ React95.createElement(import_react_native90.View, { style: styles74.emptyChatContainer }, this.props.renderChatEmpty());
     }
-    return /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: styles73.container });
+    return /* @__PURE__ */ React95.createElement(import_react_native90.View, { style: styles74.container });
   };
-  renderHeaderWrapper = () => /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: styles73.headerWrapper }, this.renderLoadEarlier());
+  renderHeaderWrapper = () => /* @__PURE__ */ React95.createElement(import_react_native90.View, { style: styles74.headerWrapper }, this.renderLoadEarlier());
   renderScrollBottomComponent() {
     const { scrollToBottomComponent } = this.props;
     if (scrollToBottomComponent) {
       return scrollToBottomComponent();
     }
-    return /* @__PURE__ */ React93.createElement(import_react_native88.Text, null, "V");
+    return /* @__PURE__ */ React95.createElement(import_react_native90.Text, null, "V");
   }
   renderScrollToBottomWrapper() {
     const propsStyle = this.props.scrollToBottomStyle || {};
-    return /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: [styles73.scrollToBottomStyle, propsStyle] }, /* @__PURE__ */ React93.createElement(
-      import_react_native88.TouchableOpacity,
+    return /* @__PURE__ */ React95.createElement(import_react_native90.View, { style: [styles74.scrollToBottomStyle, propsStyle] }, /* @__PURE__ */ React95.createElement(
+      import_react_native90.TouchableOpacity,
       {
         onPress: () => this.scrollToBottom(false),
         hitSlop: { top: 5, left: 5, right: 5, bottom: 5 }
@@ -20464,7 +21151,7 @@ var MessageContainer = class extends import_react39.PureComponent {
   };
   onEndReached = (distanceFromEnd) => {
     const { loadEarlier, onLoadEarlier, infiniteScroll, isLoadingEarlier } = this.props;
-    if (infiniteScroll && distanceFromEnd > 0 && distanceFromEnd <= 100 && loadEarlier && onLoadEarlier && !isLoadingEarlier && import_react_native88.Platform.OS !== "web") {
+    if (infiniteScroll && distanceFromEnd > 0 && distanceFromEnd <= 100 && loadEarlier && onLoadEarlier && !isLoadingEarlier && import_react_native90.Platform.OS !== "web") {
       onLoadEarlier();
     }
   };
@@ -20514,30 +21201,30 @@ var MessageContainer = class extends import_react39.PureComponent {
     if (!this.state.isListScrollable)
       return null;
     if (this.props.loadEarlier) {
-      return /* @__PURE__ */ React93.createElement(import_react_native88.ActivityIndicator, { size: "small", style: { padding: 10 } });
+      return /* @__PURE__ */ React95.createElement(import_react_native90.ActivityIndicator, { size: "small", style: { padding: 10 } });
     }
-    return /* @__PURE__ */ React93.createElement(import_react_native88.View, { style: styles73.history_container }, /* @__PURE__ */ React93.createElement(
-      import_react_native88.TouchableOpacity,
+    return /* @__PURE__ */ React95.createElement(import_react_native90.View, { style: styles74.history_container }, /* @__PURE__ */ React95.createElement(
+      import_react_native90.TouchableOpacity,
       {
-        style: [styles73.card, styles73.shadowProp],
+        style: [styles74.card, styles74.shadowProp],
         onPress: this.loadHistory
       },
-      /* @__PURE__ */ React93.createElement(import_react_native88.Text, { style: styles73.heading }, LocalizationManager.getLocalizedString("load_earlier_messages"))
+      /* @__PURE__ */ React95.createElement(import_react_native90.Text, { style: styles74.heading }, LocalizationManager.getLocalizedString("load_earlier_messages"))
     ));
   };
   render() {
     const { inverted } = this.props;
-    return /* @__PURE__ */ React93.createElement(
-      import_react_native88.View,
+    return /* @__PURE__ */ React95.createElement(
+      import_react_native90.View,
       {
         style: [
-          this.props.alignTop ? styles73.containerAlignTop : styles73.container,
+          this.props.alignTop ? styles74.containerAlignTop : styles74.container,
           { backgroundColor: this.getBackgroundColor() }
         ]
       },
       this.state.showScrollBottom && this.props.scrollToBottom ? this.renderScrollToBottomWrapper() : null,
-      /* @__PURE__ */ React93.createElement(
-        import_react_native88.TouchableOpacity,
+      /* @__PURE__ */ React95.createElement(
+        import_react_native90.TouchableOpacity,
         {
           style: {
             paddingHorizontal: 10,
@@ -20554,8 +21241,8 @@ var MessageContainer = class extends import_react39.PureComponent {
             }
           }
         },
-        /* @__PURE__ */ React93.createElement(
-          import_react_native88.Text,
+        /* @__PURE__ */ React95.createElement(
+          import_react_native90.Text,
           {
             style: {
               fontSize: 10,
@@ -20567,8 +21254,8 @@ var MessageContainer = class extends import_react39.PureComponent {
           "Load history"
         )
       ),
-      /* @__PURE__ */ React93.createElement(
-        import_react_native88.FlatList,
+      /* @__PURE__ */ React95.createElement(
+        import_react_native90.FlatList,
         {
           ref: this.props.forwardRef,
           extraData: [this.props.extraData, this.props.isTyping],
@@ -20578,7 +21265,7 @@ var MessageContainer = class extends import_react39.PureComponent {
           inverted,
           showsVerticalScrollIndicator: false,
           data: this.props.messages,
-          contentContainerStyle: styles73.contentContainerStyle,
+          contentContainerStyle: styles74.contentContainerStyle,
           renderItem: this.renderRow,
           ...this.props.invertibleScrollViewProps,
           ListEmptyComponent: this.renderChatEmpty,
@@ -20607,13 +21294,13 @@ var MessageContainer = class extends import_react39.PureComponent {
           }
         }
       ),
-      this.state.loadingHistory ? /* @__PURE__ */ React93.createElement(
-        import_react_native88.ActivityIndicator,
+      this.state.loadingHistory ? /* @__PURE__ */ React95.createElement(
+        import_react_native90.ActivityIndicator,
         {
           size: "large",
           style: { flex: 1, width: getWindowWidth(), position: "absolute" }
         }
-      ) : /* @__PURE__ */ React93.createElement(React93.Fragment, null)
+      ) : /* @__PURE__ */ React95.createElement(React95.Fragment, null)
     );
   }
   getBackgroundColor = () => {
@@ -20631,8 +21318,8 @@ var import_rn_kore_bot_socket_lib_v797 = __toESM(require("rn-kore-bot-socket-lib
 
 // bot-sdk/templates/QuickReplies.tsx
 init_cjs_shims();
-var React94 = __toESM(require("react"));
-var import_react_native89 = require("react-native");
+var React96 = __toESM(require("react"));
+var import_react_native91 = require("react-native");
 var QuickReplies = class extends BaseView_default {
   constructor(props) {
     super(props);
@@ -20649,12 +21336,12 @@ var QuickReplies = class extends BaseView_default {
   }
   renderQuickRepliesView = () => {
     if (!this.props?.quick_replies) {
-      return /* @__PURE__ */ React94.createElement(React94.Fragment, null);
+      return /* @__PURE__ */ React96.createElement(React96.Fragment, null);
     }
     const btheme = getBubbleTheme(this.props?.theme);
     const views = this.props?.quick_replies.map((item, index) => {
-      return /* @__PURE__ */ React94.createElement(
-        import_react_native89.TouchableOpacity,
+      return /* @__PURE__ */ React96.createElement(
+        import_react_native91.TouchableOpacity,
         {
           key: index + "",
           onPress: () => {
@@ -20664,11 +21351,11 @@ var QuickReplies = class extends BaseView_default {
             this.props?.itemClick?.(item);
           }
         },
-        /* @__PURE__ */ React94.createElement(
-          import_react_native89.View,
+        /* @__PURE__ */ React96.createElement(
+          import_react_native91.View,
           {
             style: this.props.quick_container_style ? this.props.quick_container_style : [
-              styles74.quick_container,
+              styles75.quick_container,
               {
                 borderColor: btheme?.BUBBLE_LEFT_BG_COLOR || "#3F51B5",
                 backgroundColor: btheme?.BUBBLE_LEFT_BG_COLOR || "#3F51B5",
@@ -20676,20 +21363,20 @@ var QuickReplies = class extends BaseView_default {
               }
             ]
           },
-          item?.image_url && /* @__PURE__ */ React94.createElement(import_react_native89.View, { style: styles74.image_bg }, /* @__PURE__ */ React94.createElement(
-            import_react_native89.Image,
+          item?.image_url && /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: styles75.image_bg }, /* @__PURE__ */ React96.createElement(
+            import_react_native91.Image,
             {
               source: { uri: item?.image_url },
               style: [
-                this.props.quick_image_style ? this.props.quick_image_style : styles74.image,
+                this.props.quick_image_style ? this.props.quick_image_style : styles75.image,
                 {
                   borderRadius: normalize(30)
                 }
               ]
             }
           )),
-          /* @__PURE__ */ React94.createElement(
-            import_react_native89.Text,
+          /* @__PURE__ */ React96.createElement(
+            import_react_native91.Text,
             {
               style: this.props.quck_text_style ? this.props.quck_text_style : [
                 {
@@ -20707,8 +21394,8 @@ var QuickReplies = class extends BaseView_default {
         )
       );
     });
-    return views && views.length > 0 ? /* @__PURE__ */ React94.createElement(
-      import_react_native89.ScrollView,
+    return views && views.length > 0 ? /* @__PURE__ */ React96.createElement(
+      import_react_native91.ScrollView,
       {
         pointerEvents: this.state.isClickedItem ? "none" : "auto",
         contentContainerStyle: {
@@ -20723,13 +21410,13 @@ var QuickReplies = class extends BaseView_default {
         keyboardShouldPersistTaps: "handled",
         horizontal: !this.props.isVertical
       },
-      /* @__PURE__ */ React94.createElement(
-        import_react_native89.View,
+      /* @__PURE__ */ React96.createElement(
+        import_react_native91.View,
         {
-          style: styles74.quick_main_container
+          style: styles75.quick_main_container
         },
-        /* @__PURE__ */ React94.createElement(
-          import_react_native89.View,
+        /* @__PURE__ */ React96.createElement(
+          import_react_native91.View,
           {
             style: {
               height: 1,
@@ -20742,13 +21429,13 @@ var QuickReplies = class extends BaseView_default {
         ),
         views
       )
-    ) : /* @__PURE__ */ React94.createElement(React94.Fragment, null);
+    ) : /* @__PURE__ */ React96.createElement(React96.Fragment, null);
   };
   render() {
     return this.renderQuickRepliesView();
   }
 };
-var styles74 = import_react_native89.StyleSheet.create({
+var styles75 = import_react_native91.StyleSheet.create({
   image_bg: {
     justifyContent: "center",
     alignItems: "center"
@@ -20802,15 +21489,15 @@ var styles74 = import_react_native89.StyleSheet.create({
 
 // bot-sdk/chat/components/BotTypingIndicator.tsx
 init_cjs_shims();
-var React96 = __toESM(require("react"));
+var React98 = __toESM(require("react"));
 var import_react41 = require("react");
 var import_async_storage3 = __toESM(require("@react-native-async-storage/async-storage"));
-var import_react_native91 = require("react-native");
+var import_react_native93 = require("react-native");
 
 // bot-sdk/components/CustomLoadingDots.tsx
 init_cjs_shims();
 var import_react40 = __toESM(require("react"));
-var import_react_native90 = require("react-native");
+var import_react_native92 = require("react-native");
 var CustomLoadingDots = ({
   animation = "typing",
   color = "#000000",
@@ -20820,43 +21507,43 @@ var CustomLoadingDots = ({
   numberOfDots = 3
 }) => {
   const animatedValues = (0, import_react40.useRef)(
-    Array.from({ length: numberOfDots }, () => new import_react_native90.Animated.Value(0))
+    Array.from({ length: numberOfDots }, () => new import_react_native92.Animated.Value(0))
   ).current;
   (0, import_react40.useEffect)(() => {
     const createTypingAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => import_react_native90.Animated.sequence([
-          import_react_native90.Animated.delay(index * delay),
-          import_react_native90.Animated.loop(
-            import_react_native90.Animated.sequence([
-              import_react_native90.Animated.timing(animatedValue, {
+        (animatedValue, index) => import_react_native92.Animated.sequence([
+          import_react_native92.Animated.delay(index * delay),
+          import_react_native92.Animated.loop(
+            import_react_native92.Animated.sequence([
+              import_react_native92.Animated.timing(animatedValue, {
                 toValue: 1,
                 duration: 300,
                 useNativeDriver: true
               }),
-              import_react_native90.Animated.timing(animatedValue, {
+              import_react_native92.Animated.timing(animatedValue, {
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: true
               }),
-              import_react_native90.Animated.delay((numberOfDots - 1 - index) * delay)
+              import_react_native92.Animated.delay((numberOfDots - 1 - index) * delay)
             ])
           )
         ])
       );
-      import_react_native90.Animated.parallel(animations).start();
+      import_react_native92.Animated.parallel(animations).start();
     };
     const createPulseAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => import_react_native90.Animated.loop(
-          import_react_native90.Animated.sequence([
-            import_react_native90.Animated.delay(index * delay),
-            import_react_native90.Animated.timing(animatedValue, {
+        (animatedValue, index) => import_react_native92.Animated.loop(
+          import_react_native92.Animated.sequence([
+            import_react_native92.Animated.delay(index * delay),
+            import_react_native92.Animated.timing(animatedValue, {
               toValue: 1,
               duration: 600,
               useNativeDriver: true
             }),
-            import_react_native90.Animated.timing(animatedValue, {
+            import_react_native92.Animated.timing(animatedValue, {
               toValue: 0,
               duration: 600,
               useNativeDriver: true
@@ -20864,20 +21551,20 @@ var CustomLoadingDots = ({
           ])
         )
       );
-      import_react_native90.Animated.stagger(delay, animations).start();
+      import_react_native92.Animated.stagger(delay, animations).start();
     };
     const createBounceAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => import_react_native90.Animated.loop(
-          import_react_native90.Animated.sequence([
-            import_react_native90.Animated.delay(index * delay),
-            import_react_native90.Animated.spring(animatedValue, {
+        (animatedValue, index) => import_react_native92.Animated.loop(
+          import_react_native92.Animated.sequence([
+            import_react_native92.Animated.delay(index * delay),
+            import_react_native92.Animated.spring(animatedValue, {
               toValue: 1,
               friction: 3,
               tension: 100,
               useNativeDriver: true
             }),
-            import_react_native90.Animated.spring(animatedValue, {
+            import_react_native92.Animated.spring(animatedValue, {
               toValue: 0,
               friction: 3,
               tension: 100,
@@ -20886,7 +21573,7 @@ var CustomLoadingDots = ({
           ])
         )
       );
-      import_react_native90.Animated.stagger(delay, animations).start();
+      import_react_native92.Animated.stagger(delay, animations).start();
     };
     animatedValues.forEach((value) => value.setValue(0));
     switch (animation) {
@@ -20920,12 +21607,12 @@ var CustomLoadingDots = ({
       transform: [{ scale: scale2 }]
     };
   };
-  return /* @__PURE__ */ import_react40.default.createElement(import_react_native90.View, { style: styles75.container }, animatedValues.map((animatedValue, index) => /* @__PURE__ */ import_react40.default.createElement(
-    import_react_native90.Animated.View,
+  return /* @__PURE__ */ import_react40.default.createElement(import_react_native92.View, { style: styles76.container }, animatedValues.map((animatedValue, index) => /* @__PURE__ */ import_react40.default.createElement(
+    import_react_native92.Animated.View,
     {
       key: index,
       style: [
-        styles75.dot,
+        styles76.dot,
         {
           backgroundColor: color,
           width: size,
@@ -20938,7 +21625,7 @@ var CustomLoadingDots = ({
     }
   )));
 };
-var styles75 = import_react_native90.StyleSheet.create({
+var styles76 = import_react_native92.StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -20989,8 +21676,8 @@ var TypingIndicator = class extends import_react41.Component {
     let name = import_rn_kore_bot_socket_lib_v793.default.getInstance().getBotName() || " ";
     const theme = this.context;
     let textColor = theme?.v3?.general?.colors?.secondary_text || "#FFFFFF";
-    return /* @__PURE__ */ React96.createElement(
-      import_react_native91.Text,
+    return /* @__PURE__ */ React98.createElement(
+      import_react_native93.Text,
       {
         style: [
           {
@@ -21005,29 +21692,29 @@ var TypingIndicator = class extends import_react41.Component {
   }
   renderBotIcon = (url) => {
     let bg = this.getAvatarBgColor();
-    return /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: styles76.bot_icon_con }, /* @__PURE__ */ React96.createElement(
-      import_react_native91.View,
+    return /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles77.bot_icon_con }, /* @__PURE__ */ React98.createElement(
+      import_react_native93.View,
       {
         style: [
-          styles76.bot_icon_con2,
+          styles77.bot_icon_con2,
           {
             backgroundColor: url ? Color_default.transparent : bg
           }
         ]
       },
-      url ? /* @__PURE__ */ React96.createElement(
-        import_react_native91.Image,
+      url ? /* @__PURE__ */ React98.createElement(
+        import_react_native93.Image,
         {
           source: {
             uri: url
           },
-          style: [styles76.bot_icon]
+          style: [styles77.bot_icon]
         }
       ) : this.renderBotName()
     ));
   };
   render() {
-    return /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: styles76.container }, /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: [styles76.box, styles76.box1] }, this.renderTyping()));
+    return /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles77.container }, /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: [styles77.box, styles77.box1] }, this.renderTyping()));
   }
   renderTyping = () => {
     let isTypingIndicator = this.props.isTypingIndicator;
@@ -21035,7 +21722,7 @@ var TypingIndicator = class extends import_react41.Component {
     if (isTypingIndicator) {
       url = this.getBotIconUrl();
     }
-    return /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: styles76.main }, isTypingIndicator && /* @__PURE__ */ React96.createElement(import_react_native91.View, { style: styles76.horizontalContainer }, this.renderBotIcon(url), /* @__PURE__ */ React96.createElement(
+    return /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles77.main }, isTypingIndicator && /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles77.horizontalContainer }, this.renderBotIcon(url), /* @__PURE__ */ React98.createElement(
       CustomLoadingDots_default,
       {
         animation: "typing",
@@ -21047,7 +21734,7 @@ var TypingIndicator = class extends import_react41.Component {
     )));
   };
 };
-var styles76 = import_react_native91.StyleSheet.create({
+var styles77 = import_react_native93.StyleSheet.create({
   bot_icon: {
     height: normalize(22),
     width: normalize(22),
@@ -21100,17 +21787,17 @@ var styles76 = import_react_native91.StyleSheet.create({
 
 // bot-sdk/chat/components/header/ChatHeader.tsx
 init_cjs_shims();
-var React101 = __toESM(require("react"));
+var React103 = __toESM(require("react"));
 
 // bot-sdk/chat/components/header/CompactHeader.tsx
 init_cjs_shims();
-var React98 = __toESM(require("react"));
-var import_react_native93 = require("react-native");
+var React100 = __toESM(require("react"));
+var import_react_native95 = require("react-native");
 
 // bot-sdk/chat/components/header/BaseHeader.tsx
 init_cjs_shims();
 var import_react42 = __toESM(require("react"));
-var import_react_native92 = require("react-native");
+var import_react_native94 = require("react-native");
 var import_rn_kore_bot_socket_lib_v794 = __toESM(require("rn-kore-bot-socket-lib-v79"));
 var BaseHeader = class extends import_react42.default.Component {
   static contextType = ThemeContext;
@@ -21154,10 +21841,10 @@ var BaseHeader = class extends import_react42.default.Component {
       return /* @__PURE__ */ import_react42.default.createElement(import_react42.default.Fragment, null);
     }
     if (type === "custom" && theme?.v3?.header?.icon?.icon_url) {
-      return /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: styles77.header_icon_main }, /* @__PURE__ */ import_react42.default.createElement(
-        import_react_native92.Image,
+      return /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: styles78.header_icon_main }, /* @__PURE__ */ import_react42.default.createElement(
+        import_react_native94.Image,
         {
-          style: styles77.header_icon_main,
+          style: styles78.header_icon_main,
           testID: "image-custom",
           source: {
             uri: theme?.v3?.header?.icon?.icon_url
@@ -21168,10 +21855,10 @@ var BaseHeader = class extends import_react42.default.Component {
       ));
     }
     return /* @__PURE__ */ import_react42.default.createElement(
-      import_react_native92.View,
+      import_react_native94.View,
       {
         style: [
-          styles77.header_icon_main,
+          styles78.header_icon_main,
           customProps,
           {
             backgroundColor: theme?.v3?.body?.user_message?.bg_color ? theme?.v3?.body?.user_message?.bg_color : Color_default.header_blue
@@ -21192,11 +21879,11 @@ var BaseHeader = class extends import_react42.default.Component {
     if (!iconName) {
       return /* @__PURE__ */ import_react42.default.createElement(import_react42.default.Fragment, null);
     }
-    const Wrapper = id ? import_react_native92.TouchableOpacity : import_react_native92.View;
+    const Wrapper = id ? import_react_native94.TouchableOpacity : import_react_native94.View;
     return /* @__PURE__ */ import_react42.default.createElement(
       Wrapper,
       {
-        style: [styles77.icon_container, {}, styleProps, {}],
+        style: [styles78.icon_container, {}, styleProps, {}],
         onPress: () => this.onHeaderIconPress(id)
       },
       /* @__PURE__ */ import_react42.default.createElement(
@@ -21218,7 +21905,7 @@ var BaseHeader = class extends import_react42.default.Component {
   onDropdownMenuView = (theme, iconColor) => {
     let buttons = theme?.v3?.header?.buttons;
     const height = MIN_HEADER_HEIGHT || 45;
-    return /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: [styles77.dropdown_main, { height: normalize(height) }] }, /* @__PURE__ */ import_react42.default.createElement(
+    return /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: [styles78.dropdown_main, { height: normalize(height) }] }, /* @__PURE__ */ import_react42.default.createElement(
       LazyPopover_default,
       {
         mode: "rn-modal",
@@ -21230,9 +21917,9 @@ var BaseHeader = class extends import_react42.default.Component {
           });
         },
         from: /* @__PURE__ */ import_react42.default.createElement(
-          import_react_native92.TouchableOpacity,
+          import_react_native94.TouchableOpacity,
           {
-            style: [styles77.pop_main],
+            style: [styles78.pop_main],
             onPress: () => {
               this.setState({
                 showPopover: true
@@ -21250,7 +21937,7 @@ var BaseHeader = class extends import_react42.default.Component {
           )
         )
       },
-      /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: styles77.pop_sub }, buttons?.help?.show && this.renderMenuItem(HeaderIconsId.HELP, "Help", "HeaderHelp"), buttons?.live_agent?.show && this.renderMenuItem(
+      /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: styles78.pop_sub }, buttons?.help?.show && this.renderMenuItem(HeaderIconsId.HELP, "Help", "HeaderHelp"), buttons?.live_agent?.show && this.renderMenuItem(
         HeaderIconsId.LIVE_AGENT,
         "Live Agent",
         "HeaderTalk"
@@ -21267,7 +21954,7 @@ var BaseHeader = class extends import_react42.default.Component {
   };
   renderMenuItem = (id, title, iconId = "HeaderHelp") => {
     return /* @__PURE__ */ import_react42.default.createElement(
-      import_react_native92.TouchableOpacity,
+      import_react_native94.TouchableOpacity,
       {
         onPress: () => {
           this.setState({
@@ -21275,11 +21962,11 @@ var BaseHeader = class extends import_react42.default.Component {
           });
           this.onHeaderIconPress(id);
         },
-        style: styles77.popover_main_2
+        style: styles78.popover_main_2
       },
-      /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: styles77.popover_item_main }, this.renderIcon(void 0, iconId, 17, 17, {
+      /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: styles78.popover_item_main }, this.renderIcon(void 0, iconId, 17, 17, {
         marginStart: 0
-      }), /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: styles77.popover_item_text_main }, /* @__PURE__ */ import_react42.default.createElement(import_react_native92.Text, { style: { fontSize: normalize(13), paddingEnd: 10 } }, title)))
+      }), /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: styles78.popover_item_text_main }, /* @__PURE__ */ import_react42.default.createElement(import_react_native94.Text, { style: { fontSize: normalize(13), paddingEnd: 10 } }, title)))
     );
   };
   renderRightSideIcons(theme, styleProps, stylePropsMain, iconColor) {
@@ -21293,7 +21980,7 @@ var BaseHeader = class extends import_react42.default.Component {
       };
       stylePropsMain = {};
     }
-    return /* @__PURE__ */ import_react42.default.createElement(import_react_native92.View, { style: [{ flexDirection: "row" }, stylePropsMain] }, buttons?.help?.show && this.renderIcon(
+    return /* @__PURE__ */ import_react42.default.createElement(import_react_native94.View, { style: [{ flexDirection: "row" }, stylePropsMain] }, buttons?.help?.show && this.renderIcon(
       HeaderIconsId.HELP,
       "HeaderHelp",
       17,
@@ -21353,7 +22040,7 @@ var BaseHeader = class extends import_react42.default.Component {
     return SHOW_BUTTONS_LIMIT < count;
   }
 };
-var styles77 = import_react_native92.StyleSheet.create({
+var styles78 = import_react_native94.StyleSheet.create({
   header_icon_main: {
     backgroundColor: Color_default.header_blue,
     width: normalize(30),
@@ -21437,52 +22124,52 @@ var CompactHeader = class extends BaseHeader {
     const theme = this.context;
     const height = MIN_HEADER_HEIGHT || 45;
     const headerColor = theme?.v3?.header?.bg_color || "#EAECF0";
-    return /* @__PURE__ */ React98.createElement(
-      import_react_native93.View,
+    return /* @__PURE__ */ React100.createElement(
+      import_react_native95.View,
       {
         style: [
-          styles78.main,
+          styles79.main,
           {
             height: normalize(height),
             backgroundColor: headerColor
           }
         ]
       },
-      /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.sub_con }, this.renderBackIcon(
+      /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.sub_con }, this.renderBackIcon(
         {},
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.sub_con1 }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.back_icon_container }, this.renderHeaderIcon(theme)), /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.title_main }, /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.title_sub_con }, /* @__PURE__ */ React98.createElement(
-        import_react_native93.Text,
+      ), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.sub_con1 }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.back_icon_container }, this.renderHeaderIcon(theme)), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.title_main }, /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.title_sub_con }, /* @__PURE__ */ React100.createElement(
+        import_react_native95.Text,
         {
           numberOfLines: 1,
           style: [
-            styles78.title_text,
+            styles79.title_text,
             { color: theme?.v3?.header?.title?.color || "#000000" }
           ]
         },
         this.getBotTitleName(theme?.v3?.header?.title?.name)
-      )), /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.title_sub_con1 }, /* @__PURE__ */ React98.createElement(
-        import_react_native93.Text,
+      )), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.title_sub_con1 }, /* @__PURE__ */ React100.createElement(
+        import_react_native95.Text,
         {
           numberOfLines: 1,
           style: [
-            styles78.title_sub_text,
+            styles79.title_sub_text,
             { color: theme?.v3?.header?.sub_title?.color || "#000000" }
           ]
         },
         theme?.v3?.header?.sub_title?.name
-      )))), /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
+      )))), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
         theme,
         {},
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
       ))),
-      /* @__PURE__ */ React98.createElement(import_react_native93.View, { style: styles78.line })
+      /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles79.line })
     );
   }
 };
-var styles78 = import_react_native93.StyleSheet.create({
+var styles79 = import_react_native95.StyleSheet.create({
   sub_con1: {
     flex: 1,
     flexDirection: "row",
@@ -21529,15 +22216,15 @@ var styles78 = import_react_native93.StyleSheet.create({
   line: {
     backgroundColor: Color_default.black,
     opacity: 0.3,
-    height: import_react_native93.StyleSheet.hairlineWidth,
+    height: import_react_native95.StyleSheet.hairlineWidth,
     width: "100%"
   }
 });
 
 // bot-sdk/chat/components/header/MediumHeader.tsx
 init_cjs_shims();
-var React99 = __toESM(require("react"));
-var import_react_native94 = require("react-native");
+var React101 = __toESM(require("react"));
+var import_react_native96 = require("react-native");
 init_PlatformCheck();
 var MediumHeader = class extends BaseHeader {
   constructor(props) {
@@ -21551,54 +22238,54 @@ var MediumHeader = class extends BaseHeader {
     const height = MIN_HEADER_HEIGHT || 45;
     const extraHeight = isIOS ? height + 25 : height + 35;
     const headerColor = theme?.v3?.header?.bg_color || "#EAECF0";
-    return /* @__PURE__ */ React99.createElement(
-      import_react_native94.View,
+    return /* @__PURE__ */ React101.createElement(
+      import_react_native96.View,
       {
         style: [
-          styles79.main,
+          styles80.main,
           {
             height: normalize(extraHeight),
             backgroundColor: headerColor
           }
         ]
       },
-      /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: [styles79.sub_con] }, this.renderBackIcon(
+      /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: [styles80.sub_con] }, this.renderBackIcon(
         {},
-        { ...styles79.back_icon, height: normalize(height) },
+        { ...styles80.back_icon, height: normalize(height) },
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: [styles79.sub_con1, {}] }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: [styles79.back_icon_container] }, this.renderHeaderIcon(theme, {
+      ), /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: [styles80.sub_con1, {}] }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: [styles80.back_icon_container] }, this.renderHeaderIcon(theme, {
         marginStart: 0
-      })), /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: styles79.title_main }, /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: styles79.title_sub_con }, /* @__PURE__ */ React99.createElement(
-        import_react_native94.Text,
+      })), /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: styles80.title_main }, /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: styles80.title_sub_con }, /* @__PURE__ */ React101.createElement(
+        import_react_native96.Text,
         {
           numberOfLines: 1,
           style: [
-            styles79.title_text,
+            styles80.title_text,
             { color: theme?.v3?.header?.title?.color || "#000000" }
           ]
         },
         this.getBotTitleName(theme?.v3?.header?.title?.name)
-      )), /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: styles79.title_sub_con1 }, /* @__PURE__ */ React99.createElement(
-        import_react_native94.Text,
+      )), /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: styles80.title_sub_con1 }, /* @__PURE__ */ React101.createElement(
+        import_react_native96.Text,
         {
           numberOfLines: 1,
           style: [
-            styles79.title_sub_text,
+            styles80.title_sub_text,
             { color: theme?.v3?.header?.sub_title?.color || "#000000" }
           ]
         },
         theme?.v3?.header?.sub_title?.name
-      )))), /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: styles79.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
+      )))), /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: styles80.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
         theme,
         { height },
-        styles79.itemProps,
+        styles80.itemProps,
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
       ))),
-      /* @__PURE__ */ React99.createElement(import_react_native94.View, { style: styles79.line })
+      /* @__PURE__ */ React101.createElement(import_react_native96.View, { style: styles80.line })
     );
   }
 };
-var styles79 = import_react_native94.StyleSheet.create({
+var styles80 = import_react_native96.StyleSheet.create({
   itemProps: {
     position: "absolute",
     end: 0,
@@ -21664,24 +22351,24 @@ var styles79 = import_react_native94.StyleSheet.create({
   line: {
     backgroundColor: Color_default.black,
     opacity: 0.3,
-    height: import_react_native94.StyleSheet.hairlineWidth,
+    height: import_react_native96.StyleSheet.hairlineWidth,
     width: "100%"
   }
 });
 
 // bot-sdk/chat/components/header/LargeHeader.tsx
 init_cjs_shims();
-var React100 = __toESM(require("react"));
-var import_react_native95 = require("react-native");
+var React102 = __toESM(require("react"));
+var import_react_native97 = require("react-native");
 var import_react_native_linear_gradient = __toESM(require("react-native-linear-gradient"));
-var windowWidth28 = import_react_native95.Dimensions.get("window").width;
+var windowWidth28 = import_react_native97.Dimensions.get("window").width;
 var LargeHeader = class extends BaseHeader {
   static contextType = ThemeContext;
   render() {
     const theme = this.context;
     const height = 140;
     const headerColor = theme?.v3?.header?.bg_color || Color_default.blue;
-    return /* @__PURE__ */ React100.createElement(
+    return /* @__PURE__ */ React102.createElement(
       import_react_native_linear_gradient.default,
       {
         colors: [
@@ -21692,14 +22379,14 @@ var LargeHeader = class extends BaseHeader {
           Color_default.white
         ],
         style: [
-          styles80.main,
+          styles81.main,
           {
             height: normalize(height),
             backgroundColor: theme?.v3?.header?.bg_color
           }
         ]
       },
-      /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: { flex: 1 } }, /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.sub_con }, this.renderBackIcon(
+      /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: { flex: 1 } }, /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.sub_con }, this.renderBackIcon(
         {
           marginTop: 10,
           justifyContent: "flex-start",
@@ -21707,16 +22394,16 @@ var LargeHeader = class extends BaseHeader {
         },
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.sub_con1 }, /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.title_main }, /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.title_sub_con }), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.title_sub_con1 }))), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
+      ), /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.sub_con1 }, /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.title_main }, /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.title_sub_con }), /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.title_sub_con1 }))), /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
         theme,
-        styles80.right_side_icon_con,
+        styles81.right_side_icon_con,
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ))), /* @__PURE__ */ React100.createElement(
-        import_react_native95.View,
+      ))), /* @__PURE__ */ React102.createElement(
+        import_react_native97.View,
         {
           style: [
-            styles80.card_main,
+            styles81.card_main,
             {
               width: windowWidth28 - normalize(30),
               borderRadius: 5,
@@ -21727,11 +22414,11 @@ var LargeHeader = class extends BaseHeader {
             }
           ]
         },
-        /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: { flex: 1, marginStart: normalize(20) } }, /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.card_con }, /* @__PURE__ */ React100.createElement(
-          import_react_native95.Text,
+        /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: { flex: 1, marginStart: normalize(20) } }, /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.card_con }, /* @__PURE__ */ React102.createElement(
+          import_react_native97.Text,
           {
             style: [
-              styles80.title_text,
+              styles81.title_text,
               {
                 color: theme?.v3?.header?.title?.color || "#000000",
                 fontFamily: this.props.theme?.v3?.body?.font?.family
@@ -21739,11 +22426,11 @@ var LargeHeader = class extends BaseHeader {
             ]
           },
           this.getBotTitleName(theme?.v3?.header?.title?.name)
-        ), /* @__PURE__ */ React100.createElement(
-          import_react_native95.Text,
+        ), /* @__PURE__ */ React102.createElement(
+          import_react_native97.Text,
           {
             style: [
-              styles80.sub_title_text,
+              styles81.sub_title_text,
               {
                 color: theme?.v3?.header?.sub_title?.color || "#000000",
                 fontFamily: this.props.theme?.v3?.body?.font?.family
@@ -21752,11 +22439,11 @@ var LargeHeader = class extends BaseHeader {
           },
           theme?.v3?.header?.sub_title?.name
         )))
-      ), /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: styles80.icon_con }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React100.createElement(import_react_native95.View, { style: [styles80.back_icon_container] }, this.renderHeaderIcon(theme))))
+      ), /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: styles81.icon_con }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React102.createElement(import_react_native97.View, { style: [styles81.back_icon_container] }, this.renderHeaderIcon(theme))))
     );
   }
 };
-var styles80 = import_react_native95.StyleSheet.create({
+var styles81 = import_react_native97.StyleSheet.create({
   icon_con: {
     position: "absolute",
     // bottom: 0,
@@ -21846,14 +22533,14 @@ var styles80 = import_react_native95.StyleSheet.create({
   line: {
     backgroundColor: Color_default.black,
     opacity: 0.3,
-    height: import_react_native95.StyleSheet.hairlineWidth,
+    height: import_react_native97.StyleSheet.hairlineWidth,
     width: "100%"
   }
 });
 
 // bot-sdk/chat/components/header/ChatHeader.tsx
 init_PlatformCheck();
-var ChatHeader = class extends React101.Component {
+var ChatHeader = class extends React103.Component {
   static contextType = ThemeContext;
   componentDidMount() {
     this.updateStatusBarColor();
@@ -21875,13 +22562,13 @@ var ChatHeader = class extends React101.Component {
     const type = theme?.v3?.header?.size;
     switch (type) {
       case ChatHeaderType.REGULAR:
-        return /* @__PURE__ */ React101.createElement(MediumHeader, { ...this.props, theme });
+        return /* @__PURE__ */ React103.createElement(MediumHeader, { ...this.props, theme });
       case ChatHeaderType.LARGE:
-        return /* @__PURE__ */ React101.createElement(LargeHeader, { ...this.props, theme });
+        return /* @__PURE__ */ React103.createElement(LargeHeader, { ...this.props, theme });
       case ChatHeaderType.COMPACT:
-        return /* @__PURE__ */ React101.createElement(CompactHeader, { ...this.props, theme });
+        return /* @__PURE__ */ React103.createElement(CompactHeader, { ...this.props, theme });
       default:
-        return /* @__PURE__ */ React101.createElement(CompactHeader, { ...this.props, theme });
+        return /* @__PURE__ */ React103.createElement(CompactHeader, { ...this.props, theme });
     }
   };
   render() {
@@ -22587,17 +23274,17 @@ var FileUploadQueue_default = FileUploadQueue;
 // bot-sdk/chat/KoreChat.tsx
 var Progress = __toESM(require("react-native-progress"));
 var import_async_storage4 = __toESM(require("@react-native-async-storage/async-storage"));
-var import_react_native_toast_message3 = __toESM(require("react-native-toast-message"));
+var import_react_native_toast_message4 = __toESM(require("react-native-toast-message"));
 
 // bot-sdk/components/WelcomeScreen/index.tsx
 init_cjs_shims();
 var import_react50 = __toESM(require("react"));
-var import_react_native104 = require("react-native");
+var import_react_native106 = require("react-native");
 
 // bot-sdk/components/WelcomeScreen/body.tsx
 init_cjs_shims();
-var React103 = __toESM(require("react"));
-var import_react_native98 = require("react-native");
+var React105 = __toESM(require("react"));
+var import_react_native100 = require("react-native");
 
 // bot-sdk/components/WelcomeScreen/WelcomeBaseView.tsx
 init_cjs_shims();
@@ -22606,20 +23293,20 @@ var WelcomeBaseView = class extends import_react43.default.Component {
 };
 
 // bot-sdk/components/WelcomeScreen/body.tsx
-var windowWidth29 = import_react_native98.Dimensions.get("window").width;
+var windowWidth29 = import_react_native100.Dimensions.get("window").width;
 var WelcomeBody = class extends WelcomeBaseView {
   quickStartBtns = () => {
     const startBox = this.props?.activetheme?.v3?.welcome_screen?.starter_box || void 0;
     if (!startBox || !startBox?.quick_start_buttons?.show) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
     if (!startBox?.quick_start_buttons?.buttons || startBox?.quick_start_buttons?.buttons?.length === 0) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
-    return /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.btn_main }, startBox?.quick_start_buttons?.buttons.map(
+    return /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.btn_main }, startBox?.quick_start_buttons?.buttons.map(
       (btn, index) => {
-        return /* @__PURE__ */ React103.createElement(
-          import_react_native98.TouchableOpacity,
+        return /* @__PURE__ */ React105.createElement(
+          import_react_native100.TouchableOpacity,
           {
             key: index + "_",
             onPress: () => {
@@ -22627,9 +23314,9 @@ var WelcomeBody = class extends WelcomeBaseView {
                 this.props?.onStartConversationClick(btn?.title);
               }
             },
-            style: styles81.quick_btn
+            style: styles82.quick_btn
           },
-          /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.btn_text }, btn?.title)
+          /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.btn_text }, btn?.title)
         );
       }
     ));
@@ -22659,29 +23346,29 @@ var WelcomeBody = class extends WelcomeBaseView {
     const startBox = this.props?.activetheme?.v3?.welcome_screen?.starter_box || void 0;
     const headerIcon = this.props?.activetheme?.v3?.header?.icon || void 0;
     if (!startBox || !headerIcon || !startBox?.show || !startBox?.icon?.show || !headerIcon?.show) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
     if (headerIcon?.type === "custom") {
     }
-    return /* @__PURE__ */ React103.createElement(
-      import_react_native98.View,
+    return /* @__PURE__ */ React105.createElement(
+      import_react_native100.View,
       {
         style: [
-          styles81.icon_main,
+          styles82.icon_main,
           {
             backgroundColor: this.props?.activetheme?.v3?.header?.bg_color || "#EAECF0"
           }
         ]
       },
-      headerIcon?.type === "custom" ? /* @__PURE__ */ React103.createElement(
-        import_react_native98.Image,
+      headerIcon?.type === "custom" ? /* @__PURE__ */ React105.createElement(
+        import_react_native100.Image,
         {
           source: {
             uri: headerIcon?.icon_url
           },
-          style: styles81.image
+          style: styles82.image
         }
-      ) : /* @__PURE__ */ React103.createElement(
+      ) : /* @__PURE__ */ React105.createElement(
         SvgIcon,
         {
           name: this.getIconName(),
@@ -22695,10 +23382,10 @@ var WelcomeBody = class extends WelcomeBaseView {
   renderStarterBox = () => {
     const startBox = this.props?.activetheme?.v3?.welcome_screen?.starter_box || void 0;
     if (!startBox || !startBox?.show) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
-    return /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.box_main }, /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.box_sub }, this.getBoxIcon(), /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.title_main }, startBox?.title && /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.title }, startBox?.title), startBox?.sub_text && /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.sub_text }, startBox?.sub_text))), /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.quick_btn_main }, this.quickStartBtns()), startBox?.quick_start_buttons?.action && /* @__PURE__ */ React103.createElement(
-      import_react_native98.TouchableOpacity,
+    return /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.box_main }, /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.box_sub }, this.getBoxIcon(), /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.title_main }, startBox?.title && /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.title }, startBox?.title), startBox?.sub_text && /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.sub_text }, startBox?.sub_text))), /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.quick_btn_main }, this.quickStartBtns()), startBox?.quick_start_buttons?.action && /* @__PURE__ */ React105.createElement(
+      import_react_native100.TouchableOpacity,
       {
         onPress: () => {
           if (this.props?.onStartConversationClick) {
@@ -22706,24 +23393,24 @@ var WelcomeBody = class extends WelcomeBaseView {
           }
         },
         style: [
-          styles81.conversation_main,
+          styles82.conversation_main,
           {
             backgroundColor: this.props?.activetheme?.v3?.welcome_screen?.background?.color || "#4B4EDE"
           }
         ]
       },
-      /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.conversation_sub }, /* @__PURE__ */ React103.createElement(
-        import_react_native98.Text,
+      /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.conversation_sub }, /* @__PURE__ */ React105.createElement(
+        import_react_native100.Text,
         {
           style: [
-            styles81.conversation_text,
+            styles82.conversation_text,
             {
               color: this.props?.activetheme?.v3?.welcome_screen?.top_fonts?.color || Color_default.white
             }
           ]
         },
         startBox?.quick_start_buttons?.action?.value
-      ), /* @__PURE__ */ React103.createElement(
+      ), /* @__PURE__ */ React105.createElement(
         SvgIcon,
         {
           name: "Right",
@@ -22739,33 +23426,33 @@ var WelcomeBody = class extends WelcomeBaseView {
       case "web_url":
       case "url":
         if (item?.url) {
-          import_react_native98.Linking.openURL(item?.url);
+          import_react_native100.Linking.openURL(item?.url);
         } else if (item?.redirectUrl) {
           let dweb = item?.redirectUrl?.dweb;
           let mob = item?.redirectUrl?.mob;
           let url = mob || dweb || "";
           if (url?.length > 0) {
-            import_react_native98.Linking.canOpenURL(url).then((supported) => {
+            import_react_native100.Linking.canOpenURL(url).then((supported) => {
               if (!supported) {
                 try {
-                  import_react_native98.Linking.openURL(url);
+                  import_react_native100.Linking.openURL(url);
                 } catch (e) {
                 }
                 console.log("No handler for URL:", url);
               } else {
-                import_react_native98.Linking.openURL(url);
+                import_react_native100.Linking.openURL(url);
               }
             });
           }
         } else if (item?.value) {
-          import_react_native98.Linking.openURL(item?.value);
+          import_react_native100.Linking.openURL(item?.value);
         }
         break;
     }
   };
   getSingleLinkView = (link, index, isFromCarousel) => {
-    const Wrapper = link?.action?.type === "url" ? import_react_native98.TouchableOpacity : import_react_native98.View;
-    return /* @__PURE__ */ React103.createElement(
+    const Wrapper = link?.action?.type === "url" ? import_react_native100.TouchableOpacity : import_react_native100.View;
+    return /* @__PURE__ */ React105.createElement(
       Wrapper,
       {
         key: index + "_" + index,
@@ -22773,22 +23460,22 @@ var WelcomeBody = class extends WelcomeBaseView {
           this.itemClick(link?.action);
         },
         style: [
-          styles81.sin_link_main,
+          styles82.sin_link_main,
           isFromCarousel && { width: windowWidth29 / 4 * 2.9 }
         ]
       },
-      /* @__PURE__ */ React103.createElement(
-        import_react_native98.View,
+      /* @__PURE__ */ React105.createElement(
+        import_react_native100.View,
         {
           style: [
-            styles81.sin_link_sub,
+            styles82.sin_link_sub,
             isFromCarousel && {
               minHeight: normalize(65)
             }
           ]
         },
-        /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: { flex: 1, marginRight: normalize(5) } }, /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.sin_link_title }, link?.title), /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.sin_link_desc }, link?.description)),
-        /* @__PURE__ */ React103.createElement(
+        /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: { flex: 1, marginRight: normalize(5) } }, /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.sin_link_title }, link?.title), /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.sin_link_desc }, link?.description)),
+        /* @__PURE__ */ React105.createElement(
           SvgIcon,
           {
             name: "Right",
@@ -22808,18 +23495,18 @@ var WelcomeBody = class extends WelcomeBaseView {
   renderStaticLinks = () => {
     const static_links = this.props?.activetheme?.v3?.welcome_screen?.static_links || void 0;
     if (!static_links || !static_links?.show) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
-    return /* @__PURE__ */ React103.createElement(import_react_native98.View, null, /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: styles81.box_main }, /* @__PURE__ */ React103.createElement(import_react_native98.Text, { style: styles81.header_link_title }, "Links"), static_links?.layout === "carousel" ? (
+    return /* @__PURE__ */ React105.createElement(import_react_native100.View, null, /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: styles82.box_main }, /* @__PURE__ */ React105.createElement(import_react_native100.Text, { style: styles82.header_link_title }, "Links"), static_links?.layout === "carousel" ? (
       // <View>
-      /* @__PURE__ */ React103.createElement(
-        import_react_native98.ScrollView,
+      /* @__PURE__ */ React105.createElement(
+        import_react_native100.ScrollView,
         {
           showsHorizontalScrollIndicator: false,
           horizontal: true,
           style: {}
         },
-        /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: { flexDirection: "row" } }, this.renderLinkViews(static_links, true))
+        /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: { flexDirection: "row" } }, this.renderLinkViews(static_links, true))
       )
     ) : (
       // {/* <Carousel
@@ -22838,18 +23525,18 @@ var WelcomeBody = class extends WelcomeBaseView {
       //   }
       // /> */}
       // {/* </View> */}
-      /* @__PURE__ */ React103.createElement(import_react_native98.View, { style: {} }, this.renderLinkViews(static_links, false))
+      /* @__PURE__ */ React105.createElement(import_react_native100.View, { style: {} }, this.renderLinkViews(static_links, false))
     )));
   };
   renderPromotionContent = () => {
     const promotional_content = this.props?.activetheme?.v3?.welcome_screen?.promotional_content || void 0;
     if (!promotional_content || !promotional_content?.show || promotional_content?.promotions?.length === 0) {
-      return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
+      return /* @__PURE__ */ React105.createElement(React105.Fragment, null);
     }
     const promotionsList = promotional_content?.promotions;
-    return /* @__PURE__ */ React103.createElement(import_react_native98.View, null, promotionsList?.map((item, index) => {
-      return /* @__PURE__ */ React103.createElement(
-        import_react_native98.TouchableOpacity,
+    return /* @__PURE__ */ React105.createElement(import_react_native100.View, null, promotionsList?.map((item, index) => {
+      return /* @__PURE__ */ React105.createElement(
+        import_react_native100.TouchableOpacity,
         {
           key: index + "__",
           onPress: () => {
@@ -22857,21 +23544,21 @@ var WelcomeBody = class extends WelcomeBaseView {
           },
           style: { marginBottom: normalize(16) }
         },
-        /* @__PURE__ */ React103.createElement(
-          import_react_native98.Image,
+        /* @__PURE__ */ React105.createElement(
+          import_react_native100.Image,
           {
             source: {
               uri: item?.banner
             },
-            style: styles81.promotion_image
+            style: styles82.promotion_image
           }
         )
       );
     }));
   };
   render() {
-    return /* @__PURE__ */ React103.createElement(
-      import_react_native98.View,
+    return /* @__PURE__ */ React105.createElement(
+      import_react_native100.View,
       {
         style: { padding: normalize(16), backgroundColor: Color_default.transparent }
       },
@@ -22881,7 +23568,7 @@ var WelcomeBody = class extends WelcomeBaseView {
     );
   }
 };
-var styles81 = import_react_native98.StyleSheet.create({
+var styles82 = import_react_native100.StyleSheet.create({
   promotion_image: {
     height: normalize(200),
     width: windowWidth29 * 0.91
@@ -23013,10 +23700,10 @@ var styles81 = import_react_native98.StyleSheet.create({
 // bot-sdk/components/WelcomeScreen/footer.tsx
 init_cjs_shims();
 var import_react44 = __toESM(require("react"));
-var import_react_native99 = require("react-native");
+var import_react_native101 = require("react-native");
 var WelcomeFooter = class extends import_react44.default.Component {
   render() {
-    return /* @__PURE__ */ import_react44.default.createElement(import_react_native99.View, { style: { backgroundColor: Color_default.transparent, padding: normalizeText_default(4) } }, /* @__PURE__ */ import_react44.default.createElement(import_react_native99.View, { style: styles82.main }, /* @__PURE__ */ import_react44.default.createElement(import_react_native99.Text, { style: styles82.text }, "Powered by"), /* @__PURE__ */ import_react44.default.createElement(
+    return /* @__PURE__ */ import_react44.default.createElement(import_react_native101.View, { style: { backgroundColor: Color_default.transparent, padding: normalizeText_default(4) } }, /* @__PURE__ */ import_react44.default.createElement(import_react_native101.View, { style: styles83.main }, /* @__PURE__ */ import_react44.default.createElement(import_react_native101.Text, { style: styles83.text }, "Powered by"), /* @__PURE__ */ import_react44.default.createElement(
       SvgIcon,
       {
         name: "Koreai_logo",
@@ -23027,7 +23714,7 @@ var WelcomeFooter = class extends import_react44.default.Component {
     )));
   }
 };
-var styles82 = import_react_native99.StyleSheet.create({
+var styles83 = import_react_native101.StyleSheet.create({
   main: {
     flexDirection: "row",
     alignItems: "center",
@@ -23050,7 +23737,7 @@ var import_react49 = __toESM(require("react"));
 // bot-sdk/components/WelcomeScreen/Header/largeHeader.tsx
 init_cjs_shims();
 var import_react45 = __toESM(require("react"));
-var import_react_native100 = require("react-native");
+var import_react_native102 = require("react-native");
 var LargeHeader2 = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23059,50 +23746,50 @@ var LargeHeader2 = class extends WelcomeBaseView {
     }
     const isValidLogo = obj?.logo?.logo_url?.trim?.()?.length || false;
     return /* @__PURE__ */ import_react45.default.createElement(
-      import_react_native100.View,
+      import_react_native102.View,
       {
         style: [
-          styles83.main_container,
+          styles84.main_container,
           { backgroundColor: obj?.background?.color || "#4B4EDE" },
           { paddingTop: normalize(20) },
           !isValidLogo ? { paddingBottom: normalize(20) } : {}
         ]
       },
       /* @__PURE__ */ import_react45.default.createElement(
-        import_react_native100.Text,
+        import_react_native102.Text,
         {
-          style: [styles83.title, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles84.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ import_react45.default.createElement(
-        import_react_native100.Text,
+        import_react_native102.Text,
         {
           style: [
-            styles83.sub_title,
+            styles84.sub_title,
             { color: obj?.top_fonts?.color || Color_default.white }
           ]
         },
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ import_react45.default.createElement(
-        import_react_native100.Text,
+        import_react_native102.Text,
         {
-          style: [styles83.note, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles84.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.note?.name
       ),
-      obj?.logo?.logo_url && /* @__PURE__ */ import_react45.default.createElement(import_react_native100.View, { style: styles83.sub_container }, /* @__PURE__ */ import_react45.default.createElement(
-        import_react_native100.Image,
+      obj?.logo?.logo_url && /* @__PURE__ */ import_react45.default.createElement(import_react_native102.View, { style: styles84.sub_container }, /* @__PURE__ */ import_react45.default.createElement(
+        import_react_native102.Image,
         {
           source: { uri: obj?.logo?.logo_url },
-          style: styles83.image
+          style: styles84.image
         }
       ))
     );
   }
 };
-var styles83 = import_react_native100.StyleSheet.create({
+var styles84 = import_react_native102.StyleSheet.create({
   note: {
     fontSize: normalize(14),
     marginTop: normalize(5),
@@ -23149,7 +23836,7 @@ var styles83 = import_react_native100.StyleSheet.create({
 // bot-sdk/components/WelcomeScreen/Header/mediumHeader.tsx
 init_cjs_shims();
 var import_react46 = __toESM(require("react"));
-var import_react_native101 = require("react-native");
+var import_react_native103 = require("react-native");
 var MediumHeader2 = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23158,49 +23845,49 @@ var MediumHeader2 = class extends WelcomeBaseView {
     }
     const isValidLogo = obj?.logo?.logo_url?.trim?.()?.length || false;
     return /* @__PURE__ */ import_react46.default.createElement(
-      import_react_native101.View,
+      import_react_native103.View,
       {
         style: [
-          styles84.main_container,
+          styles85.main_container,
           { backgroundColor: obj?.background?.color || "#4B4EDE" },
           !isValidLogo && { paddingTop: normalize(20) }
         ]
       },
-      obj?.logo?.logo_url && /* @__PURE__ */ import_react46.default.createElement(import_react_native101.View, { style: styles84.sub_container }, /* @__PURE__ */ import_react46.default.createElement(
-        import_react_native101.Image,
+      obj?.logo?.logo_url && /* @__PURE__ */ import_react46.default.createElement(import_react_native103.View, { style: styles85.sub_container }, /* @__PURE__ */ import_react46.default.createElement(
+        import_react_native103.Image,
         {
           source: { uri: obj?.logo?.logo_url },
-          style: styles84.image
+          style: styles85.image
         }
       )),
       /* @__PURE__ */ import_react46.default.createElement(
-        import_react_native101.Text,
+        import_react_native103.Text,
         {
-          style: [styles84.title, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles85.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ import_react46.default.createElement(
-        import_react_native101.Text,
+        import_react_native103.Text,
         {
           style: [
-            styles84.sub_title,
+            styles85.sub_title,
             { color: obj?.top_fonts?.color || Color_default.white }
           ]
         },
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ import_react46.default.createElement(
-        import_react_native101.Text,
+        import_react_native103.Text,
         {
-          style: [styles84.note, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles85.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.note?.name
       )
     );
   }
 };
-var styles84 = import_react_native101.StyleSheet.create({
+var styles85 = import_react_native103.StyleSheet.create({
   note: {
     fontSize: normalize(14),
     marginTop: normalize(5),
@@ -23245,7 +23932,7 @@ var styles84 = import_react_native101.StyleSheet.create({
 // bot-sdk/components/WelcomeScreen/Header/compactHeader.tsx
 init_cjs_shims();
 var import_react47 = __toESM(require("react"));
-var import_react_native102 = require("react-native");
+var import_react_native104 = require("react-native");
 var CompactHeader2 = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23254,43 +23941,43 @@ var CompactHeader2 = class extends WelcomeBaseView {
     }
     const isValidLogo = obj?.logo?.logo_url?.trim?.()?.length || false;
     return /* @__PURE__ */ import_react47.default.createElement(
-      import_react_native102.View,
+      import_react_native104.View,
       {
         style: [
-          styles85.main_container,
+          styles86.main_container,
           { backgroundColor: obj?.background?.color || "#4B4EDE" },
           isValidLogo ? { paddingTop: normalize(20) } : {}
         ]
       },
       obj?.logo?.logo_url && false,
       /* @__PURE__ */ import_react47.default.createElement(
-        import_react_native102.Text,
+        import_react_native104.Text,
         {
-          style: [styles85.title, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles86.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ import_react47.default.createElement(
-        import_react_native102.Text,
+        import_react_native104.Text,
         {
           style: [
-            styles85.sub_title,
+            styles86.sub_title,
             { color: obj?.top_fonts?.color || Color_default.white }
           ]
         },
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ import_react47.default.createElement(
-        import_react_native102.Text,
+        import_react_native104.Text,
         {
-          style: [styles85.note, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles86.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.note?.name
       )
     );
   }
 };
-var styles85 = import_react_native102.StyleSheet.create({
+var styles86 = import_react_native104.StyleSheet.create({
   note: {
     fontSize: normalize(14),
     marginTop: normalize(5),
@@ -23333,7 +24020,7 @@ var styles85 = import_react_native102.StyleSheet.create({
 // bot-sdk/components/WelcomeScreen/Header/regularHeader.tsx
 init_cjs_shims();
 var import_react48 = __toESM(require("react"));
-var import_react_native103 = require("react-native");
+var import_react_native105 = require("react-native");
 var RegularHeader = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23342,49 +24029,49 @@ var RegularHeader = class extends WelcomeBaseView {
     }
     const isValidLogo = obj?.logo?.logo_url?.trim?.()?.length || false;
     return /* @__PURE__ */ import_react48.default.createElement(
-      import_react_native103.View,
+      import_react_native105.View,
       {
         style: [
-          styles86.main_container,
+          styles87.main_container,
           { backgroundColor: obj?.background?.color || "#4B4EDE" },
           isValidLogo ? { paddingTop: normalize(20) } : {}
         ]
       },
-      obj?.logo?.logo_url && /* @__PURE__ */ import_react48.default.createElement(import_react_native103.View, { style: styles86.sub_container }, /* @__PURE__ */ import_react48.default.createElement(
-        import_react_native103.Image,
+      obj?.logo?.logo_url && /* @__PURE__ */ import_react48.default.createElement(import_react_native105.View, { style: styles87.sub_container }, /* @__PURE__ */ import_react48.default.createElement(
+        import_react_native105.Image,
         {
           source: { uri: obj?.logo?.logo_url },
-          style: styles86.image
+          style: styles87.image
         }
       )),
       /* @__PURE__ */ import_react48.default.createElement(
-        import_react_native103.Text,
+        import_react_native105.Text,
         {
-          style: [styles86.title, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles87.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ import_react48.default.createElement(
-        import_react_native103.Text,
+        import_react_native105.Text,
         {
           style: [
-            styles86.sub_title,
+            styles87.sub_title,
             { color: obj?.top_fonts?.color || Color_default.white }
           ]
         },
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ import_react48.default.createElement(
-        import_react_native103.Text,
+        import_react_native105.Text,
         {
-          style: [styles86.note, { color: obj?.top_fonts?.color || Color_default.white }]
+          style: [styles87.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.note?.name
       )
     );
   }
 };
-var styles86 = import_react_native103.StyleSheet.create({
+var styles87 = import_react_native105.StyleSheet.create({
   note: {
     fontSize: normalize(14),
     marginTop: normalize(5),
@@ -23449,7 +24136,7 @@ var Welcome = class extends WelcomeBaseView {
     const isWhiteStatus = isWhiteStatusBar(bgColor);
     const isBlackStatus = isBlackStatusBar(bgColor);
     return /* @__PURE__ */ import_react50.default.createElement(
-      import_react_native104.SafeAreaView,
+      import_react_native106.SafeAreaView,
       {
         style: {
           flex: 1,
@@ -23458,7 +24145,7 @@ var Welcome = class extends WelcomeBaseView {
         }
       },
       /* @__PURE__ */ import_react50.default.createElement(
-        import_react_native104.View,
+        import_react_native106.View,
         {
           style: {
             backgroundColor: this.props.activetheme?.v3?.welcome_screen?.bottom_background?.color || Color_default.white,
@@ -23466,20 +24153,20 @@ var Welcome = class extends WelcomeBaseView {
           }
         },
         bgColor && !isWhiteStatus ? /* @__PURE__ */ import_react50.default.createElement(
-          import_react_native104.StatusBar,
+          import_react_native106.StatusBar,
           {
             barStyle: isBlackStatus ? "default" : "dark-content",
             backgroundColor: bgColor
           }
         ) : /* @__PURE__ */ import_react50.default.createElement(
-          import_react_native104.StatusBar,
+          import_react_native106.StatusBar,
           {
             barStyle: "dark-content",
             backgroundColor: Color_default.white
           }
         ),
         /* @__PURE__ */ import_react50.default.createElement(WelcomeHeader, { ...this.props }),
-        /* @__PURE__ */ import_react50.default.createElement(import_react_native104.ScrollView, { style: { flex: 1, backgroundColor: Color_default.transparent } }, /* @__PURE__ */ import_react50.default.createElement(WelcomeBody, { ...this.props })),
+        /* @__PURE__ */ import_react50.default.createElement(import_react_native106.ScrollView, { style: { flex: 1, backgroundColor: Color_default.transparent } }, /* @__PURE__ */ import_react50.default.createElement(WelcomeBody, { ...this.props })),
         /* @__PURE__ */ import_react50.default.createElement(WelcomeFooter, { ...this.props })
       )
     );
@@ -23489,7 +24176,7 @@ var Welcome = class extends WelcomeBaseView {
 // bot-sdk/components/CustomAlertComponent.tsx
 init_cjs_shims();
 var import_react51 = __toESM(require("react"));
-var import_react_native105 = require("react-native");
+var import_react_native107 = require("react-native");
 var CustomAlertComponent = class extends import_react51.Component {
   state = {
     isModalVisible: false,
@@ -23518,7 +24205,7 @@ var CustomAlertComponent = class extends import_react51.Component {
   };
   render() {
     const { isModalVisible, title, message } = this.state;
-    return /* @__PURE__ */ import_react51.default.createElement(import_react_native105.View, { style: styles87.container }, /* @__PURE__ */ import_react51.default.createElement(
+    return /* @__PURE__ */ import_react51.default.createElement(import_react_native107.View, { style: styles88.container }, /* @__PURE__ */ import_react51.default.createElement(
       CustomModal_default,
       {
         isVisible: isModalVisible,
@@ -23527,11 +24214,11 @@ var CustomAlertComponent = class extends import_react51.Component {
         useNativeDriver: true,
         hideModalContentWhileAnimating: true
       },
-      /* @__PURE__ */ import_react51.default.createElement(import_react_native105.View, { style: styles87.alertBox }, /* @__PURE__ */ import_react51.default.createElement(import_react_native105.Text, { style: styles87.alertTitle }, title), /* @__PURE__ */ import_react51.default.createElement(import_react_native105.Text, { style: styles87.alertMessage }, message), /* @__PURE__ */ import_react51.default.createElement(import_react_native105.View, { style: styles87.btn }, /* @__PURE__ */ import_react51.default.createElement(import_react_native105.Button, { title: " Ok ", onPress: this.hideAlert })))
+      /* @__PURE__ */ import_react51.default.createElement(import_react_native107.View, { style: styles88.alertBox }, /* @__PURE__ */ import_react51.default.createElement(import_react_native107.Text, { style: styles88.alertTitle }, title), /* @__PURE__ */ import_react51.default.createElement(import_react_native107.Text, { style: styles88.alertMessage }, message), /* @__PURE__ */ import_react51.default.createElement(import_react_native107.View, { style: styles88.btn }, /* @__PURE__ */ import_react51.default.createElement(import_react_native107.Button, { title: " Ok ", onPress: this.hideAlert })))
     ));
   }
 };
-var styles87 = import_react_native105.StyleSheet.create({
+var styles88 = import_react_native107.StyleSheet.create({
   btn: {
     alignItems: "flex-end",
     justifyContent: "flex-end"
@@ -23564,7 +24251,7 @@ var CustomAlertComponent_default = CustomAlertComponent;
 // bot-sdk/chat/components/TemplateBottomSheet.tsx
 init_cjs_shims();
 var import_react52 = require("react");
-var import_react_native106 = require("react-native");
+var import_react_native108 = require("react-native");
 var TemplateBottomSheet = class extends import_react52.PureComponent {
   static contextType = ThemeContext;
   constructor(props) {
@@ -23573,7 +24260,7 @@ var TemplateBottomSheet = class extends import_react52.PureComponent {
   render() {
     let payload = this.props.payload;
     return /* @__PURE__ */ React.createElement(
-      import_react_native106.Modal,
+      import_react_native108.Modal,
       {
         animationType: "slide",
         transparent: true,
@@ -23582,11 +24269,11 @@ var TemplateBottomSheet = class extends import_react52.PureComponent {
             this.props.onSliderClosed();
         }
       },
-      /* @__PURE__ */ React.createElement(import_react_native106.View, { style: {
+      /* @__PURE__ */ React.createElement(import_react_native108.View, { style: {
         flex: 1,
         justifyContent: "flex-end",
         backgroundColor: "rgba(0, 0, 0, 0.5)"
-      } }, /* @__PURE__ */ React.createElement(import_react_native106.View, { style: {
+      } }, /* @__PURE__ */ React.createElement(import_react_native108.View, { style: {
         backgroundColor: "#fff",
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -23598,7 +24285,7 @@ var TemplateBottomSheet = class extends import_react52.PureComponent {
         shadowRadius: 10,
         elevation: 10
       } }, this.props.templateType !== TEMPLATE_TYPES.FEEDBACK_TEMPLATE && /* @__PURE__ */ React.createElement(
-        import_react_native106.TouchableOpacity,
+        import_react_native108.TouchableOpacity,
         {
           style: {
             marginBottom: 10,
@@ -23669,16 +24356,16 @@ try {
 }
 import_dayjs10.default.extend(import_localizedFormat.default);
 var imageFilesTypes2 = ["jpg", "jpeg", "png"];
-var windowWidth30 = import_react_native107.Dimensions.get("window").width;
+var windowWidth30 = import_react_native109.Dimensions.get("window").width;
 var isAgentConnect = false;
 var isMinimizedWindow = false;
 var historyMessages = 1;
-var KoreChat = class _KoreChat extends React112.Component {
-  _messageContainerRef = React112.createRef();
+var KoreChat = class _KoreChat extends React114.Component {
+  _messageContainerRef = React114.createRef();
   ttsModule = null;
   isTTSAvailable = false;
   textInput = null;
-  alertRef = React112.createRef();
+  alertRef = React114.createRef();
   _isFirstLayout = true;
   _locale = "en";
   invertibleScrollViewProps = {};
@@ -23809,10 +24496,10 @@ var KoreChat = class _KoreChat extends React112.Component {
           if (this.props.navigation?.canGoBack?.()) {
             this.props.navigation?.goBack?.();
           } else {
-            import_react_native107.BackHandler.exitApp();
+            import_react_native109.BackHandler.exitApp();
           }
         } catch (error) {
-          import_react_native107.BackHandler.exitApp();
+          import_react_native109.BackHandler.exitApp();
         }
       }, 5e3);
       return;
@@ -23943,10 +24630,10 @@ var KoreChat = class _KoreChat extends React112.Component {
         this.allowNavigation = true;
         this.props.navigation?.goBack?.();
       } else {
-        import_react_native107.BackHandler.exitApp();
+        import_react_native109.BackHandler.exitApp();
       }
     } catch (error) {
-      import_react_native107.BackHandler.exitApp();
+      import_react_native109.BackHandler.exitApp();
     }
     return true;
   };
@@ -23976,10 +24663,10 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.allowNavigation = true;
           this.props.navigation.goBack();
         } else {
-          import_react_native107.BackHandler.exitApp();
+          import_react_native109.BackHandler.exitApp();
         }
       } catch (error) {
-        import_react_native107.BackHandler.exitApp();
+        import_react_native109.BackHandler.exitApp();
       }
     }, 100);
   };
@@ -23993,10 +24680,10 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.allowNavigation = true;
           this.props.navigation.goBack();
         } else {
-          import_react_native107.BackHandler.exitApp();
+          import_react_native109.BackHandler.exitApp();
         }
       } catch (error) {
-        import_react_native107.BackHandler.exitApp();
+        import_react_native109.BackHandler.exitApp();
       }
     }, 100);
   };
@@ -24014,7 +24701,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     });
     botClient.setSessionActive(true);
     if (isAndroid) {
-      this.backHandler = import_react_native107.BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
+      this.backHandler = import_react_native109.BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
     }
     const { text } = this.props;
     this.setisChatMounted(true);
@@ -24073,6 +24760,7 @@ var KoreChat = class _KoreChat extends React112.Component {
         return;
       }
       this.setIsBotResponseLoading(false);
+      hidePdfDownloadLoader();
       this.processMessage(data);
       if (isAgentConnect) {
         import_rn_kore_bot_socket_lib_v797.default.getInstance().sendEvent("message_read");
@@ -24116,6 +24804,16 @@ var KoreChat = class _KoreChat extends React112.Component {
   processMessage = (newMessages) => {
     let modifiedMessages = null;
     const itemId = getItemId();
+    const incomingTemplateType = getTemplateType(newMessages?.message);
+    if (incomingTemplateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      hidePdfDownloadLoader();
+      if (!newMessages?.isHistory && !newMessages?.isFromHistory) {
+        const pdfPayload = newMessages?.message?.[0]?.component?.payload?.payload || newMessages?.message?.[0]?.component?.payload;
+        const msgId = newMessages?.messageId || newMessages?._id || itemId;
+        downloadPdfDataResponse(pdfPayload, msgId, false);
+      }
+      return;
+    }
     const isStreamChunk = newMessages?.sM === true && newMessages?.type === "bot_response";
     const streamText = isStreamChunk && newMessages?.message?.[0]?.component?.payload?.text;
     const endChunk = isStreamChunk && newMessages?.endChunk === true;
@@ -24289,6 +24987,9 @@ var KoreChat = class _KoreChat extends React112.Component {
         message = component?.payload?.payload?.speech_hint;
       } else {
         let tType = getTemplateType(botResponse.message);
+        if (tType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+          return;
+        }
         const payload = component.payload?.payload || component?.payload;
         if (tType === TEMPLATE_TYPES.TEXT) {
           message = payload?.text;
@@ -24331,7 +25032,12 @@ var KoreChat = class _KoreChat extends React112.Component {
   };
   setMessages = (messagesOrUpdater) => {
     this.setState((prevState) => {
-      const nextMessages = typeof messagesOrUpdater === "function" ? messagesOrUpdater(prevState.messages || []) : messagesOrUpdater;
+      let nextMessages = typeof messagesOrUpdater === "function" ? messagesOrUpdater(prevState.messages || []) : messagesOrUpdater;
+      if (Array.isArray(nextMessages)) {
+        nextMessages = nextMessages.filter(
+          (m) => getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE
+        );
+      }
       historyMessages = nextMessages.length;
       return { messages: nextMessages };
     });
@@ -24354,6 +25060,9 @@ var KoreChat = class _KoreChat extends React112.Component {
     return this.state.typingDisabled;
   };
   setIsBotResponseLoading = (value) => {
+    if (!value) {
+      hidePdfDownloadLoader();
+    }
     this.setState({
       isBotResponseLoading: value
     });
@@ -24382,7 +25091,7 @@ var KoreChat = class _KoreChat extends React112.Component {
   };
   renderMessages = () => {
     const { messagesContainerStyle, ...messagesContainerProps } = this.props;
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: [messagesContainerStyle, { flex: 1 }] }, /* @__PURE__ */ React112.createElement(
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: [messagesContainerStyle, { flex: 1 }] }, /* @__PURE__ */ React114.createElement(
       MessageContainer,
       {
         ...messagesContainerProps,
@@ -24401,8 +25110,8 @@ var KoreChat = class _KoreChat extends React112.Component {
     let message = this.state.messageBottomSheet;
     let isShow = this.state.showTemplateBottomSheet;
     if (!message)
-      return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
-    return /* @__PURE__ */ React112.createElement(
+      return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
+    return /* @__PURE__ */ React114.createElement(
       TemplateBottomSheet,
       {
         isShow: isShow && message,
@@ -24473,7 +25182,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     if (this.props?.renderQuickRepliesView) {
       return this.props.renderQuickRepliesView({ ...props, itemClick });
     }
-    return /* @__PURE__ */ React112.createElement(QuickReplies, { ...props, itemClick });
+    return /* @__PURE__ */ React114.createElement(QuickReplies, { ...props, itemClick });
   };
   renderMediaView = (props) => {
     if (this.props.renderMediaView) {
@@ -24498,12 +25207,12 @@ var KoreChat = class _KoreChat extends React112.Component {
   renderInternalMediaView = () => {
     const media = this.state.mediaPayload || [];
     if (media?.length === 0) {
-      return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
+      return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
     }
-    return /* @__PURE__ */ React112.createElement(import_react_native107.ScrollView, { horizontal: true }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.media_main }, media?.map((m, index) => {
+    return /* @__PURE__ */ React114.createElement(import_react_native109.ScrollView, { horizontal: true }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.media_main }, media?.map((m, index) => {
       let fileType = this.getFileType(m?.fileName);
-      return /* @__PURE__ */ React112.createElement(import_react_native107.View, { key: index + "", style: styles88.media_sub1 }, /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+      return /* @__PURE__ */ React114.createElement(import_react_native109.View, { key: index + "", style: styles89.media_sub1 }, /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
           onPress: () => {
             if (!m?.fileId) {
@@ -24516,9 +25225,9 @@ var KoreChat = class _KoreChat extends React112.Component {
               mediaPayload: filterList
             });
           },
-          style: styles88.close_icon_main
+          style: styles89.close_icon_main
         },
-        /* @__PURE__ */ React112.createElement(
+        /* @__PURE__ */ React114.createElement(
           SvgIcon,
           {
             name: "HeaderClose",
@@ -24527,13 +25236,13 @@ var KoreChat = class _KoreChat extends React112.Component {
             color: "#697586"
           }
         )
-      ), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: { marginTop: 6 } }, imageFilesTypes2.includes(fileType) ? renderImage({
+      ), /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: { marginTop: 6 } }, imageFilesTypes2.includes(fileType) ? renderImage({
         image: m?.uri,
         iconShape: null,
         iconSize: null,
         width: 50,
         height: 50
-      }) : /* @__PURE__ */ React112.createElement(FileIcon, { fileType, size: 45 }), !m?.status && /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.progress_main }, /* @__PURE__ */ React112.createElement(
+      }) : /* @__PURE__ */ React114.createElement(FileIcon, { fileType, size: 45 }), !m?.status && /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.progress_main }, /* @__PURE__ */ React114.createElement(
         Progress.Circle,
         {
           progress: m?.progress / 100 || 0,
@@ -24557,8 +25266,9 @@ var KoreChat = class _KoreChat extends React112.Component {
     },
     data = void 0,
     shouldResetInputToolbar = true,
-    data_type = ""
-  }) => {
+    data_type = "",
+    isDisplayUserMessage = true
+  } = {}) => {
     console.log("onSend called with message:", message);
     this.clearQuickReplies();
     if (shouldResetInputToolbar === true) {
@@ -24574,10 +25284,12 @@ var KoreChat = class _KoreChat extends React112.Component {
         data,
         data_type
       );
-      setTimeout(() => {
-        this.scrollToBottom(true);
-      }, 100);
-      this.processMessage(messageData);
+      if (isDisplayUserMessage) {
+        setTimeout(() => {
+          this.scrollToBottom(true);
+        }, 100);
+        this.processMessage(messageData);
+      }
     }
     if (shouldResetInputToolbar === true) {
       setTimeout(() => {
@@ -24633,14 +25345,14 @@ var KoreChat = class _KoreChat extends React112.Component {
           if (!url?.startsWith("http://") && !url?.startsWith("https://")) {
             url = "http://" + url;
           }
-          import_react_native107.Linking.openURL(url);
+          import_react_native109.Linking.openURL(url);
         }
         if (item?.link) {
           let url = item?.link;
           if (!url?.startsWith("http://") && !url?.startsWith("https://")) {
             url = "http://" + url;
           }
-          import_react_native107.Linking.openURL(url);
+          import_react_native109.Linking.openURL(url);
         } else if (item?.redirectUrl) {
           let dweb = item?.redirectUrl?.dweb;
           let mob = item?.redirectUrl?.mob;
@@ -24649,20 +25361,20 @@ var KoreChat = class _KoreChat extends React112.Component {
             if (!url?.startsWith("http://") && !url?.startsWith("https://")) {
               url = "http://" + url;
             }
-            import_react_native107.Linking.canOpenURL(url).then((supported) => {
+            import_react_native109.Linking.canOpenURL(url).then((supported) => {
               if (!supported) {
                 try {
-                  import_react_native107.Linking.openURL(url);
+                  import_react_native109.Linking.openURL(url);
                 } catch (e) {
                 }
                 console.log("No handler for URL:", url);
               } else {
-                import_react_native107.Linking.openURL(url);
+                import_react_native109.Linking.openURL(url);
               }
             });
           }
         } else if (item?.value) {
-          import_react_native107.Linking.openURL(item?.value);
+          import_react_native109.Linking.openURL(item?.value);
         }
         break;
       case "action":
@@ -24679,7 +25391,7 @@ var KoreChat = class _KoreChat extends React112.Component {
       default:
         if (typeof item === "string") {
           if (template_type == TEMPLATE_TYPES.IMAGE_MESSAGE) {
-            import_react_native107.Linking.openURL(item);
+            import_react_native109.Linking.openURL(item);
           } else {
             this.onSend({ message: { text: item } });
           }
@@ -24718,6 +25430,18 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.computePostBack(item, template_type);
         }
         break;
+      case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
+        if (!isFromViewMore) {
+          const title = item?.title?.trim() || "";
+          const msgToSend = `DD_Download, ${title}`;
+          this.onSend({
+            message: { text: msgToSend },
+            data: item,
+            data_type: "postback",
+            isDisplayUserMessage: false
+          });
+        }
+        break;
       case TEMPLATE_TYPES.ADVANCED_LIST_TEMPLATE:
         if (!isFromViewMore) {
           this.computePostBack(item, template_type);
@@ -24729,7 +25453,7 @@ var KoreChat = class _KoreChat extends React112.Component {
         if (!isFromViewMore) {
           this.computePostBack(item, template_type);
         } else if (isFromViewMore) {
-          import_react_native107.Keyboard.dismiss();
+          import_react_native109.Keyboard.dismiss();
           const dataPayload = [
             {
               title: "Tab1",
@@ -24918,12 +25642,12 @@ var KoreChat = class _KoreChat extends React112.Component {
           );
           return;
         }
-        import_react_native107.Keyboard.dismiss();
+        import_react_native109.Keyboard.dismiss();
         this.setState({ showAttachmentModal: true });
       },
       onMenuItemClick: (menuItems) => {
         console.log("menuItems ------->:", menuItems);
-        import_react_native107.Keyboard.dismiss();
+        import_react_native109.Keyboard.dismiss();
         this.setState({
           menuItems
         });
@@ -24932,7 +25656,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     if (this.props.renderInputToolbar) {
       return this.props.renderInputToolbar(inputToolbarProps);
     }
-    return /* @__PURE__ */ React112.createElement(InputToolbar, { ...inputToolbarProps });
+    return /* @__PURE__ */ React114.createElement(InputToolbar, { ...inputToolbarProps });
   };
   renderChatFooter = () => {
     if (this.props.renderChatFooter) {
@@ -24954,13 +25678,13 @@ var KoreChat = class _KoreChat extends React112.Component {
         isTypingIndicator
       });
     }
-    return /* @__PURE__ */ React112.createElement(TypingIndicator, { isTypingIndicator });
+    return /* @__PURE__ */ React114.createElement(TypingIndicator, { isTypingIndicator });
   };
   renderSTTview(value) {
     if (!value) {
-      return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
+      return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
     }
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.stt_main }, /* @__PURE__ */ React112.createElement(import_react_native107.View, null, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { numberOfLines: 0, style: styles88.stt_text }, value)));
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.stt_main }, /* @__PURE__ */ React114.createElement(import_react_native109.View, null, /* @__PURE__ */ React114.createElement(import_react_native109.Text, { numberOfLines: 0, style: styles89.stt_text }, value)));
   }
   refreshView = () => {
     this.resetInputToolbar();
@@ -24968,11 +25692,11 @@ var KoreChat = class _KoreChat extends React112.Component {
   getViewMoreView() {
     let viewMoreObj = this.state.viewMoreObj;
     if (!viewMoreObj || !viewMoreObj.payload || !viewMoreObj.template_type) {
-      return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
+      return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
     }
     switch (viewMoreObj.template_type) {
       case TEMPLATE_TYPES.TABLE_TEMPLATE:
-        return /* @__PURE__ */ React112.createElement(
+        return /* @__PURE__ */ React114.createElement(
           TableTemplate,
           {
             payload: viewMoreObj.payload,
@@ -24981,12 +25705,12 @@ var KoreChat = class _KoreChat extends React112.Component {
           }
         );
     }
-    return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
+    return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
   }
   openFullScreenDialog = () => {
     const { modalVisible } = this.state;
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    return /* @__PURE__ */ React114.createElement(
+      import_react_native109.Modal,
       {
         animationType: "slide",
         transparent: true,
@@ -24995,19 +25719,19 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.setState({ modalVisible: false });
         }
       },
-      /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.modalContainer }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.modalContent }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.m_con2 }, /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+      /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.modalContainer }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.modalContent }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.m_con2 }, /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
-          style: styles88.close_btn_con,
+          style: styles89.close_btn_con,
           onPress: () => this.setState({ modalVisible: false, viewMoreObj: void 0 })
         },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: styles88.close_btn_txt }, "X")
-      )), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.m_main_con }, this.getViewMoreView())))
+        /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: styles89.close_btn_txt }, "X")
+      )), /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.m_main_con }, this.getViewMoreView())))
     );
   };
   renderAttachedBottomSheet() {
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    return /* @__PURE__ */ React114.createElement(
+      import_react_native109.Modal,
       {
         visible: this.state.showAttachmentModal || false,
         animationType: "slide",
@@ -25016,11 +25740,11 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.setState({ showAttachmentModal: false });
         }
       },
-      /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         flex: 1,
         justifyContent: "flex-end",
         backgroundColor: "rgba(0, 0, 0, 0.5)"
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      } }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         backgroundColor: "#fff",
         padding: 20,
         borderTopLeftRadius: 20,
@@ -25030,15 +25754,15 @@ var KoreChat = class _KoreChat extends React112.Component {
         shadowOpacity: 0.25,
         shadowRadius: 10,
         elevation: 10
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      } }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         width: 40,
         height: 4,
         backgroundColor: "#ccc",
         borderRadius: 2,
         alignSelf: "center",
         marginBottom: 20
-      } }), /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+      } }), /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
           style: {
             position: "absolute",
@@ -25055,7 +25779,7 @@ var KoreChat = class _KoreChat extends React112.Component {
             this.setState({ showAttachmentModal: false });
           }
         },
-        /* @__PURE__ */ React112.createElement(
+        /* @__PURE__ */ React114.createElement(
           SvgIcon,
           {
             name: "HeaderClose",
@@ -25069,8 +25793,8 @@ var KoreChat = class _KoreChat extends React112.Component {
   }
   renderMenuBottomSheet() {
     const shouldShowModal = Array.isArray(this.state.menuItems) && this.state.menuItems.length > 0;
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    return /* @__PURE__ */ React114.createElement(
+      import_react_native109.Modal,
       {
         visible: shouldShowModal,
         animationType: "slide",
@@ -25079,15 +25803,15 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.setState({ menuItems: void 0 });
         }
       },
-      /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableWithoutFeedback,
+      /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableWithoutFeedback,
         {
           onPress: () => {
             this.setState({ menuItems: void 0 });
           }
         },
-        /* @__PURE__ */ React112.createElement(
-          import_react_native107.View,
+        /* @__PURE__ */ React114.createElement(
+          import_react_native109.View,
           {
             style: {
               flex: 1,
@@ -25095,14 +25819,14 @@ var KoreChat = class _KoreChat extends React112.Component {
               backgroundColor: "rgba(0, 0, 0, 0.5)"
             }
           },
-          /* @__PURE__ */ React112.createElement(
-            import_react_native107.TouchableWithoutFeedback,
+          /* @__PURE__ */ React114.createElement(
+            import_react_native109.TouchableWithoutFeedback,
             {
               onPress: () => {
               }
             },
-            /* @__PURE__ */ React112.createElement(
-              import_react_native107.View,
+            /* @__PURE__ */ React114.createElement(
+              import_react_native109.View,
               {
                 style: {
                   minHeight: 300,
@@ -25118,8 +25842,8 @@ var KoreChat = class _KoreChat extends React112.Component {
                   maxHeight: "75%"
                 }
               },
-              /* @__PURE__ */ React112.createElement(
-                import_react_native107.View,
+              /* @__PURE__ */ React114.createElement(
+                import_react_native109.View,
                 {
                   style: {
                     width: 40,
@@ -25131,8 +25855,8 @@ var KoreChat = class _KoreChat extends React112.Component {
                   }
                 }
               ),
-              /* @__PURE__ */ React112.createElement(
-                import_react_native107.TouchableOpacity,
+              /* @__PURE__ */ React114.createElement(
+                import_react_native109.TouchableOpacity,
                 {
                   style: {
                     position: "absolute",
@@ -25149,7 +25873,7 @@ var KoreChat = class _KoreChat extends React112.Component {
                     this.setState({ menuItems: void 0 });
                   }
                 },
-                /* @__PURE__ */ React112.createElement(
+                /* @__PURE__ */ React114.createElement(
                   SvgIcon,
                   {
                     name: "HeaderClose",
@@ -25159,8 +25883,8 @@ var KoreChat = class _KoreChat extends React112.Component {
                   }
                 )
               ),
-              /* @__PURE__ */ React112.createElement(
-                import_react_native107.Text,
+              /* @__PURE__ */ React114.createElement(
+                import_react_native109.Text,
                 {
                   style: {
                     fontSize: 18,
@@ -25185,9 +25909,9 @@ var KoreChat = class _KoreChat extends React112.Component {
       case TEMPLATE_TYPES.LIST_VIEW_TEMPLATE:
         const data = this.state.currentTemplateData;
         const selectedItem = data?.filter((d) => d?.isChecked);
-        return /* @__PURE__ */ React112.createElement(import_react_native107.View, null, /* @__PURE__ */ React112.createElement(import_react_native107.View, null, this.state?.currentTemplateHeading && /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.sub_container_title1 }, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: [styles88.displayTextHeaderStyle, { fontWeight: 600 }] }, this.state?.currentTemplateHeading)), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: { flexDirection: "row" } }, data?.map((tab, index) => {
-          return /* @__PURE__ */ React112.createElement(
-            import_react_native107.TouchableOpacity,
+        return /* @__PURE__ */ React114.createElement(import_react_native109.View, null, /* @__PURE__ */ React114.createElement(import_react_native109.View, null, this.state?.currentTemplateHeading && /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.sub_container_title1 }, /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: [styles89.displayTextHeaderStyle, { fontWeight: 600 }] }, this.state?.currentTemplateHeading)), /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: { flexDirection: "row" } }, data?.map((tab, index) => {
+          return /* @__PURE__ */ React114.createElement(
+            import_react_native109.TouchableOpacity,
             {
               onPress: () => {
                 if (tab?.isChecked) {
@@ -25211,13 +25935,13 @@ var KoreChat = class _KoreChat extends React112.Component {
                   currentTemplateData: dataList
                 });
               },
-              style: [styles88.tab_title_main]
+              style: [styles89.tab_title_main]
             },
-            /* @__PURE__ */ React112.createElement(
-              import_react_native107.Text,
+            /* @__PURE__ */ React114.createElement(
+              import_react_native109.Text,
               {
                 style: [
-                  styles88.tab_title,
+                  styles89.tab_title,
                   tab?.isChecked ? {
                     backgroundColor: bubbleTheme.BUBBLE_RIGHT_BG_COLOR,
                     color: Color_default.white
@@ -25230,7 +25954,7 @@ var KoreChat = class _KoreChat extends React112.Component {
               tab?.title
             )
           );
-        })), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.line })), /* @__PURE__ */ React112.createElement(import_react_native107.ScrollView, { horizontal: false, style: styles88.scrollView }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.sroll_sub }, /* @__PURE__ */ React112.createElement(
+        })), /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.line })), /* @__PURE__ */ React114.createElement(import_react_native109.ScrollView, { horizontal: false, style: styles89.scrollView }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.sroll_sub }, /* @__PURE__ */ React114.createElement(
           ListViewTemplate,
           {
             payload: {
@@ -25253,12 +25977,12 @@ var KoreChat = class _KoreChat extends React112.Component {
         break;
       case TEMPLATE_TYPES.ARTICLE_TEMPLATE:
         const payload = this.state.currentTemplateData;
-        return /* @__PURE__ */ React112.createElement(import_react_native107.ScrollView, { horizontal: false, style: [styles88.scrollView, { marginBottom: normalize(10) }] }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.sroll_sub }, /* @__PURE__ */ React112.createElement(ArticleTemplate, { payload, theme: this.state.themeData, onListItemClick: this.props.onListItemClick, onBottomSheetClose: {} }), ";"));
+        return /* @__PURE__ */ React114.createElement(import_react_native109.ScrollView, { horizontal: false, style: [styles89.scrollView, { marginBottom: normalize(10) }] }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.sroll_sub }, /* @__PURE__ */ React114.createElement(ArticleTemplate, { payload, theme: this.state.themeData, onListItemClick: this.props.onListItemClick, onBottomSheetClose: {} }), ";"));
     }
   }
   renderSeeMoreBottomSheet() {
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    return /* @__PURE__ */ React114.createElement(
+      import_react_native109.Modal,
       {
         visible: this.state.showSeeMoreModal || false,
         animationType: "slide",
@@ -25267,11 +25991,11 @@ var KoreChat = class _KoreChat extends React112.Component {
           this.setState({ showSeeMoreModal: false });
         }
       },
-      /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         flex: 1,
         justifyContent: "flex-end",
         backgroundColor: "rgba(0, 0, 0, 0.5)"
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      } }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         backgroundColor: "#fff",
         padding: 20,
         borderTopLeftRadius: 20,
@@ -25282,15 +26006,15 @@ var KoreChat = class _KoreChat extends React112.Component {
         shadowRadius: 10,
         elevation: 10,
         maxHeight: "75%"
-      } }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: {
+      } }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: {
         width: 40,
         height: 4,
         backgroundColor: "#ccc",
         borderRadius: 2,
         alignSelf: "center",
         marginBottom: 20
-      } }), /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+      } }), /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
           style: {
             position: "absolute",
@@ -25307,7 +26031,7 @@ var KoreChat = class _KoreChat extends React112.Component {
             this.setState({ showSeeMoreModal: false });
           }
         },
-        /* @__PURE__ */ React112.createElement(
+        /* @__PURE__ */ React114.createElement(
           SvgIcon,
           {
             name: "HeaderClose",
@@ -25321,9 +26045,9 @@ var KoreChat = class _KoreChat extends React112.Component {
   }
   renderMenuPopupComponent() {
     let buttons = this.state.menuItems || [];
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: [styles88.pop_sub] }, buttons.map((btn, index) => {
-      return /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: [styles89.pop_sub] }, buttons.map((btn, index) => {
+      return /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
           key: index + "",
           onPress: () => {
@@ -25334,7 +26058,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           },
           style: { padding: 15, backgroundColor: Color_default.white, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" }
         },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn.title)
+        /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn.title)
       );
     }));
   }
@@ -25348,9 +26072,9 @@ var KoreChat = class _KoreChat extends React112.Component {
     });
   };
   renderAssetPopupComponent() {
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: [styles88.pop_sub] }, attach_menu_buttons.map((btn, index) => {
-      return /* @__PURE__ */ React112.createElement(
-        import_react_native107.TouchableOpacity,
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: [styles89.pop_sub] }, attach_menu_buttons.map((btn, index) => {
+      return /* @__PURE__ */ React114.createElement(
+        import_react_native109.TouchableOpacity,
         {
           key: index + "",
           onPress: async () => {
@@ -25425,7 +26149,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           },
           style: { padding: 15, backgroundColor: Color_default.white, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" }
         },
-        /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn?.title)
+        /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn?.title)
       );
     }));
   }
@@ -25555,7 +26279,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     }
   };
   showCustomToast = (msg) => {
-    import_react_native_toast_message3.default.show({
+    import_react_native_toast_message4.default.show({
       type: "error",
       text1: msg,
       position: "bottom",
@@ -25570,17 +26294,17 @@ var KoreChat = class _KoreChat extends React112.Component {
             this.allowNavigation = true;
             this.props.navigation?.goBack?.();
           } else {
-            import_react_native107.BackHandler.exitApp();
+            import_react_native109.BackHandler.exitApp();
           }
         } catch (error) {
-          import_react_native107.BackHandler.exitApp();
+          import_react_native109.BackHandler.exitApp();
         }
         break;
       case HeaderIconsId.MINIMISE:
         this.handleDialogMinimize();
         break;
       case HeaderIconsId.CLOSE:
-        import_react_native107.Keyboard.dismiss();
+        import_react_native109.Keyboard.dismiss();
         this.setState((prevState) => ({
           showBackButtonDialog: !prevState.showBackButtonDialog
         }));
@@ -25615,7 +26339,7 @@ var KoreChat = class _KoreChat extends React112.Component {
         this.onHeaderActionsClick(item);
       }
     };
-    return /* @__PURE__ */ React112.createElement(
+    return /* @__PURE__ */ React114.createElement(
       ChatHeader,
       {
         onHeaderActionsClick: onClick,
@@ -25626,20 +26350,20 @@ var KoreChat = class _KoreChat extends React112.Component {
   }
   renderLoader = () => {
     if (this.state.showLoader) {
-      return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.load }, /* @__PURE__ */ React112.createElement(
-        import_react_native107.ActivityIndicator,
+      return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.load }, /* @__PURE__ */ React114.createElement(
+        import_react_native109.ActivityIndicator,
         {
           animating: true,
-          style: styles88.indicator,
+          style: styles89.indicator,
           size: 25,
           color: "#517BD2"
         }
-      ), /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.indicator_sub }, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: styles88.loader_text }, "Please wait")));
+      ), /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.indicator_sub }, /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: styles89.loader_text }, "Please wait")));
     }
-    return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
+    return /* @__PURE__ */ React114.createElement(React114.Fragment, null);
   };
   renderWelcomeComponent = () => {
-    return /* @__PURE__ */ React112.createElement(
+    return /* @__PURE__ */ React114.createElement(
       Welcome,
       {
         activetheme: this.state.activetheme,
@@ -25668,8 +26392,8 @@ var KoreChat = class _KoreChat extends React112.Component {
     );
   };
   renderWelcomeScreenModel = () => {
-    return /* @__PURE__ */ React112.createElement(
-      import_react_native107.Modal,
+    return /* @__PURE__ */ React114.createElement(
+      import_react_native109.Modal,
       {
         visible: this.state.wlcomeModalVisible,
         animationType: "slide",
@@ -25693,32 +26417,32 @@ var KoreChat = class _KoreChat extends React112.Component {
     const cancelText = this.props.leaveChatCancelText || this.getLocalizedString("no_stay_in_chat") || "No, stay in chat";
     const primaryColor = this.props.leaveChatPrimaryColor || "#1B365D";
     const textAlign = this.props.leaveChatTextAlign || "left";
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.leave_modal_container }, /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.leave_modal_card }, /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: [styles88.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: [styles88.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React112.createElement(
-      import_react_native107.TouchableOpacity,
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.leave_modal_container }, /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.leave_modal_card }, /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: [styles89.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: [styles89.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React114.createElement(
+      import_react_native109.TouchableOpacity,
       {
         style: [
-          styles88.leave_modal_btn_primary,
+          styles89.leave_modal_btn_primary,
           { backgroundColor: primaryColor }
         ],
         activeOpacity: 0.8,
         onPress: this.handleDialogClose
       },
-      /* @__PURE__ */ React112.createElement(import_react_native107.Text, { style: styles88.leave_modal_btn_primary_text }, confirmText)
-    ), /* @__PURE__ */ React112.createElement(
-      import_react_native107.TouchableOpacity,
+      /* @__PURE__ */ React114.createElement(import_react_native109.Text, { style: styles89.leave_modal_btn_primary_text }, confirmText)
+    ), /* @__PURE__ */ React114.createElement(
+      import_react_native109.TouchableOpacity,
       {
         style: [
-          styles88.leave_modal_btn_secondary,
+          styles89.leave_modal_btn_secondary,
           { borderColor: primaryColor }
         ],
         activeOpacity: 0.8,
         onPress: this.handleDialogCancel
       },
-      /* @__PURE__ */ React112.createElement(
-        import_react_native107.Text,
+      /* @__PURE__ */ React114.createElement(
+        import_react_native109.Text,
         {
           style: [
-            styles88.leave_modal_btn_secondary_text,
+            styles89.leave_modal_btn_secondary_text,
             { color: primaryColor }
           ]
         },
@@ -25729,37 +26453,41 @@ var KoreChat = class _KoreChat extends React112.Component {
   render() {
     if (this.state.isInitialized === true && this.state.isThemeLoaded) {
       const { wrapInSafeArea } = this.props;
-      const Wrapper = wrapInSafeArea ? import_react_native107.SafeAreaView : import_react_native107.View;
+      const Wrapper = wrapInSafeArea ? import_react_native109.SafeAreaView : import_react_native109.View;
       const bgColor = this.state.themeData?.v3?.header?.bg_color || "#EAECF0";
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
-      return /* @__PURE__ */ React112.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React112.createElement(Wrapper, { style: styles88.safeArea }, /* @__PURE__ */ React112.createElement(
-        import_react_native107.View,
+      return /* @__PURE__ */ React114.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React114.createElement(Wrapper, { style: styles89.safeArea }, /* @__PURE__ */ React114.createElement(
+        import_react_native109.View,
         {
-          style: [styles88.container, { flexDirection: "column" }],
+          style: [styles89.container, { flexDirection: "column" }],
           onLayout: this.onMainViewLayout
         },
-        bgColor && !isWhiteStatus ? /* @__PURE__ */ React112.createElement(
-          import_react_native107.StatusBar,
+        bgColor && !isWhiteStatus ? /* @__PURE__ */ React114.createElement(
+          import_react_native109.StatusBar,
           {
             barStyle: isBlackStatus ? "default" : "dark-content",
             backgroundColor: bgColor
           }
-        ) : /* @__PURE__ */ React112.createElement(
-          import_react_native107.StatusBar,
+        ) : /* @__PURE__ */ React114.createElement(
+          import_react_native109.StatusBar,
           {
             barStyle: "dark-content",
             backgroundColor: Color_default.white
           }
         ),
         this.renderHeader(),
-        /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React112.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
+        /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React114.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
       )));
     }
-    return /* @__PURE__ */ React112.createElement(import_react_native107.View, { style: styles88.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React112.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
+    return /* @__PURE__ */ React114.createElement(import_react_native109.View, { style: styles89.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React114.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
   }
   onHistoryLoaded = (historyMessages2) => {
-    let newMessages = this.getMessages().concat(historyMessages2);
+    const cleanHistory = (historyMessages2 || []).filter((msg) => {
+      const tType = getTemplateType(msg?.message);
+      return tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE;
+    });
+    let newMessages = this.getMessages().concat(cleanHistory);
     newMessages = newMessages.filter(
       (item, index, self) => index === self.findIndex((m) => m.timeMillis === item.timeMillis)
     );
@@ -25777,7 +26505,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     });
   };
 };
-var styles88 = import_react_native107.StyleSheet.create({
+var styles89 = import_react_native109.StyleSheet.create({
   displayTextHeaderStyle: {
     fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
     fontStyle: "normal",
@@ -25808,7 +26536,7 @@ var styles88 = import_react_native107.StyleSheet.create({
   },
   line: {
     width: windowWidth30 * 0.9,
-    height: import_react_native107.StyleSheet.hairlineWidth,
+    height: import_react_native109.StyleSheet.hairlineWidth,
     backgroundColor: Color_default.black,
     marginBottom: 10,
     marginTop: 10
@@ -25845,7 +26573,7 @@ var styles88 = import_react_native107.StyleSheet.create({
     borderBottomRightRadius: 10,
     borderWidth: 1,
     borderColor: "#4B4EDE",
-    margin: import_react_native107.StyleSheet.hairlineWidth,
+    margin: import_react_native109.StyleSheet.hairlineWidth,
     padding: 10,
     flexShrink: 1,
     flexGrow: 1,
@@ -25881,7 +26609,7 @@ var styles88 = import_react_native107.StyleSheet.create({
   menu_item_main: { padding: 10, backgroundColor: Color_default.white },
   menu_item_text: { fontSize: normalize(16), color: Color_default.black },
   line1: {
-    height: import_react_native107.StyleSheet.hairlineWidth,
+    height: import_react_native109.StyleSheet.hairlineWidth,
     backgroundColor: Color_default.gray,
     width: "100%",
     marginBottom: 7
@@ -26162,7 +26890,7 @@ KoreChat.defaultProps = {
   onPressActionButton: null,
   bottomOffset: 0,
   minInputToolbarHeight: 44,
-  keyboardShouldPersistTaps: import_react_native107.Platform.select({
+  keyboardShouldPersistTaps: import_react_native109.Platform.select({
     ios: "never",
     android: "always",
     default: "never"
@@ -26231,6 +26959,8 @@ var src_default = KoreChat;
   MIN_COMPOSER_HEIGHT,
   MIN_HEADER_HEIGHT,
   MIN_TOOL_BAR_HEIGHT,
+  PdfDataResponseTemplate,
+  PdfDownloadTemplate,
   QuickReplies,
   RENDER_KORA_BUBBLE,
   RTM_EVENT,
@@ -26241,6 +26971,10 @@ var src_default = KoreChat;
   UUID,
   WelcomeHeaderConstants,
   attach_menu_buttons,
+  downloadPdfDataResponse,
+  extractPdfCards,
+  hidePdfDownloadLoader,
+  showPdfDownloadLoader,
   useLazyCommunications,
   useLazySound
 });

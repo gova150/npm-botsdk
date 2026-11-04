@@ -20,6 +20,16 @@ export {default as KoreBotClient, RTM_EVENT, APP_STATE} from 'rn-kore-bot-socket
 export type {BotConfigModel} from 'rn-kore-bot-socket-lib-v79';
 
 export {default as QuickReplies} from '../bot-sdk/templates/QuickReplies';
+export {default as PdfDownloadTemplate} from '../bot-sdk/templates/PdfDownloadTemplate';
+export {
+  default as PdfDataResponseTemplate,
+  downloadPdfDataResponse,
+  extractPdfCards,
+} from '../bot-sdk/templates/PdfDataResponseTemplate';
+export {
+  showPdfDownloadLoader,
+  hidePdfDownloadLoader,
+} from '../bot-sdk/utils/PdfDownloadLoader';
 
 export {default as CustomTemplate} from '../bot-sdk/templates/CustomTemplate';
 
