@@ -412,7 +412,7 @@ init_esm_shims();
 
 // bot-sdk/templates/BotTemplate.tsx
 init_esm_shims();
-import * as React80 from "react";
+import * as React81 from "react";
 import { Text as Text50 } from "react-native";
 
 // bot-sdk/templates/AdvancedListTemplate.tsx
@@ -2683,13 +2683,13 @@ var KeyboardIcon = (props) => {
   ));
 };
 var SendIcon = (props) => {
-  let width8 = props.width || normalize(WIDTH5);
-  let height = props.height || normalize(HEIGHT5);
+  let width8 = props.width || 14;
+  let height = props.height || 14;
   let strokeColor = props.color || Color_default.white;
-  return /* @__PURE__ */ React13.createElement(Svg5, { width: width8, height, viewBox: "0 0 15 14", fill: "none" }, /* @__PURE__ */ React13.createElement(
+  return /* @__PURE__ */ React13.createElement(Svg5, { width: width8, height, viewBox: "0 0 512 512", fill: "none" }, /* @__PURE__ */ React13.createElement(
     Path5,
     {
-      d: "M1.67123 5.0568C1.30302 5.19159 1.27011 5.69959 1.61729 5.88181L6.20644 8.29374L8.61632 12.8819C8.79859 13.2289 9.30601 13.1953 9.44085 12.8272L13.5965 1.4834C13.7288 1.12213 13.378 0.771245 13.0167 0.903509L1.67123 5.0568ZM2.9406 5.55723L11.4048 2.45618L6.45612 7.40487L2.9406 5.55723ZM7.0953 8.04405L12.044 3.09537L8.94544 11.5621L7.0953 8.04405Z",
+      d: "M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3.3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z",
       fill: strokeColor
     }
   ));
@@ -2723,6 +2723,18 @@ var HappyIcon = (props) => {
       "clip-rule": "evenodd",
       d: "M2.5 10C2.5 5.86689 5.86689 2.5 10 2.5C14.1331 2.5 17.5 5.86689 17.5 10C17.5 14.1331 14.1331 17.5 10 17.5C5.86689 17.5 2.5 14.1331 2.5 10ZM16.3462 10C16.3462 6.48888 13.5111 3.65385 10 3.65385C6.48888 3.65385 3.65385 6.48888 3.65385 10C3.65385 13.5111 6.48888 16.3462 10 16.3462C13.5111 16.3462 16.3462 13.5111 16.3462 10Z",
       fill: strokeColor
+    }
+  ));
+};
+var UserSilhouetteIcon = (props) => {
+  const width8 = props.width || 14;
+  const height = props.height || 14;
+  const color = props.color || "#111827";
+  return /* @__PURE__ */ React13.createElement(Svg5, { width: width8, height, viewBox: "0 0 16 16", fill: "none" }, /* @__PURE__ */ React13.createElement(
+    Path5,
+    {
+      d: "M8 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-5 6.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5v.5H3v-.5Z",
+      fill: color
     }
   ));
 };
@@ -3614,9 +3626,12 @@ var leftBubbleStyles = {
 // bot-sdk/theme/themeHelper.tsx
 init_esm_shims();
 function getButtonTheme(propsTheme) {
+  const bodyBtn = propsTheme?.v3?.body?.buttons || propsTheme?.v3?.body?.button;
+  const btnBg = bodyBtn?.bg_color || bodyBtn?.bgColor;
+  const btnColor = bodyBtn?.color || bodyBtn?.textColor;
   let theme = {
-    ACTIVE_BG_COLOR: "#a37645",
-    ACTIVE_TXT_COLOR: "#505968",
+    ACTIVE_BG_COLOR: btnBg || "#1B365D",
+    ACTIVE_TXT_COLOR: btnColor || "#FFFFFF",
     INACTIVE_BG_COLOR: "#101828",
     INACTIVE_TXT_COLOR: "#1d2939"
   };
@@ -3626,11 +3641,17 @@ function getButtonTheme(propsTheme) {
   if (propsTheme.v3?.general?.colors?.useColorPaletteOnly) {
     theme = {
       ...theme,
-      ACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.primary || "#ffffff",
-      ACTIVE_TXT_COLOR: propsTheme.v3?.general?.colors?.primary_text || "#505968",
+      ACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.primary || theme.ACTIVE_BG_COLOR,
+      ACTIVE_TXT_COLOR: propsTheme.v3?.general?.colors?.primary_text || theme.ACTIVE_TXT_COLOR,
       INACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.secondary || "#101828",
       INACTIVE_TXT_COLOR: propsTheme.v3?.general?.colors?.secondary_text || "#1d2939"
     };
+  }
+  if (btnBg) {
+    theme.ACTIVE_BG_COLOR = btnBg;
+  }
+  if (btnColor) {
+    theme.ACTIVE_TXT_COLOR = btnColor;
   }
   return theme;
 }
@@ -8867,19 +8888,20 @@ var styles21 = StyleSheet19.create({
   text: {
     color: "#202124",
     fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-    marginTop: 5,
-    marginBottom: 5,
-    marginLeft: 5,
-    marginRight: 10
+    marginTop: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0
   },
   container: {
-    padding: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     //backgroundColor: 'red', //'#EFF0F0',
     // marginRight: 30,
     //flexWrap: 'wrap',
     marginLeft: 0,
     minHeight: 10,
-    justifyContent: "flex-start"
+    justifyContent: "center"
   }
 });
 
@@ -11337,6 +11359,23 @@ var Button2 = class extends BaseView_default {
     );
   };
   getSingleButtonView = (item, index = 0, btheme, bbtheme, payload) => {
+    const bodyBtn = this.props?.theme?.v3?.body?.buttons || this.props?.theme?.v3?.body?.button;
+    const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
+    const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
+    const isBackgroundInverted = payload.variation === "backgroundInverted";
+    const isTextInverted = payload.variation === "textInverted";
+    let btnBgColor = bodyBtnBg || "#1B365D";
+    let btnBorderColor = bodyBtnBg || "#1B365D";
+    let btnTextColor = bodyBtnColor || "#FFFFFF";
+    if (isTextInverted) {
+      btnBgColor = Color_default.white;
+      btnBorderColor = bodyBtnBg || "#1B365D";
+      btnTextColor = bodyBtnBg || "#1B365D";
+    } else if (isBackgroundInverted) {
+      btnBgColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      btnBorderColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      btnTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
+    }
     return /* @__PURE__ */ React50.createElement(View38, { key: index + "", style: styles34.item_container }, /* @__PURE__ */ React50.createElement(
       TouchableOpacity16,
       {
@@ -11345,9 +11384,9 @@ var Button2 = class extends BaseView_default {
           styles34.btn_view,
           {
             width: payload.fullWidth ? getWindowWidth() * 0.75 : void 0,
-            backgroundColor: payload.variation == "backgroundInverted" ? bbtheme.BUBBLE_RIGHT_BG_COLOR : payload.variation == "textInverted" ? bbtheme?.BUBBLE_LEFT_BG_COLOR : Color_default.white,
-            borderColor: bbtheme?.BUBBLE_LEFT_BG_COLOR || "#3F51B5",
-            borderWidth: payload.variation == "backgroundInverted" ? 0 : 1
+            backgroundColor: btnBgColor,
+            borderColor: btnBorderColor,
+            borderWidth: isTextInverted ? 1 : 0
           }
         ],
         onPress: () => {
@@ -11365,7 +11404,7 @@ var Button2 = class extends BaseView_default {
           style: [
             styles34.item_text,
             {
-              color: payload.variation == "backgroundInverted" ? bbtheme.BUBBLE_RIGHT_TEXT_COLOR : payload.variation == "textInverted" ? bbtheme.BUBBLE_RIGHT_BG_COLOR : btheme.ACTIVE_TXT_COLOR,
+              color: btnTextColor,
               fontFamily: this.props?.theme?.v3?.body?.font?.family || "Inter"
             },
             botStyles[this.props?.theme?.v3?.body?.font?.size || "medium"].size
@@ -11505,20 +11544,19 @@ import ParsedText2 from "react-native-parsed-text";
 var WWW_URL_PATTERN3 = /^www\./i;
 var textStyle = {
   fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-  // lineHeight: 20,
-  marginTop: 5,
-  marginBottom: 5,
-  marginLeft: 10,
-  marginRight: 10
+  marginTop: 0,
+  marginBottom: 0,
+  marginLeft: 0,
+  marginRight: 0
 };
 var styles35 = {
   left: StyleSheet33.create({
     container: {
       marginRight: 30,
       minHeight: 20,
-      justifyContent: "flex-end",
-      paddingBottom: 5,
-      paddingTop: 5
+      justifyContent: "center",
+      paddingVertical: 12,
+      paddingHorizontal: 16
     },
     text: {
       color: Color_default.black,
@@ -11530,7 +11568,10 @@ var styles35 = {
     }
   }),
   center: StyleSheet33.create({
-    container: {},
+    container: {
+      paddingVertical: 12,
+      paddingHorizontal: 16
+    },
     text: {
       color: Color_default.white,
       ...textStyle
@@ -11546,14 +11587,13 @@ var styles35 = {
       marginLeft: 30,
       minHeight: 20,
       minWidth: 40,
-      justifyContent: "flex-end",
-      paddingBottom: 5,
-      paddingTop: 5
+      justifyContent: "center",
+      paddingVertical: 12,
+      paddingHorizontal: 16
     },
     text: {
       color: Color_default.white,
-      ...textStyle,
-      alignSelf: "center"
+      ...textStyle
     },
     link: {
       color: Color_default.white,
@@ -16964,15 +17004,81 @@ var styles59 = StyleSheet57.create({
 
 // bot-sdk/templates/PdfDownloadTemplate.tsx
 init_esm_shims();
-import * as React78 from "react";
+import * as React79 from "react";
 import {
-  ActivityIndicator as ActivityIndicator4,
-  StyleSheet as StyleSheet58,
+  StyleSheet as StyleSheet59,
   Text as Text49,
   TouchableOpacity as TouchableOpacity38,
-  View as View65
+  View as View66
 } from "react-native";
-import Svg12, { Path as Path11 } from "react-native-svg";
+import Svg13, { Path as Path11 } from "react-native-svg";
+
+// bot-sdk/components/ArcSpinnerLoader.tsx
+init_esm_shims();
+import React78, { useEffect as useEffect2, useRef as useRef3 } from "react";
+import { View as View65, Animated as Animated5, Easing, StyleSheet as StyleSheet58 } from "react-native";
+import Svg12, { Defs as Defs4, LinearGradient as LinearGradient2, Stop as Stop2, Circle as Circle3 } from "react-native-svg";
+var ArcSpinnerLoader = ({
+  size = 42,
+  strokeWidth = 3.8,
+  color = "#1B365D",
+  style
+}) => {
+  const spinAnim = useRef3(new Animated5.Value(0)).current;
+  const gradientId = useRef3(
+    `arc_spinner_${Math.random().toString(36).substring(2, 9)}`
+  ).current;
+  useEffect2(() => {
+    const animation = Animated5.loop(
+      Animated5.timing(spinAnim, {
+        toValue: 1,
+        duration: 900,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [spinAnim]);
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"]
+  });
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const arcLength = circumference * 0.75;
+  const gapLength = circumference * 0.25;
+  return /* @__PURE__ */ React78.createElement(View65, { style: [styles60.container, style] }, /* @__PURE__ */ React78.createElement(
+    Animated5.View,
+    {
+      style: {
+        width: size,
+        height: size,
+        transform: [{ rotate: spin }]
+      }
+    },
+    /* @__PURE__ */ React78.createElement(Svg12, { width: size, height: size, viewBox: `0 0 ${size} ${size}` }, /* @__PURE__ */ React78.createElement(Defs4, null, /* @__PURE__ */ React78.createElement(LinearGradient2, { id: gradientId, x1: "1", y1: "0", x2: "0", y2: "1" }, /* @__PURE__ */ React78.createElement(Stop2, { offset: "0%", stopColor: color, stopOpacity: "1" }), /* @__PURE__ */ React78.createElement(Stop2, { offset: "50%", stopColor: color, stopOpacity: "0.55" }), /* @__PURE__ */ React78.createElement(Stop2, { offset: "85%", stopColor: color, stopOpacity: "0.15" }), /* @__PURE__ */ React78.createElement(Stop2, { offset: "100%", stopColor: color, stopOpacity: "0" }))), /* @__PURE__ */ React78.createElement(
+      Circle3,
+      {
+        cx: size / 2,
+        cy: size / 2,
+        r: radius,
+        stroke: `url(#${gradientId})`,
+        strokeWidth,
+        strokeLinecap: "round",
+        fill: "none",
+        strokeDasharray: `${arcLength} ${gapLength}`
+      }
+    ))
+  ));
+};
+var styles60 = StyleSheet58.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center"
+  }
+});
+var ArcSpinnerLoader_default = ArcSpinnerLoader;
 
 // bot-sdk/utils/PdfDownloadLoader.ts
 init_esm_shims();
@@ -17038,7 +17144,7 @@ var PdfDownloadLoader_default = PdfDownloadLoaderManager;
 var DownloadIcon = ({
   size = 18,
   color = "#FFFFFF"
-}) => /* @__PURE__ */ React78.createElement(Svg12, { width: size, height: size, viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ React78.createElement(
+}) => /* @__PURE__ */ React79.createElement(Svg13, { width: size, height: size, viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ React79.createElement(
   Path11,
   {
     d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
@@ -17047,7 +17153,7 @@ var DownloadIcon = ({
     strokeLinecap: "round",
     strokeLinejoin: "round"
   }
-), /* @__PURE__ */ React78.createElement(
+), /* @__PURE__ */ React79.createElement(
   Path11,
   {
     d: "M7 10l5 5 5-5",
@@ -17056,7 +17162,7 @@ var DownloadIcon = ({
     strokeLinecap: "round",
     strokeLinejoin: "round"
   }
-), /* @__PURE__ */ React78.createElement(
+), /* @__PURE__ */ React79.createElement(
   Path11,
   {
     d: "M12 15V3",
@@ -17093,20 +17199,20 @@ var PdfDownloadTemplate = class extends BaseView_default {
     const isLastButton = index === totalButtons - 1;
     const isClicked = this.state.clickedIndices.has(index);
     const isButtonDisabled = isClicked || this.state.isLoading;
-    return /* @__PURE__ */ React78.createElement(
-      View65,
+    return /* @__PURE__ */ React79.createElement(
+      View66,
       {
         key: `pdf-btn-${index}`,
         style: [
-          styles60.buttonItemContainer,
-          isLastButton && styles60.lastButtonItemContainer
+          styles61.buttonItemContainer,
+          isLastButton && styles61.lastButtonItemContainer
         ]
       },
-      title ? /* @__PURE__ */ React78.createElement(
+      title ? /* @__PURE__ */ React79.createElement(
         Text49,
         {
           style: [
-            styles60.buttonTitle,
+            styles61.buttonTitle,
             {
               color: titleColor,
               fontFamily
@@ -17116,7 +17222,7 @@ var PdfDownloadTemplate = class extends BaseView_default {
         },
         title
       ) : null,
-      /* @__PURE__ */ React78.createElement(
+      /* @__PURE__ */ React79.createElement(
         TouchableOpacity38,
         {
           disabled: isButtonDisabled,
@@ -17127,7 +17233,7 @@ var PdfDownloadTemplate = class extends BaseView_default {
           title,
           "data-title": title,
           style: [
-            styles60.button,
+            styles61.button,
             {
               backgroundColor: buttonBgColor,
               borderColor: buttonBorderColor,
@@ -17152,11 +17258,11 @@ var PdfDownloadTemplate = class extends BaseView_default {
             }
           }
         },
-        /* @__PURE__ */ React78.createElement(View65, { style: styles60.buttonContent }, /* @__PURE__ */ React78.createElement(DownloadIcon, { size: 18, color: buttonTextColor }), /* @__PURE__ */ React78.createElement(
+        /* @__PURE__ */ React79.createElement(View66, { style: styles61.buttonContent }, /* @__PURE__ */ React79.createElement(DownloadIcon, { size: 18, color: buttonTextColor }), /* @__PURE__ */ React79.createElement(
           Text49,
           {
             style: [
-              styles60.buttonText,
+              styles61.buttonText,
               {
                 color: buttonTextColor,
                 fontFamily
@@ -17188,41 +17294,44 @@ var PdfDownloadTemplate = class extends BaseView_default {
     const textColor = botMsgColor && botMsgColor !== "#FFFFFF" ? botMsgColor : TEMPLATE_STYLE_VALUES.TEXT_COLOR || "#1D2939";
     const isBackgroundInverted = payload?.variation === "backgroundInverted";
     const isTextInverted = payload?.variation === "textInverted";
-    let buttonBgColor = bbtheme.BUBBLE_RIGHT_BG_COLOR || this.props?.theme?.v3?.body?.buttons?.bg_color || "#205493";
-    let buttonBorderColor = bbtheme.BUBBLE_LEFT_BG_COLOR || bbtheme.BUBBLE_RIGHT_BG_COLOR || "#205493";
-    let buttonTextColor = bbtheme.BUBBLE_RIGHT_TEXT_COLOR || this.props?.theme?.v3?.body?.buttons?.color || Color_default.white;
+    const bodyBtn = this.props?.theme?.v3?.body?.buttons || this.props?.theme?.v3?.body?.button;
+    const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor;
+    const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor;
+    let buttonBgColor = bodyBtnBg || btheme.ACTIVE_BG_COLOR || bbtheme.BUBBLE_RIGHT_BG_COLOR || "#205493";
+    let buttonBorderColor = bodyBtnBg || btheme.ACTIVE_BG_COLOR || bbtheme.BUBBLE_LEFT_BG_COLOR || "#205493";
+    let buttonTextColor = bodyBtnColor || btheme.ACTIVE_TXT_COLOR || bbtheme.BUBBLE_RIGHT_TEXT_COLOR || Color_default.white;
     if (isBackgroundInverted) {
-      buttonBgColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
-      buttonTextColor = bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
-      buttonBorderColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonBgColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
+      buttonBorderColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
     } else if (isTextInverted) {
-      buttonBgColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
-      buttonTextColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
-      buttonBorderColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
+      buttonBgColor = Color_default.white;
+      buttonTextColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonBorderColor = bodyBtnBg || bbtheme.BUBBLE_LEFT_BG_COLOR;
     }
     const themeSeparator = this.props?.theme?.v3?.body?.agent_message?.separator;
     const isValidSeparatorColor = typeof themeSeparator === "string" && themeSeparator.trim() !== "" && themeSeparator !== "line" && themeSeparator !== "2" && (themeSeparator.startsWith("#") || themeSeparator.startsWith("rgb") || themeSeparator.startsWith("hsl"));
     const dividerColor = isValidSeparatorColor ? themeSeparator : "#D0D5DD";
     const templateType = rawPayload?.template_type || payload?.template_type || TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE;
     const cardWidth = Math.min(getWindowWidth() * 0.82, 380);
-    return /* @__PURE__ */ React78.createElement(
-      View65,
+    return /* @__PURE__ */ React79.createElement(
+      View66,
       {
         pointerEvents: this.state.isLoading ? "none" : "auto",
         style: [
-          styles60.mainContainer,
+          styles61.mainContainer,
           {
             width: cardWidth,
             backgroundColor: cardBgColor
           }
         ]
       },
-      this.state.isLoading && /* @__PURE__ */ React78.createElement(View65, { style: styles60.overlayLoader, pointerEvents: "auto" }, /* @__PURE__ */ React78.createElement(View65, { style: styles60.loaderBox }, /* @__PURE__ */ React78.createElement(ActivityIndicator4, { size: "small", color: buttonBgColor }))),
-      headerMsg ? /* @__PURE__ */ React78.createElement(
+      this.state.isLoading && /* @__PURE__ */ React79.createElement(View66, { style: styles61.overlayLoader, pointerEvents: "auto" }, /* @__PURE__ */ React79.createElement(View66, { style: styles61.loaderBox }, /* @__PURE__ */ React79.createElement(ArcSpinnerLoader_default, { size: 42, strokeWidth: 3.8, color: buttonBgColor }))),
+      headerMsg ? /* @__PURE__ */ React79.createElement(
         Text49,
         {
           style: [
-            styles60.headerText,
+            styles61.headerText,
             {
               color: textColor,
               fontFamily
@@ -17232,7 +17341,7 @@ var PdfDownloadTemplate = class extends BaseView_default {
         },
         headerMsg
       ) : null,
-      buttons.length > 0 ? /* @__PURE__ */ React78.createElement(View65, { style: styles60.buttonsContainer }, buttons.map(
+      buttons.length > 0 ? /* @__PURE__ */ React79.createElement(View66, { style: styles61.buttonsContainer }, buttons.map(
         (btn, index) => this.renderButton(
           btn,
           index,
@@ -17246,11 +17355,11 @@ var PdfDownloadTemplate = class extends BaseView_default {
           templateType
         )
       )) : null,
-      footerMsg ? /* @__PURE__ */ React78.createElement(View65, { style: styles60.footerContainer }, /* @__PURE__ */ React78.createElement(View65, { style: [styles60.divider, { backgroundColor: dividerColor }] }), /* @__PURE__ */ React78.createElement(
+      footerMsg ? /* @__PURE__ */ React79.createElement(View66, { style: styles61.footerContainer }, /* @__PURE__ */ React79.createElement(View66, { style: [styles61.divider, { backgroundColor: dividerColor }] }), /* @__PURE__ */ React79.createElement(
         Text49,
         {
           style: [
-            styles60.footerText,
+            styles61.footerText,
             {
               color: textColor,
               fontFamily
@@ -17263,7 +17372,7 @@ var PdfDownloadTemplate = class extends BaseView_default {
     );
   }
 };
-var styles60 = StyleSheet58.create({
+var styles61 = StyleSheet59.create({
   mainContainer: {
     borderRadius: 14,
     padding: 14,
@@ -17274,7 +17383,7 @@ var styles60 = StyleSheet58.create({
     overflow: "hidden"
   },
   overlayLoader: {
-    ...StyleSheet58.absoluteFillObject,
+    ...StyleSheet59.absoluteFillObject,
     backgroundColor: "rgba(255, 255, 255, 0.75)",
     borderRadius: 14,
     justifyContent: "center",
@@ -17351,7 +17460,7 @@ var styles60 = StyleSheet58.create({
 
 // bot-sdk/templates/PdfDataResponseTemplate.tsx
 init_esm_shims();
-import * as React79 from "react";
+import * as React80 from "react";
 import { NativeModules, Platform as Platform13, Share } from "react-native";
 import Toast3 from "react-native-toast-message";
 var processedKeys = /* @__PURE__ */ new Set();
@@ -17587,7 +17696,7 @@ var downloadPdfDataResponse = async (payload, messageId, isHistory) => {
   }
   return savedPaths;
 };
-var PdfDataResponseTemplate = class extends React79.Component {
+var PdfDataResponseTemplate = class extends React80.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -17606,7 +17715,7 @@ var PdfDataResponseTemplate = class extends React79.Component {
 };
 
 // bot-sdk/templates/BotTemplate.tsx
-var BotTemplate = class extends React80.Component {
+var BotTemplate = class extends React81.Component {
   static defaultProps;
   renderBubbleViews = (templateType, payload, theme, onListItemClick, onSeeMoreClick) => {
     if (onListItemClick) {
@@ -17627,80 +17736,80 @@ var BotTemplate = class extends React80.Component {
       case TEMPLATE_TYPES.SYSTEM_TEMPLATE:
         return this.renderMessageText(payload, theme, templateType);
       case TEMPLATE_TYPES.BUTTON:
-        return /* @__PURE__ */ React80.createElement(Button2, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(Button2, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CARD_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(CardTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(CardTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.IMAGE_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(ImageTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ImageTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.TABLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(TableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(TableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.QUICK_REPLIES:
         return this.renderBotText(payload, templateType, theme);
       case TEMPLATE_TYPES.ERROR_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ErrorTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ErrorTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CAROUSEL_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(CarouselTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(CarouselTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ADVANCED_LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AdvancedListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(AdvancedListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.MINI_TABLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(MiniTableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(MiniTableTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.BAR_CHART_TEMPLATE:
         if (payload?.stacked) {
-          return /* @__PURE__ */ React80.createElement(StackBarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+          return /* @__PURE__ */ React81.createElement(StackBarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
         }
-        return /* @__PURE__ */ React80.createElement(BarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(BarChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.PIE_CHART_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(PieChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(PieChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LINE_CHART_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(LineChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(LineChartTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DATE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DATE_RANGE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(DateTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.TABLE_LIST_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(TableListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(TableListTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ADVANCED_MULTI_SELECT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AdvanceMultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(AdvanceMultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.MULTI_SELECT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(MultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(MultiSelectTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.RADIO_OPTION_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(RadioOptionTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(RadioOptionTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LIST_VIEW_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListViewTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ListViewTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DROPDOWN_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DropdownTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(DropdownTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.FEEDBACK_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(FeedbackTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(FeedbackTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.FORM_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(FormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(FormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.CLOCK_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ClockTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ClockTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LISTWIDGET_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ListWidgetTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ListWidgetTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.AUDIO_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(AudioTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(AudioTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.VIDEO_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(VideoTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(VideoTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.USER_ATTACHEMENT_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(Attachements, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(Attachements, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ARTICLE_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ArticleTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ArticleTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.ANSWER_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(AnswerTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(AnswerTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.OTP_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(OTPTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(OTPTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.RESET_PIN_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(ResetPinTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(ResetPinTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.LINK_MESSAGE:
-        return /* @__PURE__ */ React80.createElement(LinkTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(LinkTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.DIGITALFORM_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(DigitalFormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(DigitalFormTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
-        return /* @__PURE__ */ React80.createElement(PdfDownloadTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
+        return /* @__PURE__ */ React81.createElement(PdfDownloadTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.PDF_DATA_RESPONSE:
-        return /* @__PURE__ */ React80.createElement(
+        return /* @__PURE__ */ React81.createElement(
           PdfDataResponseTemplate,
           {
             payload,
@@ -17710,7 +17819,7 @@ var BotTemplate = class extends React80.Component {
           }
         );
     }
-    return /* @__PURE__ */ React80.createElement(Text50, { style: { padding: 10 } }, "This template is under development...");
+    return /* @__PURE__ */ React81.createElement(Text50, { style: { padding: 10 } }, "This template is under development...");
   };
   renderMessageText = (payload, theme, template_type) => {
     if (payload) {
@@ -17718,7 +17827,7 @@ var BotTemplate = class extends React80.Component {
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps);
       }
-      return /* @__PURE__ */ React80.createElement(
+      return /* @__PURE__ */ React81.createElement(
         MessageText_default,
         {
           ...messageTextProps?.messageTextProps,
@@ -17750,9 +17859,9 @@ var BotTemplate = class extends React80.Component {
     }
     if (typeof text !== "string") {
       console.log("value is not a string type   : ", text);
-      return /* @__PURE__ */ React80.createElement(React80.Fragment, null);
+      return /* @__PURE__ */ React81.createElement(React81.Fragment, null);
     }
-    return /* @__PURE__ */ React80.createElement(
+    return /* @__PURE__ */ React81.createElement(
       BotText,
       {
         text,
@@ -17793,12 +17902,12 @@ import {
   SafeAreaView as SafeAreaView2,
   Linking as Linking9,
   ActivityIndicator as ActivityIndicator6,
-  Text as Text71,
+  Text as Text70,
   TouchableOpacity as TouchableOpacity47,
   Modal as Modal9,
   ScrollView as ScrollView5,
   Keyboard as Keyboard5,
-  Dimensions as Dimensions37,
+  Dimensions as Dimensions36,
   StatusBar as StatusBar3,
   BackHandler as BackHandler2,
   TouchableWithoutFeedback as TouchableWithoutFeedback3
@@ -17843,25 +17952,24 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 
 // bot-sdk/chat/components/InputToolbar.tsx
 init_esm_shims();
-import * as React86 from "react";
+import * as React87 from "react";
 import {
   Platform as Platform16,
-  StyleSheet as StyleSheet64,
+  StyleSheet as StyleSheet65,
   Text as Text53,
   TouchableOpacity as TouchableOpacity41,
-  View as View71
+  View as View72
 } from "react-native";
 
 // bot-sdk/chat/components/Composer.tsx
 init_esm_shims();
-import React81, { useRef as useRef3, useState as useState5, useEffect as useEffect2, useCallback } from "react";
+import React82, { useRef as useRef4, useState as useState5, useEffect as useEffect3, useCallback } from "react";
 import {
-  StyleSheet as StyleSheet59,
+  StyleSheet as StyleSheet60,
   TextInput as TextInput7,
-  View as View66,
+  View as View67,
   TouchableOpacity as TouchableOpacity39
 } from "react-native";
-init_PlatformCheck();
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
   disableComposer = false,
@@ -17882,10 +17990,10 @@ function Composer({
   isTTSenable = false,
   sendButtonBgColor
 }) {
-  const dimensionsRef = useRef3();
+  const dimensionsRef = useRef4(void 0);
   const [isTTS, setTTS] = useState5(false);
   const [isFocused, setIsFocused] = useState5(false);
-  useEffect2(() => {
+  useEffect3(() => {
     setTTS(isTTSenable);
   }, [isTTSenable]);
   const composerHeightNew = composerHeight || 35;
@@ -17905,58 +18013,45 @@ function Composer({
     nativeEvent: { contentSize }
   }) => determineInputSizeChange(contentSize);
   const maxHeight = MAX_TOOL_BAR_HEIGHT || 180;
-  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || Color_default.white;
-  const defaultOutlineColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || Color_default.gray;
-  const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
-  const outLineColor = isFocused ? sendButtonColor : defaultOutlineColor;
-  const currentBorderWidth = isFocused ? 2 : StyleSheet59.hairlineWidth;
+  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
+  const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#1B365D";
+  const focusBorderColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || sendButtonColor;
+  const outLineColor = isFocused ? focusBorderColor : bgColor;
+  const currentBorderWidth = 1;
   const textColor = invertColor(bgColor, true);
-  return /* @__PURE__ */ React81.createElement(
-    View66,
+  return /* @__PURE__ */ React82.createElement(
+    View67,
     {
-      style: [
-        {
+      style: {
+        justifyContent: "center",
+        backgroundColor: Color_default.transparent,
+        flex: 1
+      }
+    },
+    /* @__PURE__ */ React82.createElement(
+      View67,
+      {
+        style: {
           justifyContent: "center",
-          alignItems: "stretch",
-          backgroundColor: Color_default.transparent
-        },
-        isIOS && {
+          maxHeight: normalize(maxHeight),
+          flexDirection: "row",
+          alignItems: "center",
           borderWidth: currentBorderWidth,
           borderColor: outLineColor,
           borderStyle: "solid",
-          borderRadius: 4,
+          borderRadius: 8,
           backgroundColor: bgColor,
-          minHeight: normalize(composerHeightNew + 16)
+          minHeight: 38
         }
-      ]
-    },
-    /* @__PURE__ */ React81.createElement(
-      View66,
-      {
-        style: [
-          {
-            justifyContent: "center",
-            maxHeight: normalize(maxHeight),
-            flexDirection: "row"
-          },
-          isAndroid && {
-            borderWidth: currentBorderWidth,
-            borderColor: outLineColor,
-            borderStyle: "solid",
-            borderRadius: 4,
-            backgroundColor: bgColor,
-            minHeight: normalize(composerHeightNew + 16)
-          }
-        ]
       },
-      /* @__PURE__ */ React81.createElement(
+      /* @__PURE__ */ React82.createElement(
         TextInput7,
         {
           testID: placeholder2,
           accessible: true,
           accessibilityLabel: placeholder2,
           placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
-          placeholderTextColor,
+          placeholderTextColor: "#9CA3AF",
           selectionColor: textColor,
           multiline,
           maxLength: MAX_INPUT_TEXT_LENGTH,
@@ -17964,14 +18059,14 @@ function Composer({
           onContentSizeChange: handleContentSizeChange,
           onChangeText: onTextChanged,
           style: [
-            styles61.textInput,
+            styles62.textInput,
             {
-              minHeight: normalize(composerHeightNew),
-              paddingRight: theme?.v3?.footer?.buttons?.emoji?.show ? 4 : 8
-            },
-            {
-              color: textColor
-              //bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,
+              paddingVertical: 9,
+              paddingHorizontal: 12,
+              fontSize: 14,
+              fontWeight: "400",
+              color: textColor,
+              minHeight: 38
             }
           ],
           autoFocus: textInputAutoFocus,
@@ -17990,7 +18085,7 @@ function Composer({
           }
         }
       ),
-      theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React81.createElement(
+      theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React82.createElement(
         TouchableOpacity39,
         {
           onPress: () => {
@@ -18005,7 +18100,7 @@ function Composer({
             justifyContent: "center"
           }
         },
-        /* @__PURE__ */ React81.createElement(
+        /* @__PURE__ */ React82.createElement(
           SvgIcon,
           {
             name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
@@ -18018,7 +18113,7 @@ function Composer({
     )
   );
 }
-var styles61 = StyleSheet59.create({
+var styles62 = StyleSheet60.create({
   emoji_main: {
     justifyContent: "center",
     alignItems: "center",
@@ -18038,11 +18133,11 @@ var styles61 = StyleSheet59.create({
   },
   textInput: {
     flex: 1,
-    fontSize: normalize(16),
-    paddingLeft: 8,
-    paddingRight: 8,
-    minHeight: normalize(isIOS ? 34 : 36),
-    paddingVertical: isIOS ? 8 : 6,
+    fontSize: 14,
+    fontWeight: "400",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    minHeight: 38,
     textAlignVertical: "center",
     color: Color_default.text_color
   }
@@ -18050,21 +18145,21 @@ var styles61 = StyleSheet59.create({
 
 // bot-sdk/chat/components/Send.tsx
 init_esm_shims();
-import * as React82 from "react";
+import * as React83 from "react";
 import { Component as Component24 } from "react";
 import {
-  StyleSheet as StyleSheet60,
+  StyleSheet as StyleSheet61,
   Text as Text51,
   TouchableOpacity as TouchableOpacity40,
-  View as View67
+  View as View68
 } from "react-native";
-var styles62 = StyleSheet60.create({
+var styles63 = StyleSheet61.create({
   container: {
-    width: normalize(38),
-    height: normalize(38),
+    width: 38,
+    height: 38,
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 8
+    marginStart: 8
   },
   text: {
     color: Color_default.defaultBlue,
@@ -18101,32 +18196,32 @@ var Send = class extends Component24 {
       sendButtonProps
     } = this.props;
     if (alwaysShowSend || text && text.trim().length > 0) {
-      return /* @__PURE__ */ React82.createElement(
+      return /* @__PURE__ */ React83.createElement(
         TouchableOpacity40,
         {
           testID: "send",
           accessible: true,
           accessibilityLabel: "send",
-          style: [styles62.container],
+          style: [styles63.container],
           onPress: this.handleOnPress,
           accessibilityRole: "button",
           disabled,
           ...sendButtonProps
         },
-        /* @__PURE__ */ React82.createElement(View67, null, children || /* @__PURE__ */ React82.createElement(Text51, { style: [styles62.text, textStyle3] }, label))
+        /* @__PURE__ */ React83.createElement(View68, null, children || /* @__PURE__ */ React83.createElement(Text51, { style: [styles63.text, textStyle3] }, label))
       );
     }
-    return /* @__PURE__ */ React82.createElement(View67, null);
+    return /* @__PURE__ */ React83.createElement(View68, null);
   }
 };
 
 // bot-sdk/animation/FadeInToBottom.tsx
 init_esm_shims();
-import React83, { Component as Component25 } from "react";
-import { Animated as Animated5, StyleSheet as StyleSheet61 } from "react-native";
+import React84, { Component as Component25 } from "react";
+import { Animated as Animated6, StyleSheet as StyleSheet62 } from "react-native";
 var FadeInToBottom = class extends Component25 {
-  fadeAnim = new Animated5.Value(0);
-  translateAnim = new Animated5.Value(100);
+  fadeAnim = new Animated6.Value(0);
+  translateAnim = new Animated6.Value(100);
   // Initial position is off-screen
   animation;
   constructor(props) {
@@ -18141,13 +18236,13 @@ var FadeInToBottom = class extends Component25 {
       this.props.getRef(this);
     }
     const { duration = 500 } = this.props;
-    this.animation = Animated5.parallel([
-      Animated5.timing(this.fadeAnim, {
+    this.animation = Animated6.parallel([
+      Animated6.timing(this.fadeAnim, {
         toValue: 1,
         duration,
         useNativeDriver: true
       }),
-      Animated5.timing(this.translateAnim, {
+      Animated6.timing(this.translateAnim, {
         toValue: 0,
         // Adjust this value to control how far the element moves down
         duration,
@@ -18166,63 +18261,6 @@ var FadeInToBottom = class extends Component25 {
     if (!this.state.isApplyAnim) {
       return this.props.children;
     }
-    return /* @__PURE__ */ React83.createElement(
-      Animated5.View,
-      {
-        style: [
-          styles63.container,
-          {
-            opacity: this.fadeAnim,
-            transform: [{ translateY: this.translateAnim }]
-          }
-        ]
-      },
-      this.props.children
-    );
-  }
-};
-var styles63 = StyleSheet61.create({
-  container: {
-    //flex: 1,
-    // position: 'absolute',
-    //bottom: 0,
-    // left: 0,
-    // right: 0,
-    // top: 0,
-  }
-});
-var FadeInToBottom_default = FadeInToBottom;
-
-// bot-sdk/animation/FadeInToTop.tsx
-init_esm_shims();
-import React84, { Component as Component26 } from "react";
-import { Animated as Animated6, StyleSheet as StyleSheet62 } from "react-native";
-var FadeInToTop = class extends Component26 {
-  fadeAnim = new Animated6.Value(0);
-  translateAnim = new Animated6.Value(200);
-  // Initial position is off-screen
-  componentDidMount() {
-    const { duration = 500 } = this.props;
-    const animation = Animated6.parallel([
-      Animated6.timing(this.translateAnim, {
-        toValue: 0,
-        // Adjust this value to control how far the element moves up
-        duration,
-        useNativeDriver: true
-      }),
-      Animated6.timing(this.fadeAnim, {
-        toValue: 1,
-        duration,
-        useNativeDriver: true
-      })
-    ]);
-    this.setState({ animation }, () => {
-      if (this.state.animation) {
-        this.state.animation.start();
-      }
-    });
-  }
-  render() {
     return /* @__PURE__ */ React84.createElement(
       Animated6.View,
       {
@@ -18240,6 +18278,63 @@ var FadeInToTop = class extends Component26 {
 };
 var styles64 = StyleSheet62.create({
   container: {
+    //flex: 1,
+    // position: 'absolute',
+    //bottom: 0,
+    // left: 0,
+    // right: 0,
+    // top: 0,
+  }
+});
+var FadeInToBottom_default = FadeInToBottom;
+
+// bot-sdk/animation/FadeInToTop.tsx
+init_esm_shims();
+import React85, { Component as Component26 } from "react";
+import { Animated as Animated7, StyleSheet as StyleSheet63 } from "react-native";
+var FadeInToTop = class extends Component26 {
+  fadeAnim = new Animated7.Value(0);
+  translateAnim = new Animated7.Value(200);
+  // Initial position is off-screen
+  componentDidMount() {
+    const { duration = 500 } = this.props;
+    const animation = Animated7.parallel([
+      Animated7.timing(this.translateAnim, {
+        toValue: 0,
+        // Adjust this value to control how far the element moves up
+        duration,
+        useNativeDriver: true
+      }),
+      Animated7.timing(this.fadeAnim, {
+        toValue: 1,
+        duration,
+        useNativeDriver: true
+      })
+    ]);
+    this.setState({ animation }, () => {
+      if (this.state.animation) {
+        this.state.animation.start();
+      }
+    });
+  }
+  render() {
+    return /* @__PURE__ */ React85.createElement(
+      Animated7.View,
+      {
+        style: [
+          styles65.container,
+          {
+            opacity: this.fadeAnim,
+            transform: [{ translateY: this.translateAnim }]
+          }
+        ]
+      },
+      this.props.children
+    );
+  }
+};
+var styles65 = StyleSheet63.create({
+  container: {
     flex: 1
     // position: 'absolute',
     // //top: 0,
@@ -18252,38 +18347,38 @@ var FadeInToTop_default = FadeInToTop;
 
 // bot-sdk/components/WaveFormView.tsx
 init_esm_shims();
-import React85, { Component as Component27 } from "react";
-import { View as View70, Animated as Animated7, Easing, StyleSheet as StyleSheet63 } from "react-native";
-var dotAnimations = Array.from({ length: 4 }).map(() => new Animated7.Value(1));
+import React86, { Component as Component27 } from "react";
+import { View as View71, Animated as Animated8, Easing as Easing2, StyleSheet as StyleSheet64 } from "react-native";
+var dotAnimations = Array.from({ length: 4 }).map(() => new Animated8.Value(1));
 var keyframes1 = [0, 1, 0.8, 0.5, 0, 0.5, 0.8, 1, 0];
 var keyframes3 = [0, 1, 0.5, 0.2, 0, 0.2, 0.5, 0.8, 1, 0];
 var keyFramesList = [keyframes3, keyframes1];
 var AnimatedSoundBars = ({ barColor = "white" }) => {
   const loopAnimation = (node, index) => {
-    const loop = Animated7.sequence(
+    const loop = Animated8.sequence(
       keyFramesList[index % keyFramesList.length].map((toValue) => {
-        return Animated7.timing(node, {
+        return Animated8.timing(node, {
           toValue,
-          easing: Easing.ease,
+          easing: Easing2.ease,
           useNativeDriver: true
         });
       })
     );
     return loop;
   };
-  const loadAnimation = (nodes) => Animated7.loop(Animated7.stagger(200, nodes.map(loopAnimation)))?.start?.();
-  React85.useEffect(() => {
+  const loadAnimation = (nodes) => Animated8.loop(Animated8.stagger(200, nodes.map(loopAnimation)))?.start?.();
+  React86.useEffect(() => {
     setTimeout(() => {
       loadAnimation(dotAnimations);
     }, 1);
   }, []);
-  return /* @__PURE__ */ React85.createElement(View70, { style: styles65.row }, dotAnimations.map((animation, index) => {
-    return /* @__PURE__ */ React85.createElement(
-      Animated7.View,
+  return /* @__PURE__ */ React86.createElement(View71, { style: styles66.row }, dotAnimations.map((animation, index) => {
+    return /* @__PURE__ */ React86.createElement(
+      Animated8.View,
       {
         key: `${index}`,
         style: [
-          styles65.bar,
+          styles66.bar,
           { backgroundColor: barColor },
           {
             transform: [
@@ -18299,10 +18394,10 @@ var AnimatedSoundBars = ({ barColor = "white" }) => {
 };
 var WaveFormView = class extends Component27 {
   render() {
-    return /* @__PURE__ */ React85.createElement(AnimatedSoundBars, { barColor: this.props.barColor || "white" });
+    return /* @__PURE__ */ React86.createElement(AnimatedSoundBars, { barColor: this.props.barColor || "white" });
   }
 };
-var styles65 = StyleSheet63.create({
+var styles66 = StyleSheet64.create({
   row: {
     // flex: 1,
     flexDirection: "row",
@@ -18949,7 +19044,7 @@ var RECORD_STATE = {
   onSpeechError: "onSpeechError",
   onSpeechStop: "onSpeechStop"
 };
-var styles66 = StyleSheet64.create({
+var styles67 = StyleSheet65.create({
   handle_container: {
     alignItems: "center",
     height: 26,
@@ -19015,8 +19110,10 @@ var styles66 = StyleSheet64.create({
     justifyContent: "center"
   },
   send_container1: {
-    backgroundColor: Color_default.bot_blue,
-    borderRadius: 7,
+    backgroundColor: "#1B365D",
+    borderRadius: 8,
+    width: 38,
+    height: 38,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center"
@@ -19029,33 +19126,47 @@ var styles66 = StyleSheet64.create({
     fontFamily: "Inter"
   },
   send_container: {
-    width: normalize(40),
-    height: normalize(40),
-    borderRadius: 6,
+    width: 38,
+    height: 38,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center"
   },
   send_main_container: {
-    width: normalize(40),
-    height: normalize(40),
+    width: 38,
+    height: 38,
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 6,
+    marginHorizontal: 0,
     backgroundColor: Color_default.red
   },
   container: {
-    justifyContent: "center"
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 6
   },
   primary: {
     flexDirection: "row",
     alignItems: "center"
   },
+  disclaimerText: {
+    fontSize: 11,
+    fontWeight: "400",
+    textAlign: "center",
+    color: "#666666",
+    paddingTop: 8,
+    paddingBottom: 4
+  },
   accessory: {
     height: 44
   }
 });
-var InputToolbar = class extends React86.Component {
+var InputToolbar = class extends React87.Component {
   static contextType = ThemeContext;
   voiceHelper = null;
   constructor(props) {
@@ -19137,7 +19248,7 @@ var InputToolbar = class extends React86.Component {
   };
   _renderActions = (_props) => {
     const theme = this.context;
-    return /* @__PURE__ */ React86.createElement(View71, { style: { flexDirection: "row" } }, theme?.v3?.footer?.buttons?.menu?.show && /* @__PURE__ */ React86.createElement(
+    return /* @__PURE__ */ React87.createElement(View72, { style: { flexDirection: "row" } }, theme?.v3?.footer?.buttons?.menu?.show && /* @__PURE__ */ React87.createElement(
       TouchableOpacity41,
       {
         onPress: () => {
@@ -19149,7 +19260,7 @@ var InputToolbar = class extends React86.Component {
         },
         style: { padding: 5, marginLeft: 5 }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         SvgIcon,
         {
           name: "MenuIcon",
@@ -19158,7 +19269,7 @@ var InputToolbar = class extends React86.Component {
           color: theme?.v3?.footer?.buttons?.menu?.icon_color || theme?.v3?.footer?.icons_color || "#697586"
         }
       )
-    ), theme?.v3?.footer?.buttons?.attachment?.show && /* @__PURE__ */ React86.createElement(
+    ), theme?.v3?.footer?.buttons?.attachment?.show && /* @__PURE__ */ React87.createElement(
       TouchableOpacity41,
       {
         onPress: () => {
@@ -19168,7 +19279,7 @@ var InputToolbar = class extends React86.Component {
         },
         style: { padding: 5 }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         SvgIcon,
         {
           name: "AttachmentIcon",
@@ -19186,56 +19297,61 @@ var InputToolbar = class extends React86.Component {
     return this._renderSend(this.props);
   }
   getSendButtonBgColor = (theme) => {
-    return theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#0D6EFD";
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
+    return bodyBtn?.bg_color || bodyBtn?.bgColor || theme?.v3?.footer?.buttons?.send?.bg_color || "#1B365D";
+  };
+  getSendButtonTextColor = (theme) => {
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
+    return bodyBtn?.color || bodyBtn?.textColor || theme?.v3?.footer?.buttons?.send?.color || "#FFFFFF";
   };
   _renderSend = (props) => {
     const theme = this.context;
     const isMicVisible = theme?.v3?.footer?.buttons?.microphone?.show === true && !this.props?.alwaysShowSend && !props?.alwaysShowSend;
-    const height = normalize(36);
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
-    return /* @__PURE__ */ React86.createElement(Send, { ...props, alwaysShowSend: true, disabled: false }, isMicVisible ? /* @__PURE__ */ React86.createElement(
-      View71,
+    return /* @__PURE__ */ React87.createElement(Send, { ...props, alwaysShowSend: true, disabled: false }, isMicVisible ? /* @__PURE__ */ React87.createElement(
+      View72,
       {
         pointerEvents: this.props.isMediaLoading ? "none" : "auto",
-        style: [styles66.send_container]
+        style: [styles67.send_container]
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         TouchableOpacity41,
         {
           onPress: () => {
             this.handleVoiceTextSwitch();
           }
         },
-        /* @__PURE__ */ React86.createElement(
+        /* @__PURE__ */ React87.createElement(
           SvgIcon,
           {
             name: this.state.isSTTViewShow ? "KeyboardIcon" : "MicIcon",
-            width: normalize(22),
-            height: normalize(22),
+            width: 14,
+            height: 14,
             color: theme?.v3?.footer?.buttons?.attachment?.icon_color || theme?.v3?.footer?.icons_color || "#697586"
           }
         )
       )
-    ) : /* @__PURE__ */ React86.createElement(
-      View71,
+    ) : /* @__PURE__ */ React87.createElement(
+      View72,
       {
         pointerEvents: "auto",
         style: [
-          styles66.send_container1,
+          styles67.send_container1,
           {
             backgroundColor: sendButtonBgColor,
-            width: normalize(height),
-            height: normalize(height)
+            width: 38,
+            height: 38,
+            borderRadius: 8
           }
         ]
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         SvgIcon,
         {
           name: "SendIcon",
-          width: normalize(16),
-          height: normalize(16),
-          color: theme?.v3?.body?.user_message?.color ? theme?.v3?.body?.user_message?.color : Color_default.white
+          width: 14,
+          height: 14,
+          color: this.getSendButtonTextColor(theme)
         }
       )
     ));
@@ -19246,21 +19362,21 @@ var InputToolbar = class extends React86.Component {
     }
     const theme = this.context;
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
-    return /* @__PURE__ */ React86.createElement(
-      View71,
+    return /* @__PURE__ */ React87.createElement(
+      View72,
       {
         style: {
           flex: 1
         }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         FadeInToBottom_default,
         {
           getRef: (ref) => {
             this.fadeInToBottomRef = ref;
           }
         },
-        /* @__PURE__ */ React86.createElement(
+        /* @__PURE__ */ React87.createElement(
           Composer,
           {
             theme,
@@ -19403,7 +19519,7 @@ var InputToolbar = class extends React86.Component {
     );
   };
   renderSTTView() {
-    return /* @__PURE__ */ React86.createElement(View71, { style: { flex: 1 } }, /* @__PURE__ */ React86.createElement(FadeInToTop_default, null, /* @__PURE__ */ React86.createElement(View71, { style: styles66.stt_sub }, /* @__PURE__ */ React86.createElement(View71, { style: styles66.stt_sub2 }, this.state.isRecordingstart ? /* @__PURE__ */ React86.createElement(WaveFormView, null) : /* @__PURE__ */ React86.createElement(
+    return /* @__PURE__ */ React87.createElement(View72, { style: { flex: 1 } }, /* @__PURE__ */ React87.createElement(FadeInToTop_default, null, /* @__PURE__ */ React87.createElement(View72, { style: styles67.stt_sub }, /* @__PURE__ */ React87.createElement(View72, { style: styles67.stt_sub2 }, this.state.isRecordingstart ? /* @__PURE__ */ React87.createElement(WaveFormView, null) : /* @__PURE__ */ React87.createElement(
       TouchableOpacity41,
       {
         onPress: () => {
@@ -19430,9 +19546,9 @@ var InputToolbar = class extends React86.Component {
             this.voiceHelper.startRecognizing();
           }
         },
-        style: styles66.stt_mic_main
+        style: styles67.stt_mic_main
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         SvgIcon,
         {
           name: this.state.recordState === RECORD_STATE.onSpeechEnd ? "SendIcon" : "MicIcon",
@@ -19441,7 +19557,7 @@ var InputToolbar = class extends React86.Component {
           color: Color_default.white
         }
       )
-    )), /* @__PURE__ */ React86.createElement(View71, { style: {} }, /* @__PURE__ */ React86.createElement(Text53, { style: styles66.stt_title }, this.getRecordTitle()), this.state.recordState !== RECORD_STATE.onSpeechStop && /* @__PURE__ */ React86.createElement(
+    )), /* @__PURE__ */ React87.createElement(View72, { style: {} }, /* @__PURE__ */ React87.createElement(Text53, { style: styles67.stt_title }, this.getRecordTitle()), this.state.recordState !== RECORD_STATE.onSpeechStop && /* @__PURE__ */ React87.createElement(
       TouchableOpacity41,
       {
         style: {
@@ -19467,7 +19583,7 @@ var InputToolbar = class extends React86.Component {
           );
         }
       },
-      /* @__PURE__ */ React86.createElement(
+      /* @__PURE__ */ React87.createElement(
         Text53,
         {
           style: {
@@ -19498,7 +19614,7 @@ var InputToolbar = class extends React86.Component {
   }
   renderAccessory() {
     if (this.props.renderAccessory) {
-      return /* @__PURE__ */ React86.createElement(View71, { style: [styles66.accessory, this.props.accessoryStyle] }, this.props.renderAccessory(this.props));
+      return /* @__PURE__ */ React87.createElement(View72, { style: [styles67.accessory, this.props.accessoryStyle] }, this.props.renderAccessory(this.props));
     }
     return null;
   }
@@ -19522,33 +19638,46 @@ var InputToolbar = class extends React86.Component {
   };
   render() {
     const theme = this.context;
-    const minHeight = this.state.isSTTViewShow && this.state.recordState === RECORD_STATE.onSpeechStop ? 52 : MIN_TOOL_BAR_HEIGHT || 72;
-    return /* @__PURE__ */ React86.createElement(View71, { style: [styles66.container, this.props.containerStyle] }, /* @__PURE__ */ React86.createElement(View71, { style: { flexDirection: "column" } }, this.renderSuggestionsView(), this.renderMediaView(), this.renderQuickRepliesView(theme), /* @__PURE__ */ React86.createElement(
-      View71,
+    const footerBgColor = theme?.v3?.footer?.bg_color || "#FFFFFF";
+    return /* @__PURE__ */ React87.createElement(
+      View72,
       {
         style: [
-          styles66.primary,
-          this.props.primaryStyle,
+          styles67.container,
           {
-            minHeight: normalize(minHeight),
-            backgroundColor: theme?.v3?.footer?.bg_color || "#6975860D"
-          }
+            backgroundColor: footerBgColor
+          },
+          this.props.containerStyle
         ]
       },
-      this.isShowActions() && this.renderActions(),
-      theme?.v3?.footer?.buttons?.microphone?.show ? this.state.isSTTViewShow ? this.renderSTTView() : this.renderComposer() : this.renderComposer(),
-      this.isShowActions() && this.renderSend()
-    )), this.renderAccessory(), this.renderSpeechToText());
+      /* @__PURE__ */ React87.createElement(View72, { style: { flexDirection: "column" } }, this.renderSuggestionsView(), this.renderMediaView(), this.renderQuickRepliesView(theme), /* @__PURE__ */ React87.createElement(
+        View72,
+        {
+          style: [
+            styles67.primary,
+            this.props.primaryStyle,
+            {
+              backgroundColor: "transparent"
+            }
+          ]
+        },
+        this.isShowActions() && this.renderActions(),
+        theme?.v3?.footer?.buttons?.microphone?.show ? this.state.isSTTViewShow ? this.renderSTTView() : this.renderComposer() : this.renderComposer(),
+        this.isShowActions() && this.renderSend()
+      ), /* @__PURE__ */ React87.createElement(Text53, { style: styles67.disclaimerText }, "AI responses may occasionally be incorrect or outdated.")),
+      this.renderAccessory(),
+      this.renderSpeechToText()
+    );
   }
 };
 
 // bot-sdk/chat/components/MessageContainer.tsx
 init_esm_shims();
-import * as React93 from "react";
+import * as React94 from "react";
 import { PureComponent } from "react";
 import {
-  View as View77,
-  StyleSheet as StyleSheet70,
+  View as View78,
+  StyleSheet as StyleSheet71,
   TouchableOpacity as TouchableOpacity42,
   Text as Text57,
   Platform as Platform18,
@@ -19558,13 +19687,13 @@ import {
 
 // bot-sdk/chat/components/Message.tsx
 init_esm_shims();
-import * as React92 from "react";
-import { Image as Image20, View as View76, StyleSheet as StyleSheet69 } from "react-native";
+import * as React93 from "react";
+import { Image as Image20, View as View77, StyleSheet as StyleSheet70 } from "react-native";
 
 // bot-sdk/chat/components/Avatar.tsx
 init_esm_shims();
-import React87, { Component as Component29 } from "react";
-import { StyleSheet as StyleSheet65, View as View72 } from "react-native";
+import React88, { Component as Component29 } from "react";
+import { StyleSheet as StyleSheet66, View as View73 } from "react-native";
 var Avatar = class extends Component29 {
   constructor(props) {
     super(props);
@@ -19594,11 +19723,11 @@ var Avatar = class extends Component29 {
       return this.props.renderAvatar(avatarProps);
     }
     if (this.props.currentMessage) {
-      return /* @__PURE__ */ React87.createElement(
+      return /* @__PURE__ */ React88.createElement(
         UserAvatar,
         {
           avatarStyle: [
-            styles67[this.props.position].image,
+            styles68[this.props.position].image,
             this.props.imageStyle && this.props.imageStyle[this.props.position]
           ],
           textStyle: this.props.textStyle ? this.props.textStyle : {},
@@ -19628,40 +19757,40 @@ var Avatar = class extends Component29 {
       return null;
     }
     if (!showAvatarForEveryMessage && currentMessage && messageToCompare && isSameUser(currentMessage, messageToCompare) && isSameDay(currentMessage, messageToCompare)) {
-      return /* @__PURE__ */ React87.createElement(
-        View72,
+      return /* @__PURE__ */ React88.createElement(
+        View73,
         {
           style: [
-            styles67[position].container,
-            styles67[position][computedStyle],
+            styles68[position].container,
+            styles68[position][computedStyle],
             containerStyle2 && containerStyle2[position]
           ]
         },
-        renderAvatar ? /* @__PURE__ */ React87.createElement(
-          View72,
+        renderAvatar ? /* @__PURE__ */ React88.createElement(
+          View73,
           {
             style: [
-              styles67[position].image,
+              styles68[position].image,
               imageStyle && imageStyle[position]
             ]
           }
-        ) : /* @__PURE__ */ React87.createElement(
+        ) : /* @__PURE__ */ React88.createElement(
           UserAvatar,
           {
             avatarStyle: [
-              styles67[position].image,
+              styles68[position].image,
               imageStyle && imageStyle[position]
             ]
           }
         )
       );
     }
-    return /* @__PURE__ */ React87.createElement(
-      View72,
+    return /* @__PURE__ */ React88.createElement(
+      View73,
       {
         style: [
-          styles67[position].container,
-          styles67[position][computedStyle],
+          styles68[position].container,
+          styles68[position][computedStyle],
           containerStyle2 && containerStyle2[position]
         ]
       },
@@ -19669,8 +19798,8 @@ var Avatar = class extends Component29 {
     );
   }
 };
-var styles67 = {
-  left: StyleSheet65.create({
+var styles68 = {
+  left: StyleSheet66.create({
     container: {
       marginRight: 8
     },
@@ -19686,7 +19815,7 @@ var styles67 = {
       borderRadius: 18
     }
   }),
-  center: StyleSheet65.create({
+  center: StyleSheet66.create({
     container: {
       marginRight: 8
     },
@@ -19702,7 +19831,7 @@ var styles67 = {
       borderRadius: 18
     }
   }),
-  right: StyleSheet65.create({
+  right: StyleSheet66.create({
     container: {
       marginLeft: 8
     },
@@ -19722,21 +19851,21 @@ var styles67 = {
 
 // bot-sdk/chat/components/Bubble.tsx
 init_esm_shims();
-import * as React90 from "react";
+import * as React91 from "react";
 import {
   Text as Text55,
-  StyleSheet as StyleSheet67,
+  StyleSheet as StyleSheet68,
   TouchableWithoutFeedback as TouchableWithoutFeedback2,
-  View as View74,
+  View as View75,
   ToastAndroid,
   Platform as Platform17,
-  Animated as Animated8
+  Animated as Animated9
 } from "react-native";
 
 // bot-sdk/chat/components/Time.tsx
 init_esm_shims();
-import * as React88 from "react";
-import { StyleSheet as StyleSheet66, Text as Text54, View as View73 } from "react-native";
+import * as React89 from "react";
+import { StyleSheet as StyleSheet67, Text as Text54, View as View74 } from "react-native";
 import dayjs8 from "dayjs";
 import "dayjs/locale/en";
 import "dayjs/locale/en";
@@ -19757,7 +19886,7 @@ var textStyle2 = {
   marginTop: 5,
   opacity: 0.8
 };
-var styles68 = {
+var styles69 = {
   main_con: {
     flexDirection: "row",
     backgroundColor: "transparent",
@@ -19765,7 +19894,7 @@ var styles68 = {
     justifyContent: "center",
     alignItems: "center"
   },
-  left: StyleSheet66.create({
+  left: StyleSheet67.create({
     container: {
       ...containerStyle,
       marginTop: 1
@@ -19775,7 +19904,7 @@ var styles68 = {
       ...textStyle2
     }
   }),
-  center: StyleSheet66.create({
+  center: StyleSheet67.create({
     container: {
       ...containerStyle
     },
@@ -19784,7 +19913,7 @@ var styles68 = {
       ...textStyle2
     }
   }),
-  right: StyleSheet66.create({
+  right: StyleSheet67.create({
     container: {
       ...containerStyle,
       marginTop: 0
@@ -19807,74 +19936,60 @@ var Time = class extends BaseView_default {
     const now = dayjs8();
     const date = dayjs8(myDate);
     const diffInDays = date.diff(now, "day");
+    const timeStr = date.format("hh:mm");
+    const ampm = date.format("A") === "PM" ? "p.m." : "a.m.";
     if (diffInDays === -1) {
-      return date.format("hh:mm A, [Yesterday]");
+      return `${timeStr} ${ampm} Yesterday`;
     } else if (diffInDays === 0) {
-      return date.format("hh:mm A, [Today]");
+      return `${timeStr} ${ampm} Today`;
     } else if (diffInDays === 1) {
-      return date.format("hh:mm A, [Tomorrow]");
+      return `${timeStr} ${ampm} Tomorrow`;
     } else if (diffInDays < -1 && diffInDays >= -7) {
-      return date.format("[Last] dddd");
+      return `${timeStr} ${ampm} ` + date.format("dddd");
     } else if (diffInDays > 1 && diffInDays <= 7) {
-      return date.format("hh:mm A, dddd");
+      return `${timeStr} ${ampm} ` + date.format("dddd");
     } else {
-      return date.format("MM/DD/YYYY");
+      return `${timeStr} ${ampm} ` + date.format("MM/DD/YYYY");
     }
   };
   render() {
     const { position, createdOn } = this.props;
     if (createdOn && position) {
-      return /* @__PURE__ */ React88.createElement(
-        View73,
+      return /* @__PURE__ */ React89.createElement(View74, { style: { backgroundColor: "transparent" } }, /* @__PURE__ */ React89.createElement(
+        Text54,
         {
           style: [
-            styles68[position].container
+            {
+              fontSize: 12,
+              color: this.props?.theme?.v3?.body?.time_stamp?.color || "#6B7280",
+              fontFamily: this.props?.theme?.v3?.body?.font?.family || "Inter",
+              fontWeight: "400"
+            }
           ]
         },
-        /* @__PURE__ */ React88.createElement(
-          Text54,
-          {
-            style: [
-              {
-                fontSize: normalize(10),
-                backgroundColor: "transparent",
-                marginTop: normalize(3),
-                opacity: 0.8
-              },
-              {
-                color: this.props?.theme?.v3?.body?.time_stamp?.color || "#1d2939",
-                fontFamily: this.props?.theme?.v3?.body?.font?.family || "Inter"
-              },
-              {
-                fontSize: normalize(9)
-              }
-            ]
-          },
-          " ",
-          this.dateToFromNowDaily(createdOn)
-        )
-      );
+        this.dateToFromNowDaily(createdOn)
+      ));
     }
-    return /* @__PURE__ */ React88.createElement(React88.Fragment, null);
+    return /* @__PURE__ */ React89.createElement(React89.Fragment, null);
   }
 };
 
 // bot-sdk/chat/BotChatContext.tsx
 init_esm_shims();
-import * as React89 from "react";
-var BotChatContext = React89.createContext({
+import * as React90 from "react";
+var BotChatContext = React90.createContext({
   getLocale: () => "en",
   actionSheet: () => ({
     showActionSheetWithOptions: () => {
     }
   })
 });
-var useChatContext = () => React89.useContext(BotChatContext);
+var useChatContext = () => React90.useContext(BotChatContext);
 
 // bot-sdk/chat/components/Bubble.tsx
 init_PlatformCheck();
 import KoraBotClient from "rn-kore-bot-socket-lib-v79";
-var Bubble = class extends React90.Component {
+var Bubble = class extends React91.Component {
   static contextType = ThemeContext;
   actionSheet;
   static Bubble;
@@ -19882,9 +19997,9 @@ var Bubble = class extends React90.Component {
     super(props);
     this.actionSheet = BotChatContext;
     this.state = {
-      shakeAnim: new Animated8.Value(0),
+      shakeAnim: new Animated9.Value(0),
       // Initial X position
-      shakeInterpolate: new Animated8.Value(0)
+      shakeInterpolate: new Animated9.Value(0)
     };
   }
   static defaultProps;
@@ -19912,8 +20027,8 @@ var Bubble = class extends React90.Component {
   };
   shake = () => {
     this.state.shakeAnim.setValue(0);
-    Animated8.sequence([
-      Animated8.timing(this.state.shakeAnim, {
+    Animated9.sequence([
+      Animated9.timing(this.state.shakeAnim, {
         toValue: 1,
         duration: 500,
         // Duration of the shake
@@ -19961,7 +20076,7 @@ var Bubble = class extends React90.Component {
     const { currentMessage, nextMessage, position, containerToNextStyle } = this.props;
     if (currentMessage && nextMessage && position && isSameUser(currentMessage, nextMessage) && isSameDay(currentMessage, nextMessage)) {
       return [
-        styles69[position].containerToNext,
+        styles70[position].containerToNext,
         containerToNextStyle && containerToNextStyle[position]
       ];
     }
@@ -19976,7 +20091,7 @@ var Bubble = class extends React90.Component {
     } = this.props;
     if (currentMessage && previousMessage && position && isSameUser(currentMessage, previousMessage) && isSameDay(currentMessage, previousMessage)) {
       return [
-        styles69[position].containerToPrevious,
+        styles70[position].containerToPrevious,
         containerToPreviousStyle && containerToPreviousStyle[position]
       ];
     }
@@ -20004,11 +20119,11 @@ var Bubble = class extends React90.Component {
       console.log("\u26A0\uFE0F  Bot text value is not a string type:", text);
       console.log("\u26A0\uFE0F  Type of text:", typeof text);
       console.log("\u26A0\uFE0F  Full message data:", JSON.stringify(this.props.currentMessage, null, 2));
-      return /* @__PURE__ */ React90.createElement(React90.Fragment, null);
+      return /* @__PURE__ */ React91.createElement(React91.Fragment, null);
     }
     console.log("\u2705 Rendering bot text:", text);
     const theme = this.context;
-    return /* @__PURE__ */ React90.createElement(
+    return /* @__PURE__ */ React91.createElement(
       BotText,
       {
         text,
@@ -20024,7 +20139,7 @@ var Bubble = class extends React90.Component {
         return this.props.renderMessageText(messageTextProps);
       }
       const theme = this.context;
-      return /* @__PURE__ */ React90.createElement(MessageText_default, { ...messageTextProps, theme });
+      return /* @__PURE__ */ React91.createElement(MessageText_default, { ...messageTextProps, theme });
     }
     return null;
   };
@@ -20033,7 +20148,7 @@ var Bubble = class extends React90.Component {
   };
   renderBubbleViews = (templateType, payload, theme) => {
     const { containerStyle: containerStyle2, wrapperStyle, optionTitles, ...messageTextProps } = this.props;
-    return /* @__PURE__ */ React90.createElement(
+    return /* @__PURE__ */ React91.createElement(
       BotTemplate,
       {
         templateType,
@@ -20113,7 +20228,7 @@ var Bubble = class extends React90.Component {
       let CustomView = templateInjection?.get?.(templateType);
       if (CustomView) {
         try {
-          return /* @__PURE__ */ React90.createElement(
+          return /* @__PURE__ */ React91.createElement(
             CustomView,
             {
               payload,
@@ -20127,69 +20242,99 @@ var Bubble = class extends React90.Component {
         }
       }
     }
-    return /* @__PURE__ */ React90.createElement(View74, { style: { marginTop: normalize(0) } }, this.renderBubbleViews(templateType, payload, theme));
+    return /* @__PURE__ */ React91.createElement(View75, { style: { marginTop: normalize(0) } }, this.renderBubbleViews(templateType, payload, theme));
   };
   renderUsername = () => {
     return null;
   };
   renderTime = () => {
-    let createdOn = this.props.currentMessage?.createdOn || this.props.currentMessage.message?.[0]?.component?.payload?.createdOn;
-    if (createdOn) {
-      const {
-        position = "left",
-        containerStyle: containerStyle2,
-        wrapperStyle,
-        textStyle: textStyle3,
-        ...timeProps
-      } = this.props;
-      if (this.props.renderTime) {
-        return this.props.renderTime(timeProps);
-      }
-      const theme = this.context;
-      const isUserMessage = this.props.currentMessage?.type === "user_message";
-      return /* @__PURE__ */ React90.createElement(View74, { style: { flexDirection: "row" } }, isUserMessage && /* @__PURE__ */ React90.createElement(
-        Time,
-        {
-          createdOn,
-          ...timeProps,
-          theme
-        }
-      ), /* @__PURE__ */ React90.createElement(
-        Text55,
-        {
-          style: [
-            {
-              fontSize: normalize(10),
-              textAlign: "center",
-              opacity: 0.8,
-              marginStart: position === "left" ? theme?.v3?.body?.icon?.show ? 5 : 0 : 5
-            },
-            isUserMessage && {
-              marginEnd: 10
-            },
-            {
-              color: theme?.v3?.body?.time_stamp?.color || "#1d2939",
-              fontFamily: theme?.v3?.body?.font?.family || "Inter",
-              opacity: 1
-            },
-            {
-              fontWeight: "700",
-              alignSelf: "center",
-              fontSize: normalize(10)
-            }
-          ]
-        },
-        isUserMessage ? "You" : KoraBotClient.getInstance().getBotName()
-      ), !isUserMessage && /* @__PURE__ */ React90.createElement(
-        Time,
-        {
-          createdOn,
-          ...timeProps,
-          theme
-        }
-      ));
+    let createdOn = this.props.currentMessage?.createdOn || this.props.currentMessage?.created_at || this.props.currentMessage?.timeMillis || this.props.currentMessage.message?.[0]?.component?.payload?.createdOn || this.props.currentMessage.message?.[0]?.createdOn || (/* @__PURE__ */ new Date()).toISOString();
+    const {
+      position = "left",
+      containerStyle: containerStyle2,
+      wrapperStyle,
+      textStyle: textStyle3,
+      ...timeProps
+    } = this.props;
+    if (this.props.renderTime) {
+      return this.props.renderTime(timeProps);
     }
-    return /* @__PURE__ */ React90.createElement(React90.Fragment, null);
+    const theme = this.context;
+    const isUserMessage = this.props.currentMessage?.type === "user_message";
+    const botName = KoraBotClient.getInstance().getBotName() || "Digital Advocate";
+    const primaryTextColor = theme?.v3?.general?.colors?.primary_text || "#111827";
+    const fontFamily = theme?.v3?.body?.font?.family || "Inter";
+    if (isUserMessage) {
+      return /* @__PURE__ */ React91.createElement(
+        View75,
+        {
+          style: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            marginBottom: 6
+          }
+        },
+        /* @__PURE__ */ React91.createElement(
+          Time,
+          {
+            createdOn,
+            ...timeProps,
+            position: "right",
+            theme
+          }
+        ),
+        /* @__PURE__ */ React91.createElement(
+          Text55,
+          {
+            style: {
+              fontSize: 12,
+              fontWeight: "700",
+              color: primaryTextColor,
+              fontFamily,
+              marginLeft: 6,
+              marginRight: 6
+            }
+          },
+          "You"
+        ),
+        /* @__PURE__ */ React91.createElement(UserSilhouetteIcon, { width: 14, height: 14, color: primaryTextColor })
+      );
+    } else {
+      return /* @__PURE__ */ React91.createElement(
+        View75,
+        {
+          style: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            marginBottom: 6
+          }
+        },
+        /* @__PURE__ */ React91.createElement(
+          Text55,
+          {
+            style: {
+              fontSize: 12,
+              fontWeight: "700",
+              color: primaryTextColor,
+              fontFamily,
+              marginRight: 6
+            }
+          },
+          botName
+        ),
+        /* @__PURE__ */ React91.createElement(
+          Time,
+          {
+            createdOn,
+            ...timeProps,
+            position: "left",
+            theme
+          }
+        )
+      );
+    }
   };
   isBotTextMessage = () => {
     return this.props.currentMessage?.type === "bot_response" && getTemplateType(this.props.currentMessage?.message) === TEMPLATE_TYPES.TEXT;
@@ -20201,46 +20346,46 @@ var Bubble = class extends React90.Component {
     }
     const { position, containerStyle: containerStyle2, wrapperStyle, bottomContainerStyle } = this.props;
     const theme = this.context;
-    return /* @__PURE__ */ React90.createElement(
-      View74,
+    return /* @__PURE__ */ React91.createElement(
+      View75,
       {
         style: [
-          styles69[position].container,
+          styles70[position].container,
           containerStyle2 && containerStyle2[position]
         ]
       },
-      theme?.v3?.body?.time_stamp?.show && theme?.v3?.body?.time_stamp?.position === "top" && this.renderTime(),
-      /* @__PURE__ */ React90.createElement(
-        View74,
+      theme?.v3?.body?.time_stamp?.show !== false && theme?.v3?.body?.time_stamp?.position !== "bottom" && this.renderTime(),
+      /* @__PURE__ */ React91.createElement(
+        View75,
         {
           style: [
-            styles69[position].wrapper,
+            styles70[position].wrapper,
             this.styledBubbleToNext(),
             this.styledBubbleToPrevious(),
             wrapperStyle && wrapperStyle[position],
             theme?.v3?.body?.icon?.show && position === "left" && { marginLeft: 5 }
           ]
         },
-        /* @__PURE__ */ React90.createElement(
+        /* @__PURE__ */ React91.createElement(
           TouchableWithoutFeedback2,
           {
             onLongPress: (event) => this.onLongPress(event, position === "right"),
             accessibilityRole: "text",
             ...this.props.touchableProps
           },
-          /* @__PURE__ */ React90.createElement(
-            Animated8.View,
+          /* @__PURE__ */ React91.createElement(
+            Animated9.View,
             {
               style: [
                 { transform: [{ translateX: this.state.shakeInterpolate }] }
               ]
             },
             this.renderBubbleContent(),
-            /* @__PURE__ */ React90.createElement(
-              View74,
+            /* @__PURE__ */ React91.createElement(
+              View75,
               {
                 style: [
-                  styles69[position].bottom,
+                  styles70[position].bottom,
                   bottomContainerStyle && bottomContainerStyle[position]
                 ]
               },
@@ -20254,8 +20399,8 @@ var Bubble = class extends React90.Component {
     );
   }
 };
-var styles69 = {
-  left: StyleSheet67.create({
+var styles70 = {
+  left: StyleSheet68.create({
     container: {
       flex: 1,
       alignItems: "flex-start"
@@ -20274,7 +20419,7 @@ var styles69 = {
       justifyContent: "flex-start"
     }
   }),
-  right: StyleSheet67.create({
+  right: StyleSheet68.create({
     container: {
       flex: 1,
       alignItems: "flex-end"
@@ -20293,7 +20438,7 @@ var styles69 = {
       justifyContent: "flex-end"
     }
   }),
-  content: StyleSheet67.create({
+  content: StyleSheet68.create({
     tick: {
       fontSize: normalize(10),
       backgroundColor: Color_default.backgroundTransparent,
@@ -20315,7 +20460,7 @@ var styles69 = {
       marginHorizontal: 10
     }
   }),
-  center: StyleSheet67.create({
+  center: StyleSheet68.create({
     containerToNext: {},
     containerToPrevious: {},
     container: {},
@@ -20329,11 +20474,11 @@ Bubble.defaultProps = {
 
 // bot-sdk/chat/components/Day.tsx
 init_esm_shims();
-import * as React91 from "react";
+import * as React92 from "react";
 import {
-  StyleSheet as StyleSheet68,
+  StyleSheet as StyleSheet69,
   Text as Text56,
-  View as View75
+  View as View76
 } from "react-native";
 import dayjs9 from "dayjs";
 import "dayjs/locale/en";
@@ -20341,7 +20486,7 @@ import advancedFormat5 from "dayjs/plugin/advancedFormat";
 import customParseFormat5 from "dayjs/plugin/customParseFormat";
 dayjs9.extend(advancedFormat5);
 dayjs9.extend(customParseFormat5);
-var styles70 = StyleSheet68.create({
+var styles71 = StyleSheet69.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
@@ -20373,11 +20518,11 @@ function Day({
       return null;
     }
   }
-  return /* @__PURE__ */ React91.createElement(View75, { style: [styles70.container, containerStyle2] }, /* @__PURE__ */ React91.createElement(View75, { style: wrapperStyle }, /* @__PURE__ */ React91.createElement(
+  return /* @__PURE__ */ React92.createElement(View76, { style: [styles71.container, containerStyle2] }, /* @__PURE__ */ React92.createElement(View76, { style: wrapperStyle }, /* @__PURE__ */ React92.createElement(
     Text56,
     {
       style: [
-        styles70.text,
+        styles71.text,
         textStyle3,
         {
           color: theme?.v3?.body?.time_stamp?.color,
@@ -20397,7 +20542,7 @@ var TIMESTAMP_OFFSET_TRIM = normalize(7);
 var effectiveTimestampAvatarOffset = () => Math.max(0, TIMESTAMP_ROW_OFFSET - TIMESTAMP_OFFSET_TRIM);
 var effectiveTimestampAvatarOffsetWhenTsBelow = () => TIMESTAMP_ROW_OFFSET;
 var AVATAR_MARGIN_BOTTOM_TS_TOP_ICON_BOTTOM = normalize(6);
-var styles71 = {
+var styles72 = {
   bot_icon: {
     height: normalize(23),
     width: normalize(23),
@@ -20418,16 +20563,16 @@ var styles71 = {
     resizeMode: "stretch",
     margin: 0
   },
-  left: StyleSheet69.create({
+  left: StyleSheet70.create({
     container: {
       flexDirection: "row",
-      alignItems: "flex-end",
+      alignItems: "flex-start",
       justifyContent: "flex-start",
-      marginLeft: 8,
-      marginRight: 0
+      marginLeft: 16,
+      marginRight: 16
     }
   }),
-  center: StyleSheet69.create({
+  center: StyleSheet70.create({
     container: {
       flexDirection: "row",
       alignItems: "stretch",
@@ -20436,17 +20581,17 @@ var styles71 = {
       marginRight: 0
     }
   }),
-  right: StyleSheet69.create({
+  right: StyleSheet70.create({
     container: {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "flex-end",
-      marginLeft: 0,
-      marginRight: 8
+      marginLeft: 16,
+      marginRight: 16
     }
   })
 };
-var Message = class extends React92.Component {
+var Message = class extends React93.Component {
   botIconUrl = null;
   state = {
     imageLoadFailed: false
@@ -20531,11 +20676,11 @@ var Message = class extends React92.Component {
   renderDefaultBotAvatar = (avatarProps) => {
     const currentMessage = avatarProps.currentMessage || this.props.currentMessage;
     const iconUrl = currentMessage?.icon || this.props.fallbackBotIcon || null;
-    return /* @__PURE__ */ React92.createElement(
-      View76,
+    return /* @__PURE__ */ React93.createElement(
+      View77,
       {
         style: [
-          styles71.bot_icon_con2,
+          styles72.bot_icon_con2,
           {
             backgroundColor: Color_default.transparent,
             alignItems: "center",
@@ -20543,14 +20688,14 @@ var Message = class extends React92.Component {
           }
         ]
       },
-      /* @__PURE__ */ React92.createElement(
+      /* @__PURE__ */ React93.createElement(
         Image20,
         {
           source: this.state.imageLoadFailed || !iconUrl ? placeholder.default_bot_icon : {
             uri: iconUrl
           },
           resizeMode: "cover",
-          style: [styles71.bot_icon, { alignSelf: "center" }],
+          style: [styles72.bot_icon, { alignSelf: "center" }],
           onError: () => {
             this.setState({ imageLoadFailed: true });
           }
@@ -20561,16 +20706,16 @@ var Message = class extends React92.Component {
   renderBotAvatarSlot() {
     const { currentMessage, theme, position } = this.props;
     if (currentMessage?.type !== "bot_response" || !theme?.v3?.body?.icon?.show) {
-      return /* @__PURE__ */ React92.createElement(View76, { style: { width: normalize(5) } });
+      return null;
     }
     if (!theme?.v3?.body?.icon?.bot_icon) {
-      return /* @__PURE__ */ React92.createElement(View76, { style: { width: normalize(5) } });
+      return null;
     }
     const newPosition = position ? position : "left";
     const customRender = this.props.renderAvatar;
     const renderFn = customRender != null ? customRender : this.renderDefaultBotAvatar;
     const containerOffset = this.getTimestampAvatarOffset();
-    return /* @__PURE__ */ React92.createElement(
+    return /* @__PURE__ */ React93.createElement(
       Avatar,
       {
         renderAvatar: renderFn,
@@ -20583,7 +20728,7 @@ var Message = class extends React92.Component {
         onPressAvatar: this.props.onPressAvatar,
         onLongPressAvatar: this.props.onLongPressAvatar,
         containerStyle: {
-          [newPosition]: [styles71.bot_icon_con, containerOffset]
+          [newPosition]: [styles72.bot_icon_con, containerOffset]
         }
       }
     );
@@ -20594,7 +20739,7 @@ var Message = class extends React92.Component {
       if (this.props.renderDay) {
         return this.props.renderDay(props);
       }
-      return /* @__PURE__ */ React92.createElement(Day, { ...props });
+      return /* @__PURE__ */ React93.createElement(Day, { ...props });
     }
     return null;
   }
@@ -20605,7 +20750,7 @@ var Message = class extends React92.Component {
       onListItemClick: this.props.onListItemClick,
       onSendText: this.props.onSendText
     };
-    return /* @__PURE__ */ React92.createElement(Bubble, { ...newProps });
+    return /* @__PURE__ */ React93.createElement(Bubble, { ...newProps });
   }
   render() {
     const { currentMessage, nextMessage, position, containerStyle: containerStyle2 } = this.props;
@@ -20616,33 +20761,31 @@ var Message = class extends React92.Component {
       }
       const sameUser = isSameUser(currentMessage, nextMessage);
       const newPosition = position ? position : "left";
-      return /* @__PURE__ */ React92.createElement(View76, null, /* @__PURE__ */ React92.createElement(View76, { style: { flexDirection: "column" } }, this.renderDay(), /* @__PURE__ */ React92.createElement(View76, { style: { flexDirection: "row", marginBottom: normalize(5) } }, this.renderBotAvatarSlot(), /* @__PURE__ */ React92.createElement(
-        View76,
+      return /* @__PURE__ */ React93.createElement(View77, { style: { marginBottom: 16 } }, /* @__PURE__ */ React93.createElement(View77, { style: { flexDirection: "column" } }, this.renderDay(), /* @__PURE__ */ React93.createElement(View77, { style: { flexDirection: "row" } }, this.renderBotAvatarSlot(), /* @__PURE__ */ React93.createElement(
+        View77,
         {
           style: [
-            styles71[newPosition].container,
-            { marginBottom: sameUser ? 2 : 10 },
-            !this.props.inverted && { marginBottom: 2 },
+            styles72[newPosition].container,
             containerStyle2 && containerStyle2[position ? position : "left"],
             { flex: 1 },
             this.props?.theme?.v3?.body?.icon?.show && currentMessage?.type === "bot_response" && position === "left" && {
               marginLeft: 0
             },
             position === "right" && {
-              marginRight: normalize(8)
+              marginRight: 0
             }
           ]
         },
         this.renderBubble()
       ))));
     }
-    return /* @__PURE__ */ React92.createElement(React92.Fragment, null);
+    return /* @__PURE__ */ React93.createElement(React93.Fragment, null);
   }
 };
 
 // bot-sdk/chat/components/MessageContainer.tsx
 import KoreBotClient, { ApiService } from "rn-kore-bot-socket-lib-v79";
-var styles72 = StyleSheet70.create({
+var styles73 = StyleSheet71.create({
   container: {
     flex: 1
   },
@@ -20684,8 +20827,8 @@ var styles72 = StyleSheet70.create({
     // Android shadow
   },
   contentContainerStyle: {
-    //flexGrow: 1,
-    //justifyContent: 'flex-end',
+    paddingTop: 16,
+    paddingBottom: 16
   },
   emptyChatContainer: {
     flex: 1,
@@ -20729,7 +20872,7 @@ var MessageContainer = class extends PureComponent {
     },
     onQuickReply: () => {
     },
-    inverted: true,
+    inverted: false,
     loadEarlier: false,
     listViewProps: {},
     invertibleScrollViewProps: {},
@@ -20842,7 +20985,7 @@ var MessageContainer = class extends PureComponent {
         inverted,
         nextMessage,
         itemIndex: index,
-        isFirstMsz: totalLength - 1 === index,
+        isFirstMsz: inverted ? totalLength - 1 === index : index === 0,
         position,
         onListItemClick: this.onListItemClick,
         onSendText: this.props.onSendText,
@@ -20852,7 +20995,7 @@ var MessageContainer = class extends PureComponent {
         return this.props.renderMessage(messageProps);
       }
       const theme = this.context;
-      return /* @__PURE__ */ React93.createElement(Message, { ...messageProps, theme });
+      return /* @__PURE__ */ React94.createElement(Message, { ...messageProps, theme });
     }
     return null;
   };
@@ -20864,21 +21007,21 @@ var MessageContainer = class extends PureComponent {
   };
   renderChatEmpty = () => {
     if (this.props.renderChatEmpty) {
-      return this.props.inverted ? this.props.renderChatEmpty() : /* @__PURE__ */ React93.createElement(View77, { style: styles72.emptyChatContainer }, this.props.renderChatEmpty());
+      return this.props.inverted ? /* @__PURE__ */ React94.createElement(View78, { style: styles73.emptyChatContainer }, this.props.renderChatEmpty()) : this.props.renderChatEmpty();
     }
-    return /* @__PURE__ */ React93.createElement(View77, { style: styles72.container });
+    return /* @__PURE__ */ React94.createElement(View78, { style: styles73.container });
   };
-  renderHeaderWrapper = () => /* @__PURE__ */ React93.createElement(View77, { style: styles72.headerWrapper }, this.renderLoadEarlier());
+  renderHeaderWrapper = () => /* @__PURE__ */ React94.createElement(View78, { style: styles73.headerWrapper }, this.renderLoadEarlier());
   renderScrollBottomComponent() {
     const { scrollToBottomComponent } = this.props;
     if (scrollToBottomComponent) {
       return scrollToBottomComponent();
     }
-    return /* @__PURE__ */ React93.createElement(Text57, null, "V");
+    return /* @__PURE__ */ React94.createElement(Text57, null, "V");
   }
   renderScrollToBottomWrapper() {
     const propsStyle = this.props.scrollToBottomStyle || {};
-    return /* @__PURE__ */ React93.createElement(View77, { style: [styles72.scrollToBottomStyle, propsStyle] }, /* @__PURE__ */ React93.createElement(
+    return /* @__PURE__ */ React94.createElement(View78, { style: [styles73.scrollToBottomStyle, propsStyle] }, /* @__PURE__ */ React94.createElement(
       TouchableOpacity42,
       {
         onPress: () => this.scrollToBottom(false),
@@ -20961,29 +21104,29 @@ var MessageContainer = class extends PureComponent {
     if (!this.state.isListScrollable)
       return null;
     if (this.props.loadEarlier) {
-      return /* @__PURE__ */ React93.createElement(ActivityIndicator5, { size: "small", style: { padding: 10 } });
+      return /* @__PURE__ */ React94.createElement(ActivityIndicator5, { size: "small", style: { padding: 10 } });
     }
-    return /* @__PURE__ */ React93.createElement(View77, { style: styles72.history_container }, /* @__PURE__ */ React93.createElement(
+    return /* @__PURE__ */ React94.createElement(View78, { style: styles73.history_container }, /* @__PURE__ */ React94.createElement(
       TouchableOpacity42,
       {
-        style: [styles72.card, styles72.shadowProp],
+        style: [styles73.card, styles73.shadowProp],
         onPress: this.loadHistory
       },
-      /* @__PURE__ */ React93.createElement(Text57, { style: styles72.heading }, LocalizationManager.getLocalizedString("load_earlier_messages"))
+      /* @__PURE__ */ React94.createElement(Text57, { style: styles73.heading }, LocalizationManager.getLocalizedString("load_earlier_messages"))
     ));
   };
   render() {
     const { inverted } = this.props;
-    return /* @__PURE__ */ React93.createElement(
-      View77,
+    return /* @__PURE__ */ React94.createElement(
+      View78,
       {
         style: [
-          this.props.alignTop ? styles72.containerAlignTop : styles72.container,
+          this.props.alignTop ? styles73.containerAlignTop : styles73.container,
           { backgroundColor: this.getBackgroundColor() }
         ]
       },
       this.state.showScrollBottom && this.props.scrollToBottom ? this.renderScrollToBottomWrapper() : null,
-      /* @__PURE__ */ React93.createElement(
+      /* @__PURE__ */ React94.createElement(
         TouchableOpacity42,
         {
           style: {
@@ -21001,7 +21144,7 @@ var MessageContainer = class extends PureComponent {
             }
           }
         },
-        /* @__PURE__ */ React93.createElement(
+        /* @__PURE__ */ React94.createElement(
           Text57,
           {
             style: {
@@ -21014,7 +21157,7 @@ var MessageContainer = class extends PureComponent {
           "Load history"
         )
       ),
-      /* @__PURE__ */ React93.createElement(
+      /* @__PURE__ */ React94.createElement(
         FlatList5,
         {
           ref: this.props.forwardRef,
@@ -21025,7 +21168,7 @@ var MessageContainer = class extends PureComponent {
           inverted,
           showsVerticalScrollIndicator: false,
           data: this.props.messages,
-          contentContainerStyle: styles72.contentContainerStyle,
+          contentContainerStyle: styles73.contentContainerStyle,
           renderItem: this.renderRow,
           ...this.props.invertibleScrollViewProps,
           ListEmptyComponent: this.renderChatEmpty,
@@ -21054,13 +21197,13 @@ var MessageContainer = class extends PureComponent {
           }
         }
       ),
-      this.state.loadingHistory ? /* @__PURE__ */ React93.createElement(
+      this.state.loadingHistory ? /* @__PURE__ */ React94.createElement(
         ActivityIndicator5,
         {
           size: "large",
           style: { flex: 1, width: getWindowWidth(), position: "absolute" }
         }
-      ) : /* @__PURE__ */ React93.createElement(React93.Fragment, null)
+      ) : /* @__PURE__ */ React94.createElement(React94.Fragment, null)
     );
   }
   getBackgroundColor = () => {
@@ -21083,14 +21226,14 @@ import KoreBotClient3, {
 
 // bot-sdk/templates/QuickReplies.tsx
 init_esm_shims();
-import * as React94 from "react";
+import * as React95 from "react";
 import {
   Image as Image21,
   ScrollView as ScrollView2,
-  StyleSheet as StyleSheet71,
+  StyleSheet as StyleSheet72,
   Text as Text58,
   TouchableOpacity as TouchableOpacity43,
-  View as View78
+  View as View79
 } from "react-native";
 var QuickReplies = class extends BaseView_default {
   constructor(props) {
@@ -21108,11 +21251,11 @@ var QuickReplies = class extends BaseView_default {
   }
   renderQuickRepliesView = () => {
     if (!this.props?.quick_replies) {
-      return /* @__PURE__ */ React94.createElement(React94.Fragment, null);
+      return /* @__PURE__ */ React95.createElement(React95.Fragment, null);
     }
     const btheme = getBubbleTheme(this.props?.theme);
     const views = this.props?.quick_replies.map((item, index) => {
-      return /* @__PURE__ */ React94.createElement(
+      return /* @__PURE__ */ React95.createElement(
         TouchableOpacity43,
         {
           key: index + "",
@@ -21123,11 +21266,11 @@ var QuickReplies = class extends BaseView_default {
             this.props?.itemClick?.(item);
           }
         },
-        /* @__PURE__ */ React94.createElement(
-          View78,
+        /* @__PURE__ */ React95.createElement(
+          View79,
           {
             style: this.props.quick_container_style ? this.props.quick_container_style : [
-              styles73.quick_container,
+              styles74.quick_container,
               {
                 borderColor: btheme?.BUBBLE_LEFT_BG_COLOR || "#3F51B5",
                 backgroundColor: btheme?.BUBBLE_LEFT_BG_COLOR || "#3F51B5",
@@ -21135,19 +21278,19 @@ var QuickReplies = class extends BaseView_default {
               }
             ]
           },
-          item?.image_url && /* @__PURE__ */ React94.createElement(View78, { style: styles73.image_bg }, /* @__PURE__ */ React94.createElement(
+          item?.image_url && /* @__PURE__ */ React95.createElement(View79, { style: styles74.image_bg }, /* @__PURE__ */ React95.createElement(
             Image21,
             {
               source: { uri: item?.image_url },
               style: [
-                this.props.quick_image_style ? this.props.quick_image_style : styles73.image,
+                this.props.quick_image_style ? this.props.quick_image_style : styles74.image,
                 {
                   borderRadius: normalize(30)
                 }
               ]
             }
           )),
-          /* @__PURE__ */ React94.createElement(
+          /* @__PURE__ */ React95.createElement(
             Text58,
             {
               style: this.props.quck_text_style ? this.props.quck_text_style : [
@@ -21166,7 +21309,7 @@ var QuickReplies = class extends BaseView_default {
         )
       );
     });
-    return views && views.length > 0 ? /* @__PURE__ */ React94.createElement(
+    return views && views.length > 0 ? /* @__PURE__ */ React95.createElement(
       ScrollView2,
       {
         pointerEvents: this.state.isClickedItem ? "none" : "auto",
@@ -21182,13 +21325,13 @@ var QuickReplies = class extends BaseView_default {
         keyboardShouldPersistTaps: "handled",
         horizontal: !this.props.isVertical
       },
-      /* @__PURE__ */ React94.createElement(
-        View78,
+      /* @__PURE__ */ React95.createElement(
+        View79,
         {
-          style: styles73.quick_main_container
+          style: styles74.quick_main_container
         },
-        /* @__PURE__ */ React94.createElement(
-          View78,
+        /* @__PURE__ */ React95.createElement(
+          View79,
           {
             style: {
               height: 1,
@@ -21201,13 +21344,13 @@ var QuickReplies = class extends BaseView_default {
         ),
         views
       )
-    ) : /* @__PURE__ */ React94.createElement(React94.Fragment, null);
+    ) : /* @__PURE__ */ React95.createElement(React95.Fragment, null);
   };
   render() {
     return this.renderQuickRepliesView();
   }
 };
-var styles73 = StyleSheet71.create({
+var styles74 = StyleSheet72.create({
   image_bg: {
     justifyContent: "center",
     alignItems: "center"
@@ -21261,15 +21404,15 @@ var styles73 = StyleSheet71.create({
 
 // bot-sdk/chat/components/BotTypingIndicator.tsx
 init_esm_shims();
-import * as React96 from "react";
+import * as React97 from "react";
 import { Component as Component32 } from "react";
 import AsyncStorage3 from "@react-native-async-storage/async-storage";
-import { StyleSheet as StyleSheet73, Text as Text59, View as View80, Image as Image22 } from "react-native";
+import { StyleSheet as StyleSheet74, Text as Text59, View as View81, Image as Image22 } from "react-native";
 
 // bot-sdk/components/CustomLoadingDots.tsx
 init_esm_shims();
-import React95, { useEffect as useEffect3, useRef as useRef4 } from "react";
-import { View as View79, Animated as Animated9, StyleSheet as StyleSheet72 } from "react-native";
+import React96, { useEffect as useEffect4, useRef as useRef5 } from "react";
+import { View as View80, Animated as Animated10, StyleSheet as StyleSheet73 } from "react-native";
 var CustomLoadingDots = ({
   animation = "typing",
   color = "#000000",
@@ -21278,44 +21421,44 @@ var CustomLoadingDots = ({
   delay = 150,
   numberOfDots = 3
 }) => {
-  const animatedValues = useRef4(
-    Array.from({ length: numberOfDots }, () => new Animated9.Value(0))
+  const animatedValues = useRef5(
+    Array.from({ length: numberOfDots }, () => new Animated10.Value(0))
   ).current;
-  useEffect3(() => {
+  useEffect4(() => {
     const createTypingAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => Animated9.sequence([
-          Animated9.delay(index * delay),
-          Animated9.loop(
-            Animated9.sequence([
-              Animated9.timing(animatedValue, {
+        (animatedValue, index) => Animated10.sequence([
+          Animated10.delay(index * delay),
+          Animated10.loop(
+            Animated10.sequence([
+              Animated10.timing(animatedValue, {
                 toValue: 1,
                 duration: 300,
                 useNativeDriver: true
               }),
-              Animated9.timing(animatedValue, {
+              Animated10.timing(animatedValue, {
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: true
               }),
-              Animated9.delay((numberOfDots - 1 - index) * delay)
+              Animated10.delay((numberOfDots - 1 - index) * delay)
             ])
           )
         ])
       );
-      Animated9.parallel(animations).start();
+      Animated10.parallel(animations).start();
     };
     const createPulseAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => Animated9.loop(
-          Animated9.sequence([
-            Animated9.delay(index * delay),
-            Animated9.timing(animatedValue, {
+        (animatedValue, index) => Animated10.loop(
+          Animated10.sequence([
+            Animated10.delay(index * delay),
+            Animated10.timing(animatedValue, {
               toValue: 1,
               duration: 600,
               useNativeDriver: true
             }),
-            Animated9.timing(animatedValue, {
+            Animated10.timing(animatedValue, {
               toValue: 0,
               duration: 600,
               useNativeDriver: true
@@ -21323,20 +21466,20 @@ var CustomLoadingDots = ({
           ])
         )
       );
-      Animated9.stagger(delay, animations).start();
+      Animated10.stagger(delay, animations).start();
     };
     const createBounceAnimation = () => {
       const animations = animatedValues.map(
-        (animatedValue, index) => Animated9.loop(
-          Animated9.sequence([
-            Animated9.delay(index * delay),
-            Animated9.spring(animatedValue, {
+        (animatedValue, index) => Animated10.loop(
+          Animated10.sequence([
+            Animated10.delay(index * delay),
+            Animated10.spring(animatedValue, {
               toValue: 1,
               friction: 3,
               tension: 100,
               useNativeDriver: true
             }),
-            Animated9.spring(animatedValue, {
+            Animated10.spring(animatedValue, {
               toValue: 0,
               friction: 3,
               tension: 100,
@@ -21345,7 +21488,7 @@ var CustomLoadingDots = ({
           ])
         )
       );
-      Animated9.stagger(delay, animations).start();
+      Animated10.stagger(delay, animations).start();
     };
     animatedValues.forEach((value) => value.setValue(0));
     switch (animation) {
@@ -21379,12 +21522,12 @@ var CustomLoadingDots = ({
       transform: [{ scale: scale2 }]
     };
   };
-  return /* @__PURE__ */ React95.createElement(View79, { style: styles74.container }, animatedValues.map((animatedValue, index) => /* @__PURE__ */ React95.createElement(
-    Animated9.View,
+  return /* @__PURE__ */ React96.createElement(View80, { style: styles75.container }, animatedValues.map((animatedValue, index) => /* @__PURE__ */ React96.createElement(
+    Animated10.View,
     {
       key: index,
       style: [
-        styles74.dot,
+        styles75.dot,
         {
           backgroundColor: color,
           width: size,
@@ -21397,7 +21540,7 @@ var CustomLoadingDots = ({
     }
   )));
 };
-var styles74 = StyleSheet72.create({
+var styles75 = StyleSheet73.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -21448,7 +21591,7 @@ var TypingIndicator = class extends Component32 {
     let name = KoraBotClient2.getInstance().getBotName() || " ";
     const theme = this.context;
     let textColor = theme?.v3?.general?.colors?.secondary_text || "#FFFFFF";
-    return /* @__PURE__ */ React96.createElement(
+    return /* @__PURE__ */ React97.createElement(
       Text59,
       {
         style: [
@@ -21464,29 +21607,29 @@ var TypingIndicator = class extends Component32 {
   }
   renderBotIcon = (url) => {
     let bg = this.getAvatarBgColor();
-    return /* @__PURE__ */ React96.createElement(View80, { style: styles75.bot_icon_con }, /* @__PURE__ */ React96.createElement(
-      View80,
+    return /* @__PURE__ */ React97.createElement(View81, { style: styles76.bot_icon_con }, /* @__PURE__ */ React97.createElement(
+      View81,
       {
         style: [
-          styles75.bot_icon_con2,
+          styles76.bot_icon_con2,
           {
             backgroundColor: url ? Color_default.transparent : bg
           }
         ]
       },
-      url ? /* @__PURE__ */ React96.createElement(
+      url ? /* @__PURE__ */ React97.createElement(
         Image22,
         {
           source: {
             uri: url
           },
-          style: [styles75.bot_icon]
+          style: [styles76.bot_icon]
         }
       ) : this.renderBotName()
     ));
   };
   render() {
-    return /* @__PURE__ */ React96.createElement(View80, { style: styles75.container }, /* @__PURE__ */ React96.createElement(View80, { style: [styles75.box, styles75.box1] }, this.renderTyping()));
+    return /* @__PURE__ */ React97.createElement(View81, { style: styles76.container }, /* @__PURE__ */ React97.createElement(View81, { style: [styles76.box, styles76.box1] }, this.renderTyping()));
   }
   renderTyping = () => {
     let isTypingIndicator = this.props.isTypingIndicator;
@@ -21494,7 +21637,7 @@ var TypingIndicator = class extends Component32 {
     if (isTypingIndicator) {
       url = this.getBotIconUrl();
     }
-    return /* @__PURE__ */ React96.createElement(View80, { style: styles75.main }, isTypingIndicator && /* @__PURE__ */ React96.createElement(View80, { style: styles75.horizontalContainer }, this.renderBotIcon(url), /* @__PURE__ */ React96.createElement(
+    return /* @__PURE__ */ React97.createElement(View81, { style: styles76.main }, isTypingIndicator && /* @__PURE__ */ React97.createElement(View81, { style: styles76.horizontalContainer }, this.renderBotIcon(url), /* @__PURE__ */ React97.createElement(
       CustomLoadingDots_default,
       {
         animation: "typing",
@@ -21506,7 +21649,7 @@ var TypingIndicator = class extends Component32 {
     )));
   };
 };
-var styles75 = StyleSheet73.create({
+var styles76 = StyleSheet74.create({
   bot_icon: {
     height: normalize(22),
     width: normalize(22),
@@ -21563,15 +21706,15 @@ import * as React101 from "react";
 
 // bot-sdk/chat/components/header/CompactHeader.tsx
 init_esm_shims();
-import * as React98 from "react";
-import { StyleSheet as StyleSheet75, Text as Text61, View as View82 } from "react-native";
+import * as React99 from "react";
+import { StyleSheet as StyleSheet76, Text as Text61, View as View83 } from "react-native";
 
 // bot-sdk/chat/components/header/BaseHeader.tsx
 init_esm_shims();
-import React97 from "react";
-import { Image as Image23, StyleSheet as StyleSheet74, Text as Text60, TouchableOpacity as TouchableOpacity44, View as View81 } from "react-native";
+import React98 from "react";
+import { Image as Image23, StyleSheet as StyleSheet75, Text as Text60, TouchableOpacity as TouchableOpacity44, View as View82 } from "react-native";
 import KoraBotClient3 from "rn-kore-bot-socket-lib-v79";
-var BaseHeader = class extends React97.Component {
+var BaseHeader = class extends React98.Component {
   static contextType = ThemeContext;
   renderBackIcon(_styleProps, _stylePropsMain, _colorIcon) {
     return null;
@@ -21606,17 +21749,17 @@ var BaseHeader = class extends React97.Component {
   }
   renderHeaderIcon = (theme, customProps) => {
     if (!theme?.v3?.header?.icon?.show) {
-      return /* @__PURE__ */ React97.createElement(React97.Fragment, null);
+      return /* @__PURE__ */ React98.createElement(React98.Fragment, null);
     }
     let type = theme?.v3?.header?.icon?.type;
     if (!type || type?.trim?.()?.length === 0) {
-      return /* @__PURE__ */ React97.createElement(React97.Fragment, null);
+      return /* @__PURE__ */ React98.createElement(React98.Fragment, null);
     }
     if (type === "custom" && theme?.v3?.header?.icon?.icon_url) {
-      return /* @__PURE__ */ React97.createElement(View81, { style: styles76.header_icon_main }, /* @__PURE__ */ React97.createElement(
+      return /* @__PURE__ */ React98.createElement(View82, { style: styles77.header_icon_main }, /* @__PURE__ */ React98.createElement(
         Image23,
         {
-          style: styles76.header_icon_main,
+          style: styles77.header_icon_main,
           testID: "image-custom",
           source: {
             uri: theme?.v3?.header?.icon?.icon_url
@@ -21626,11 +21769,11 @@ var BaseHeader = class extends React97.Component {
         }
       ));
     }
-    return /* @__PURE__ */ React97.createElement(
-      View81,
+    return /* @__PURE__ */ React98.createElement(
+      View82,
       {
         style: [
-          styles76.header_icon_main,
+          styles77.header_icon_main,
           customProps,
           {
             backgroundColor: theme?.v3?.body?.user_message?.bg_color ? theme?.v3?.body?.user_message?.bg_color : Color_default.header_blue
@@ -21647,24 +21790,24 @@ var BaseHeader = class extends React97.Component {
       )
     );
   };
-  renderIcon = (id = void 0, iconName, width8 = 17, height = 17, styleProps, iconColor) => {
+  renderIcon = (id = void 0, iconName, width8 = 14, height = 14, styleProps, iconColor) => {
     if (!iconName) {
-      return /* @__PURE__ */ React97.createElement(React97.Fragment, null);
+      return /* @__PURE__ */ React98.createElement(React98.Fragment, null);
     }
-    const Wrapper = id ? TouchableOpacity44 : View81;
-    return /* @__PURE__ */ React97.createElement(
+    const Wrapper = id ? TouchableOpacity44 : View82;
+    return /* @__PURE__ */ React98.createElement(
       Wrapper,
       {
-        style: [styles76.icon_container, {}, styleProps, {}],
+        style: [styles77.icon_container, {}, styleProps, {}],
         onPress: () => this.onHeaderIconPress(id)
       },
-      /* @__PURE__ */ React97.createElement(
+      /* @__PURE__ */ React98.createElement(
         SvgIcon,
         {
           name: iconName,
-          width: normalize(width8),
-          height: normalize(height),
-          color: iconColor ? iconColor : "#697586"
+          width: width8,
+          height,
+          color: iconColor ? iconColor : "#1F2A44"
         }
       )
     );
@@ -21677,7 +21820,7 @@ var BaseHeader = class extends React97.Component {
   onDropdownMenuView = (theme, iconColor) => {
     let buttons = theme?.v3?.header?.buttons;
     const height = MIN_HEADER_HEIGHT || 45;
-    return /* @__PURE__ */ React97.createElement(View81, { style: [styles76.dropdown_main, { height: normalize(height) }] }, /* @__PURE__ */ React97.createElement(
+    return /* @__PURE__ */ React98.createElement(View82, { style: [styles77.dropdown_main, { height: normalize(height) }] }, /* @__PURE__ */ React98.createElement(
       LazyPopover_default,
       {
         mode: "rn-modal",
@@ -21688,17 +21831,17 @@ var BaseHeader = class extends React97.Component {
             showPopover: false
           });
         },
-        from: /* @__PURE__ */ React97.createElement(
+        from: /* @__PURE__ */ React98.createElement(
           TouchableOpacity44,
           {
-            style: [styles76.pop_main],
+            style: [styles77.pop_main],
             onPress: () => {
               this.setState({
                 showPopover: true
               });
             }
           },
-          /* @__PURE__ */ React97.createElement(
+          /* @__PURE__ */ React98.createElement(
             SvgIcon,
             {
               name: "ThreeDots",
@@ -21709,7 +21852,7 @@ var BaseHeader = class extends React97.Component {
           )
         )
       },
-      /* @__PURE__ */ React97.createElement(View81, { style: styles76.pop_sub }, buttons?.help?.show && this.renderMenuItem(HeaderIconsId.HELP, "Help", "HeaderHelp"), buttons?.live_agent?.show && this.renderMenuItem(
+      /* @__PURE__ */ React98.createElement(View82, { style: styles77.pop_sub }, buttons?.help?.show && this.renderMenuItem(HeaderIconsId.HELP, "Help", "HeaderHelp"), buttons?.live_agent?.show && this.renderMenuItem(
         HeaderIconsId.LIVE_AGENT,
         "Live Agent",
         "HeaderTalk"
@@ -21725,7 +21868,7 @@ var BaseHeader = class extends React97.Component {
     ));
   };
   renderMenuItem = (id, title, iconId = "HeaderHelp") => {
-    return /* @__PURE__ */ React97.createElement(
+    return /* @__PURE__ */ React98.createElement(
       TouchableOpacity44,
       {
         onPress: () => {
@@ -21734,11 +21877,11 @@ var BaseHeader = class extends React97.Component {
           });
           this.onHeaderIconPress(id);
         },
-        style: styles76.popover_main_2
+        style: styles77.popover_main_2
       },
-      /* @__PURE__ */ React97.createElement(View81, { style: styles76.popover_item_main }, this.renderIcon(void 0, iconId, 17, 17, {
+      /* @__PURE__ */ React98.createElement(View82, { style: styles77.popover_item_main }, this.renderIcon(void 0, iconId, 17, 17, {
         marginStart: 0
-      }), /* @__PURE__ */ React97.createElement(View81, { style: styles76.popover_item_text_main }, /* @__PURE__ */ React97.createElement(Text60, { style: { fontSize: normalize(13), paddingEnd: 10 } }, title)))
+      }), /* @__PURE__ */ React98.createElement(View82, { style: styles77.popover_item_text_main }, /* @__PURE__ */ React98.createElement(Text60, { style: { fontSize: normalize(13), paddingEnd: 10 } }, title)))
     );
   };
   renderRightSideIcons(theme, styleProps, stylePropsMain, iconColor) {
@@ -21752,42 +21895,60 @@ var BaseHeader = class extends React97.Component {
       };
       stylePropsMain = {};
     }
-    return /* @__PURE__ */ React97.createElement(View81, { style: [{ flexDirection: "row" }, stylePropsMain] }, buttons?.help?.show && this.renderIcon(
-      HeaderIconsId.HELP,
-      "HeaderHelp",
-      17,
-      17,
-      styleProps,
-      iconColor
-    ), buttons?.live_agent?.show && this.renderIcon(
-      HeaderIconsId.LIVE_AGENT,
-      "HeaderTalk",
-      17,
-      17,
-      styleProps,
-      iconColor
-    ), buttons?.reconnect?.show && this.renderIcon(
-      HeaderIconsId.RECONNECT,
-      "HeaderReconnect",
-      17,
-      17,
-      styleProps,
-      iconColor
-    ), this.renderIcon(
-      HeaderIconsId.MINIMISE,
-      "HeaderMenu",
-      17,
-      17,
-      styleProps,
-      iconColor
-    ), buttons?.close?.show && this.renderIcon(
-      HeaderIconsId.CLOSE,
-      "HeaderClose",
-      17,
-      17,
-      styleProps,
-      iconColor
-    ), buttons?.threeDots?.show && this.onDropdownMenuView(theme, iconColor));
+    return /* @__PURE__ */ React98.createElement(
+      View82,
+      {
+        style: [
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12
+          },
+          stylePropsMain
+        ]
+      },
+      this.renderIcon(
+        HeaderIconsId.MINIMISE,
+        "HeaderMenu",
+        14,
+        14,
+        styleProps,
+        iconColor
+      ),
+      buttons?.help?.show !== false && this.renderIcon(
+        HeaderIconsId.HELP,
+        "HeaderHelp",
+        14,
+        14,
+        styleProps,
+        iconColor
+      ),
+      buttons?.live_agent?.show && this.renderIcon(
+        HeaderIconsId.LIVE_AGENT,
+        "HeaderTalk",
+        14,
+        14,
+        styleProps,
+        iconColor
+      ),
+      buttons?.reconnect?.show && this.renderIcon(
+        HeaderIconsId.RECONNECT,
+        "HeaderReconnect",
+        14,
+        14,
+        styleProps,
+        iconColor
+      ),
+      buttons?.close?.show !== false && this.renderIcon(
+        HeaderIconsId.CLOSE,
+        "HeaderClose",
+        14,
+        14,
+        styleProps,
+        iconColor
+      ),
+      buttons?.threeDots?.show && this.onDropdownMenuView(theme, iconColor)
+    );
   }
   isMoreButtons(theme) {
     let count = 0;
@@ -21812,7 +21973,7 @@ var BaseHeader = class extends React97.Component {
     return SHOW_BUTTONS_LIMIT < count;
   }
 };
-var styles76 = StyleSheet74.create({
+var styles77 = StyleSheet75.create({
   header_icon_main: {
     backgroundColor: Color_default.header_blue,
     width: normalize(30),
@@ -21878,12 +22039,8 @@ var styles76 = StyleSheet74.create({
     width: normalize(40)
   },
   icon_container: {
-    paddingHorizontal: normalize(4),
-    flexWrap: "wrap",
-    height: "100%",
     justifyContent: "center",
-    alignItems: "center",
-    marginStart: 5
+    alignItems: "center"
   }
 });
 
@@ -21894,110 +22051,138 @@ var CompactHeader = class extends BaseHeader {
   }
   render() {
     const theme = this.context;
-    const height = MIN_HEADER_HEIGHT || 45;
-    const headerColor = theme?.v3?.header?.bg_color || "#EAECF0";
-    return /* @__PURE__ */ React98.createElement(
-      View82,
+    const headerColor = theme?.v3?.header?.bg_color || "#FFFFFF";
+    const titleName = theme?.v3?.header?.title?.name;
+    const subTitleName = theme?.v3?.header?.sub_title?.name;
+    let topText = "DIGITAL CHAT";
+    let bottomText = "Digital Advocate";
+    if (subTitleName?.toLowerCase().includes("chat")) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName) || "Digital Advocate";
+    } else if (titleName?.toLowerCase().includes("chat")) {
+      topText = titleName;
+      bottomText = this.getBotTitleName(subTitleName) || "Digital Advocate";
+    } else if (subTitleName && titleName) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName);
+    } else {
+      topText = subTitleName || "DIGITAL CHAT";
+      bottomText = this.getBotTitleName(titleName) || "Digital Advocate";
+    }
+    if (bottomText.toUpperCase() === "DIGITAL ADVOCATE") {
+      bottomText = "Digital Advocate";
+    }
+    topText = topText.toUpperCase();
+    return /* @__PURE__ */ React99.createElement(
+      View83,
       {
         style: [
-          styles77.main,
+          styles78.main,
           {
-            height: normalize(height),
             backgroundColor: headerColor
           }
         ]
       },
-      /* @__PURE__ */ React98.createElement(View82, { style: styles77.sub_con }, this.renderBackIcon(
+      /* @__PURE__ */ React99.createElement(View83, { style: styles78.sub_con }, this.renderBackIcon(
         {},
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React98.createElement(View82, { style: styles77.sub_con1 }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React98.createElement(View82, { style: styles77.back_icon_container }, this.renderHeaderIcon(theme)), /* @__PURE__ */ React98.createElement(View82, { style: styles77.title_main }, /* @__PURE__ */ React98.createElement(View82, { style: styles77.title_sub_con }, /* @__PURE__ */ React98.createElement(
+      ), /* @__PURE__ */ React99.createElement(View83, { style: styles78.sub_con1 }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React99.createElement(View83, { style: styles78.back_icon_container }, this.renderHeaderIcon(theme)), /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_main }, /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_sub_con }, /* @__PURE__ */ React99.createElement(
         Text61,
         {
           numberOfLines: 1,
           style: [
-            styles77.title_text,
-            { color: theme?.v3?.header?.title?.color || "#000000" }
+            styles78.title_text,
+            { color: theme?.v3?.header?.sub_title?.color || "#6B7280" }
           ]
         },
-        this.getBotTitleName(theme?.v3?.header?.title?.name)
-      )), /* @__PURE__ */ React98.createElement(View82, { style: styles77.title_sub_con1 }, /* @__PURE__ */ React98.createElement(
+        topText
+      )), /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_sub_con1 }, /* @__PURE__ */ React99.createElement(
         Text61,
         {
           numberOfLines: 1,
           style: [
-            styles77.title_sub_text,
-            { color: theme?.v3?.header?.sub_title?.color || "#000000" }
+            styles78.title_sub_text,
+            { color: theme?.v3?.header?.title?.color || "#111827" }
           ]
         },
-        theme?.v3?.header?.sub_title?.name
-      )))), /* @__PURE__ */ React98.createElement(View82, { style: styles77.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
+        bottomText
+      )))), /* @__PURE__ */ React99.createElement(View83, { style: styles78.right_icon_container }, this.renderRightSideIcons(
         theme,
         {},
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ))),
-      /* @__PURE__ */ React98.createElement(View82, { style: styles77.line })
+      )))
     );
   }
 };
-var styles77 = StyleSheet75.create({
+var styles78 = StyleSheet76.create({
   sub_con1: {
     flex: 1,
     flexDirection: "row",
+    alignItems: "center",
     marginStart: 0
   },
   title_sub_text: {
     fontWeight: "700",
-    fontSize: normalize(15),
+    fontSize: 16,
     fontStyle: "normal",
-    lineHeight: 22.5
+    lineHeight: 22,
+    color: "#111827"
   },
   title_sub_con1: {
-    flex: 1
+    justifyContent: "center"
   },
   title_text: {
-    fontWeight: "500",
-    fontSize: normalize(10),
+    fontWeight: "600",
+    fontSize: 11,
     fontStyle: "normal",
     lineHeight: 15,
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    color: "#6B7280"
   },
   title_sub_con: {
-    flex: 1,
-    justifyContent: "flex-end"
+    justifyContent: "center"
   },
-  title_main: { flexDirection: "column", flex: 1, marginStart: 5 },
-  sub_con: { flex: 1, flexDirection: "row" },
+  title_main: {
+    flexDirection: "column",
+    justifyContent: "center"
+  },
+  sub_con: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
   main: {
     width: "100%",
-    marginBottom: 2
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    borderStyle: "solid",
+    backgroundColor: "#FFFFFF"
   },
   back_icon_container: {
-    height: "100%",
     width: normalize(33),
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 8
+  },
+  right_icon_container: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center"
   },
-  right_icon_container: {
-    //backgroundColor: 'green',
-    alignItems: "center",
-    justifyContent: "center",
-    marginEnd: 5
-  },
   line: {
-    backgroundColor: Color_default.black,
-    opacity: 0.3,
-    height: StyleSheet75.hairlineWidth,
-    width: "100%"
+    display: "none"
   }
 });
 
 // bot-sdk/chat/components/header/MediumHeader.tsx
 init_esm_shims();
-import * as React99 from "react";
-import { StyleSheet as StyleSheet76, Text as Text62, View as View83 } from "react-native";
-init_PlatformCheck();
+import * as React100 from "react";
+import { StyleSheet as StyleSheet77, Text as Text62, View as View84 } from "react-native";
 var MediumHeader = class extends BaseHeader {
   constructor(props) {
     super(props);
@@ -22007,306 +22192,145 @@ var MediumHeader = class extends BaseHeader {
   }
   render() {
     const theme = this.context;
-    const height = MIN_HEADER_HEIGHT || 45;
-    const extraHeight = isIOS ? height + 25 : height + 35;
-    const headerColor = theme?.v3?.header?.bg_color || "#EAECF0";
-    return /* @__PURE__ */ React99.createElement(
-      View83,
+    const headerColor = theme?.v3?.header?.bg_color || "#FFFFFF";
+    const titleName = theme?.v3?.header?.title?.name;
+    const subTitleName = theme?.v3?.header?.sub_title?.name;
+    let topText = "DIGITAL CHAT";
+    let bottomText = "Digital Advocate";
+    if (subTitleName?.toLowerCase().includes("chat")) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName) || "Digital Advocate";
+    } else if (titleName?.toLowerCase().includes("chat")) {
+      topText = titleName;
+      bottomText = this.getBotTitleName(subTitleName) || "Digital Advocate";
+    } else if (subTitleName && titleName) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName);
+    } else {
+      topText = subTitleName || "DIGITAL CHAT";
+      bottomText = this.getBotTitleName(titleName) || "Digital Advocate";
+    }
+    if (bottomText.toUpperCase() === "DIGITAL ADVOCATE") {
+      bottomText = "Digital Advocate";
+    }
+    topText = topText.toUpperCase();
+    return /* @__PURE__ */ React100.createElement(
+      View84,
       {
         style: [
-          styles78.main,
+          styles79.main,
           {
-            height: normalize(extraHeight),
             backgroundColor: headerColor
           }
         ]
       },
-      /* @__PURE__ */ React99.createElement(View83, { style: [styles78.sub_con] }, this.renderBackIcon(
+      /* @__PURE__ */ React100.createElement(View84, { style: styles79.sub_con }, this.renderBackIcon(
         {},
-        { ...styles78.back_icon, height: normalize(height) },
+        {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React99.createElement(View83, { style: [styles78.sub_con1, {}] }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React99.createElement(View83, { style: [styles78.back_icon_container] }, this.renderHeaderIcon(theme, {
+      ), /* @__PURE__ */ React100.createElement(View84, { style: styles79.sub_con1 }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React100.createElement(View84, { style: styles79.back_icon_container }, this.renderHeaderIcon(theme, {
         marginStart: 0
-      })), /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_main }, /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_sub_con }, /* @__PURE__ */ React99.createElement(
+      })), /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_main }, /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_sub_con }, /* @__PURE__ */ React100.createElement(
         Text62,
         {
           numberOfLines: 1,
           style: [
-            styles78.title_text,
-            { color: theme?.v3?.header?.title?.color || "#000000" }
+            styles79.title_text,
+            { color: theme?.v3?.header?.sub_title?.color || "#6B7280" }
           ]
         },
-        this.getBotTitleName(theme?.v3?.header?.title?.name)
-      )), /* @__PURE__ */ React99.createElement(View83, { style: styles78.title_sub_con1 }, /* @__PURE__ */ React99.createElement(
+        topText
+      )), /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_sub_con1 }, /* @__PURE__ */ React100.createElement(
         Text62,
         {
           numberOfLines: 1,
           style: [
-            styles78.title_sub_text,
-            { color: theme?.v3?.header?.sub_title?.color || "#000000" }
+            styles79.title_sub_text,
+            { color: theme?.v3?.header?.title?.color || "#111827" }
           ]
         },
-        theme?.v3?.header?.sub_title?.name
-      )))), /* @__PURE__ */ React99.createElement(View83, { style: styles78.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
+        bottomText
+      )))), /* @__PURE__ */ React100.createElement(View84, { style: styles79.right_icon_container }, this.renderRightSideIcons(
         theme,
-        { height },
-        styles78.itemProps,
-        theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ))),
-      /* @__PURE__ */ React99.createElement(View83, { style: styles78.line })
-    );
-  }
-};
-var styles78 = StyleSheet76.create({
-  itemProps: {
-    position: "absolute",
-    end: 0,
-    marginEnd: 5
-  },
-  render_icon: {
-    paddingHorizontal: 0,
-    flexWrap: "wrap",
-    marginStart: 0,
-    marginBottom: 5,
-    justifyContent: "flex-end",
-    alignItems: "center"
-  },
-  back_icon: {
-    position: "absolute",
-    left: 0,
-    zIndex: 1
-  },
-  sub_con1: {
-    flex: 1
-    //flexDirection: 'column',
-    //backgroundColor: 'yellow',
-    //marginStart: 10,
-  },
-  title_sub_con1: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start"
-  },
-  title_sub_text: {
-    fontWeight: "700",
-    fontSize: normalize(15),
-    fontStyle: "normal",
-    lineHeight: 22.5
-  },
-  title_text: {
-    fontWeight: "500",
-    fontSize: normalize(10),
-    fontStyle: "normal",
-    lineHeight: 15,
-    letterSpacing: 0.5
-  },
-  title_sub_con: {
-    alignItems: "center",
-    justifyContent: "flex-start"
-  },
-  title_main: { flexDirection: "column", flex: 1, marginStart: 5 },
-  sub_con: { flex: 1, flexDirection: "row", alignSelf: "flex-start" },
-  main: {
-    width: "100%",
-    marginBottom: 2
-  },
-  back_icon_container: {
-    alignItems: "center",
-    justifyContent: "flex-start",
-    marginTop: 8
-  },
-  right_icon_container: {
-    //backgroundColor: 'green',
-    alignItems: "flex-start",
-    justifyContent: "flex-start"
-  },
-  line: {
-    backgroundColor: Color_default.black,
-    opacity: 0.3,
-    height: StyleSheet76.hairlineWidth,
-    width: "100%"
-  }
-});
-
-// bot-sdk/chat/components/header/LargeHeader.tsx
-init_esm_shims();
-import * as React100 from "react";
-import { StyleSheet as StyleSheet77, Text as Text63, View as View84, Dimensions as Dimensions35 } from "react-native";
-import LinearGradient2 from "react-native-linear-gradient";
-var windowWidth28 = Dimensions35.get("window").width;
-var LargeHeader = class extends BaseHeader {
-  static contextType = ThemeContext;
-  render() {
-    const theme = this.context;
-    const height = 140;
-    const headerColor = theme?.v3?.header?.bg_color || Color_default.blue;
-    return /* @__PURE__ */ React100.createElement(
-      LinearGradient2,
-      {
-        colors: [
-          headerColor,
-          headerColor,
-          headerColor,
-          Color_default.white,
-          Color_default.white
-        ],
-        style: [
-          styles79.main,
-          {
-            height: normalize(height),
-            backgroundColor: theme?.v3?.header?.bg_color
-          }
-        ]
-      },
-      /* @__PURE__ */ React100.createElement(View84, { style: { flex: 1 } }, /* @__PURE__ */ React100.createElement(View84, { style: styles79.sub_con }, this.renderBackIcon(
-        {
-          marginTop: 10,
-          justifyContent: "flex-start",
-          alignItems: "flex-start"
-        },
+        {},
         {},
         theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ), /* @__PURE__ */ React100.createElement(View84, { style: styles79.sub_con1 }, /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_main }, /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_sub_con }), /* @__PURE__ */ React100.createElement(View84, { style: styles79.title_sub_con1 }))), /* @__PURE__ */ React100.createElement(View84, { style: styles79.right_icon_container }, theme?.v3?.header?.buttons && this.renderRightSideIcons(
-        theme,
-        styles79.right_side_icon_con,
-        {},
-        theme?.v3?.header?.icons_color || invertColor(headerColor, true)
-      ))), /* @__PURE__ */ React100.createElement(
-        View84,
-        {
-          style: [
-            styles79.card_main,
-            {
-              width: windowWidth28 - normalize(30),
-              borderRadius: 5,
-              boxShadow: `
-                  0 1px 3px rgba(0, 0, 0, 0.12),
-                  0 1px 2px rgba(0, 0, 0, 0.24)
-                `
-            }
-          ]
-        },
-        /* @__PURE__ */ React100.createElement(View84, { style: { flex: 1, marginStart: normalize(20) } }, /* @__PURE__ */ React100.createElement(View84, { style: styles79.card_con }, /* @__PURE__ */ React100.createElement(
-          Text63,
-          {
-            style: [
-              styles79.title_text,
-              {
-                color: theme?.v3?.header?.title?.color || "#000000",
-                fontFamily: this.props.theme?.v3?.body?.font?.family
-              }
-            ]
-          },
-          this.getBotTitleName(theme?.v3?.header?.title?.name)
-        ), /* @__PURE__ */ React100.createElement(
-          Text63,
-          {
-            style: [
-              styles79.sub_title_text,
-              {
-                color: theme?.v3?.header?.sub_title?.color || "#000000",
-                fontFamily: this.props.theme?.v3?.body?.font?.family
-              }
-            ]
-          },
-          theme?.v3?.header?.sub_title?.name
-        )))
-      ), /* @__PURE__ */ React100.createElement(View84, { style: styles79.icon_con }, theme?.v3?.header?.icon?.show && /* @__PURE__ */ React100.createElement(View84, { style: [styles79.back_icon_container] }, this.renderHeaderIcon(theme))))
+      )))
     );
   }
 };
 var styles79 = StyleSheet77.create({
-  icon_con: {
-    position: "absolute",
-    // bottom: 0,
-    left: normalize(30),
-    // right: 0,
-    top: normalize(35),
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  card_con: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "baseline",
-    marginTop: normalize(5)
-  },
-  right_side_icon_con: {
-    marginTop: 10,
-    justifyContent: "flex-start",
-    alignItems: "flex-start"
-  },
-  card_main: {
-    backgroundColor: "#FAFAFA",
-    height: normalize(85),
-    position: "absolute",
-    bottom: 2,
-    alignSelf: "center"
-    //justifyContent: 'center',
-  },
-  sub_title_text: {
-    fontWeight: "700",
-    fontSize: normalize(15),
-    fontStyle: "normal",
-    lineHeight: 22.5
-  },
-  title_sub_text: {
-    fontWeight: "700",
-    fontSize: normalize(15),
-    fontStyle: "normal",
-    lineHeight: 22.5
-  },
-  title_text: {
-    fontWeight: "500",
-    fontSize: normalize(10),
-    fontStyle: "normal",
-    lineHeight: 15,
-    letterSpacing: 0.5
+  itemProps: {
+    marginEnd: 0
   },
   render_icon: {
     paddingHorizontal: 0,
-    flexWrap: "wrap",
-    marginStart: 0,
-    marginBottom: 5,
-    marginTop: -5,
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  back_icon: {
+    justifyContent: "center",
     alignItems: "center"
   },
   sub_con1: {
     flex: 1,
     flexDirection: "row",
-    marginStart: 10
+    alignItems: "center",
+    marginStart: 0
   },
   title_sub_con1: {
-    flex: 1
+    justifyContent: "center"
+  },
+  title_sub_text: {
+    fontWeight: "700",
+    fontSize: 16,
+    fontStyle: "normal",
+    lineHeight: 22,
+    color: "#111827"
+  },
+  title_text: {
+    fontWeight: "600",
+    fontSize: 11,
+    fontStyle: "normal",
+    lineHeight: 15,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    color: "#6B7280"
   },
   title_sub_con: {
-    flex: 1,
-    justifyContent: "flex-end"
+    justifyContent: "center"
   },
-  title_main: { flexDirection: "column", flex: 1, marginStart: 5 },
-  sub_con: { flex: 1, flexDirection: "row", paddingTop: 5 },
+  title_main: {
+    flexDirection: "column",
+    justifyContent: "center"
+  },
+  sub_con: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
   main: {
     width: "100%",
-    marginBottom: 2
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    borderStyle: "solid",
+    backgroundColor: "#FFFFFF"
   },
   back_icon_container: {
-    // height: '100%',
-    // backgroundColor: 'green',
-    width: normalize(50),
-    alignItems: "flex-start",
-    justifyContent: "flex-start"
+    width: normalize(33),
+    alignItems: "center",
+    justifyContent: "center",
+    marginEnd: 8
   },
   right_icon_container: {
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    marginEnd: 5
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center"
   },
   line: {
-    backgroundColor: Color_default.black,
-    opacity: 0.3,
-    height: StyleSheet77.hairlineWidth,
-    width: "100%"
+    display: "none"
   }
 });
 
@@ -22336,7 +22360,7 @@ var ChatHeader = class extends React101.Component {
       case ChatHeaderType.REGULAR:
         return /* @__PURE__ */ React101.createElement(MediumHeader, { ...this.props, theme });
       case ChatHeaderType.LARGE:
-        return /* @__PURE__ */ React101.createElement(LargeHeader, { ...this.props, theme });
+        return /* @__PURE__ */ React101.createElement(CompactHeader, { ...this.props, theme });
       case ChatHeaderType.COMPACT:
         return /* @__PURE__ */ React101.createElement(CompactHeader, { ...this.props, theme });
       default:
@@ -23057,11 +23081,11 @@ import { SafeAreaView, ScrollView as ScrollView4, StatusBar as StatusBar2, View 
 init_esm_shims();
 import * as React103 from "react";
 import {
-  Dimensions as Dimensions36,
+  Dimensions as Dimensions35,
   Linking as Linking8,
   ScrollView as ScrollView3,
   StyleSheet as StyleSheet78,
-  Text as Text64,
+  Text as Text63,
   TouchableOpacity as TouchableOpacity45,
   View as View85,
   Image as Image24
@@ -23074,7 +23098,7 @@ var WelcomeBaseView = class extends React102.Component {
 };
 
 // bot-sdk/components/WelcomeScreen/body.tsx
-var windowWidth29 = Dimensions36.get("window").width;
+var windowWidth28 = Dimensions35.get("window").width;
 var WelcomeBody = class extends WelcomeBaseView {
   quickStartBtns = () => {
     const startBox = this.props?.activetheme?.v3?.welcome_screen?.starter_box || void 0;
@@ -23097,7 +23121,7 @@ var WelcomeBody = class extends WelcomeBaseView {
             },
             style: styles80.quick_btn
           },
-          /* @__PURE__ */ React103.createElement(Text64, { style: styles80.btn_text }, btn?.title)
+          /* @__PURE__ */ React103.createElement(Text63, { style: styles80.btn_text }, btn?.title)
         );
       }
     ));
@@ -23165,7 +23189,7 @@ var WelcomeBody = class extends WelcomeBaseView {
     if (!startBox || !startBox?.show) {
       return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
     }
-    return /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_main }, /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_sub }, this.getBoxIcon(), /* @__PURE__ */ React103.createElement(View85, { style: styles80.title_main }, startBox?.title && /* @__PURE__ */ React103.createElement(Text64, { style: styles80.title }, startBox?.title), startBox?.sub_text && /* @__PURE__ */ React103.createElement(Text64, { style: styles80.sub_text }, startBox?.sub_text))), /* @__PURE__ */ React103.createElement(View85, { style: styles80.quick_btn_main }, this.quickStartBtns()), startBox?.quick_start_buttons?.action && /* @__PURE__ */ React103.createElement(
+    return /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_main }, /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_sub }, this.getBoxIcon(), /* @__PURE__ */ React103.createElement(View85, { style: styles80.title_main }, startBox?.title && /* @__PURE__ */ React103.createElement(Text63, { style: styles80.title }, startBox?.title), startBox?.sub_text && /* @__PURE__ */ React103.createElement(Text63, { style: styles80.sub_text }, startBox?.sub_text))), /* @__PURE__ */ React103.createElement(View85, { style: styles80.quick_btn_main }, this.quickStartBtns()), startBox?.quick_start_buttons?.action && /* @__PURE__ */ React103.createElement(
       TouchableOpacity45,
       {
         onPress: () => {
@@ -23181,7 +23205,7 @@ var WelcomeBody = class extends WelcomeBaseView {
         ]
       },
       /* @__PURE__ */ React103.createElement(View85, { style: styles80.conversation_sub }, /* @__PURE__ */ React103.createElement(
-        Text64,
+        Text63,
         {
           style: [
             styles80.conversation_text,
@@ -23242,7 +23266,7 @@ var WelcomeBody = class extends WelcomeBaseView {
         },
         style: [
           styles80.sin_link_main,
-          isFromCarousel && { width: windowWidth29 / 4 * 2.9 }
+          isFromCarousel && { width: windowWidth28 / 4 * 2.9 }
         ]
       },
       /* @__PURE__ */ React103.createElement(
@@ -23255,7 +23279,7 @@ var WelcomeBody = class extends WelcomeBaseView {
             }
           ]
         },
-        /* @__PURE__ */ React103.createElement(View85, { style: { flex: 1, marginRight: normalize(5) } }, /* @__PURE__ */ React103.createElement(Text64, { style: styles80.sin_link_title }, link?.title), /* @__PURE__ */ React103.createElement(Text64, { style: styles80.sin_link_desc }, link?.description)),
+        /* @__PURE__ */ React103.createElement(View85, { style: { flex: 1, marginRight: normalize(5) } }, /* @__PURE__ */ React103.createElement(Text63, { style: styles80.sin_link_title }, link?.title), /* @__PURE__ */ React103.createElement(Text63, { style: styles80.sin_link_desc }, link?.description)),
         /* @__PURE__ */ React103.createElement(
           SvgIcon,
           {
@@ -23278,7 +23302,7 @@ var WelcomeBody = class extends WelcomeBaseView {
     if (!static_links || !static_links?.show) {
       return /* @__PURE__ */ React103.createElement(React103.Fragment, null);
     }
-    return /* @__PURE__ */ React103.createElement(View85, null, /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_main }, /* @__PURE__ */ React103.createElement(Text64, { style: styles80.header_link_title }, "Links"), static_links?.layout === "carousel" ? (
+    return /* @__PURE__ */ React103.createElement(View85, null, /* @__PURE__ */ React103.createElement(View85, { style: styles80.box_main }, /* @__PURE__ */ React103.createElement(Text63, { style: styles80.header_link_title }, "Links"), static_links?.layout === "carousel" ? (
       // <View>
       /* @__PURE__ */ React103.createElement(
         ScrollView3,
@@ -23352,7 +23376,7 @@ var WelcomeBody = class extends WelcomeBaseView {
 var styles80 = StyleSheet78.create({
   promotion_image: {
     height: normalize(200),
-    width: windowWidth29 * 0.91
+    width: windowWidth28 * 0.91
   },
   sin_link_desc: {
     color: "#4B5565",
@@ -23481,10 +23505,10 @@ var styles80 = StyleSheet78.create({
 // bot-sdk/components/WelcomeScreen/footer.tsx
 init_esm_shims();
 import React104 from "react";
-import { StyleSheet as StyleSheet79, Text as Text65, View as View86 } from "react-native";
+import { StyleSheet as StyleSheet79, Text as Text64, View as View86 } from "react-native";
 var WelcomeFooter = class extends React104.Component {
   render() {
-    return /* @__PURE__ */ React104.createElement(View86, { style: { backgroundColor: Color_default.transparent, padding: normalizeText_default(4) } }, /* @__PURE__ */ React104.createElement(View86, { style: styles81.main }, /* @__PURE__ */ React104.createElement(Text65, { style: styles81.text }, "Powered by"), /* @__PURE__ */ React104.createElement(
+    return /* @__PURE__ */ React104.createElement(View86, { style: { backgroundColor: Color_default.transparent, padding: normalizeText_default(4) } }, /* @__PURE__ */ React104.createElement(View86, { style: styles81.main }, /* @__PURE__ */ React104.createElement(Text64, { style: styles81.text }, "Powered by"), /* @__PURE__ */ React104.createElement(
       SvgIcon,
       {
         name: "Koreai_logo",
@@ -23518,8 +23542,8 @@ import React109 from "react";
 // bot-sdk/components/WelcomeScreen/Header/largeHeader.tsx
 init_esm_shims();
 import React105 from "react";
-import { StyleSheet as StyleSheet80, Text as Text66, View as View87, Image as Image25 } from "react-native";
-var LargeHeader2 = class extends WelcomeBaseView {
+import { StyleSheet as StyleSheet80, Text as Text65, View as View87, Image as Image25 } from "react-native";
+var LargeHeader = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
     if (!obj) {
@@ -23537,14 +23561,14 @@ var LargeHeader2 = class extends WelcomeBaseView {
         ]
       },
       /* @__PURE__ */ React105.createElement(
-        Text66,
+        Text65,
         {
           style: [styles82.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ React105.createElement(
-        Text66,
+        Text65,
         {
           style: [
             styles82.sub_title,
@@ -23554,7 +23578,7 @@ var LargeHeader2 = class extends WelcomeBaseView {
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ React105.createElement(
-        Text66,
+        Text65,
         {
           style: [styles82.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
@@ -23617,7 +23641,7 @@ var styles82 = StyleSheet80.create({
 // bot-sdk/components/WelcomeScreen/Header/mediumHeader.tsx
 init_esm_shims();
 import React106 from "react";
-import { StyleSheet as StyleSheet81, Text as Text67, View as View88, Image as Image26 } from "react-native";
+import { StyleSheet as StyleSheet81, Text as Text66, View as View88, Image as Image26 } from "react-native";
 var MediumHeader2 = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23642,14 +23666,14 @@ var MediumHeader2 = class extends WelcomeBaseView {
         }
       )),
       /* @__PURE__ */ React106.createElement(
-        Text67,
+        Text66,
         {
           style: [styles83.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ React106.createElement(
-        Text67,
+        Text66,
         {
           style: [
             styles83.sub_title,
@@ -23659,7 +23683,7 @@ var MediumHeader2 = class extends WelcomeBaseView {
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ React106.createElement(
-        Text67,
+        Text66,
         {
           style: [styles83.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
@@ -23713,7 +23737,7 @@ var styles83 = StyleSheet81.create({
 // bot-sdk/components/WelcomeScreen/Header/compactHeader.tsx
 init_esm_shims();
 import React107 from "react";
-import { StyleSheet as StyleSheet82, Text as Text68, View as View89 } from "react-native";
+import { StyleSheet as StyleSheet82, Text as Text67, View as View89 } from "react-native";
 var CompactHeader2 = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23732,14 +23756,14 @@ var CompactHeader2 = class extends WelcomeBaseView {
       },
       obj?.logo?.logo_url && false,
       /* @__PURE__ */ React107.createElement(
-        Text68,
+        Text67,
         {
           style: [styles84.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ React107.createElement(
-        Text68,
+        Text67,
         {
           style: [
             styles84.sub_title,
@@ -23749,7 +23773,7 @@ var CompactHeader2 = class extends WelcomeBaseView {
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ React107.createElement(
-        Text68,
+        Text67,
         {
           style: [styles84.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
@@ -23801,7 +23825,7 @@ var styles84 = StyleSheet82.create({
 // bot-sdk/components/WelcomeScreen/Header/regularHeader.tsx
 init_esm_shims();
 import React108 from "react";
-import { StyleSheet as StyleSheet83, Text as Text69, View as View90, Image as Image28 } from "react-native";
+import { StyleSheet as StyleSheet83, Text as Text68, View as View90, Image as Image28 } from "react-native";
 var RegularHeader = class extends WelcomeBaseView {
   render() {
     const obj = this.props?.activetheme?.v3?.welcome_screen || null;
@@ -23826,14 +23850,14 @@ var RegularHeader = class extends WelcomeBaseView {
         }
       )),
       /* @__PURE__ */ React108.createElement(
-        Text69,
+        Text68,
         {
           style: [styles85.title, { color: obj?.top_fonts?.color || Color_default.white }]
         },
         obj?.title?.name
       ),
       /* @__PURE__ */ React108.createElement(
-        Text69,
+        Text68,
         {
           style: [
             styles85.sub_title,
@@ -23843,7 +23867,7 @@ var RegularHeader = class extends WelcomeBaseView {
         obj?.sub_title?.name
       ),
       /* @__PURE__ */ React108.createElement(
-        Text69,
+        Text68,
         {
           style: [styles85.note, { color: obj?.top_fonts?.color || Color_default.white }]
         },
@@ -23899,7 +23923,7 @@ var WelcomeHeader = class extends React109.Component {
     const type = this.props?.activetheme?.v3?.welcome_screen?.layout;
     switch (type) {
       case WelcomeHeaderConstants.LARGE:
-        return /* @__PURE__ */ React109.createElement(LargeHeader2, { ...this.props });
+        return /* @__PURE__ */ React109.createElement(LargeHeader, { ...this.props });
       case WelcomeHeaderConstants.MEDIUM:
         return /* @__PURE__ */ React109.createElement(MediumHeader2, { ...this.props });
       case WelcomeHeaderConstants.REGULAR:
@@ -23957,7 +23981,7 @@ var Welcome = class extends WelcomeBaseView {
 // bot-sdk/components/CustomAlertComponent.tsx
 init_esm_shims();
 import React111, { Component as Component34 } from "react";
-import { Button as Button3, View as View92, Text as Text70, StyleSheet as StyleSheet84 } from "react-native";
+import { Button as Button3, View as View92, Text as Text69, StyleSheet as StyleSheet84 } from "react-native";
 var CustomAlertComponent = class extends Component34 {
   state = {
     isModalVisible: false,
@@ -23995,7 +24019,7 @@ var CustomAlertComponent = class extends Component34 {
         useNativeDriver: true,
         hideModalContentWhileAnimating: true
       },
-      /* @__PURE__ */ React111.createElement(View92, { style: styles86.alertBox }, /* @__PURE__ */ React111.createElement(Text70, { style: styles86.alertTitle }, title), /* @__PURE__ */ React111.createElement(Text70, { style: styles86.alertMessage }, message), /* @__PURE__ */ React111.createElement(View92, { style: styles86.btn }, /* @__PURE__ */ React111.createElement(Button3, { title: " Ok ", onPress: this.hideAlert })))
+      /* @__PURE__ */ React111.createElement(View92, { style: styles86.alertBox }, /* @__PURE__ */ React111.createElement(Text69, { style: styles86.alertTitle }, title), /* @__PURE__ */ React111.createElement(Text69, { style: styles86.alertMessage }, message), /* @__PURE__ */ React111.createElement(View92, { style: styles86.btn }, /* @__PURE__ */ React111.createElement(Button3, { title: " Ok ", onPress: this.hideAlert })))
     ));
   }
 };
@@ -24184,7 +24208,7 @@ try {
 }
 dayjs10.extend(localizedFormat);
 var imageFilesTypes2 = ["jpg", "jpeg", "png"];
-var windowWidth30 = Dimensions37.get("window").width;
+var windowWidth29 = Dimensions36.get("window").width;
 var isAgentConnect = false;
 var isMinimizedWindow = false;
 var historyMessages = 1;
@@ -24557,8 +24581,8 @@ var KoreChat = class _KoreChat extends React112.Component {
     if (this.props.messages !== prevProps.messages) {
       this.setMessages(messages || []);
     }
-    if (inverted === false && messages && prevProps.messages && messages?.length !== prevProps.messages?.length) {
-      setTimeout(() => this.scrollToBottom(false), 200);
+    if (inverted === false && (messages?.length !== prevProps.messages?.length || this.state.messages?.length !== prevState.messages?.length)) {
+      setTimeout(() => this.scrollToBottom(true), 150);
     }
     if (text !== prevProps.text) {
       this.setTextFromProp(text);
@@ -24721,6 +24745,11 @@ var KoreChat = class _KoreChat extends React112.Component {
       }
     }
     this.setMessages(_KoreChat.append(this.state.messages, modifiedMessages));
+    if (this.props.inverted === false) {
+      setTimeout(() => {
+        this.scrollToBottom(true);
+      }, 100);
+    }
     if (!isStreamChunk) {
       setTimeout(() => {
         this.textToSpeech(newMessages);
@@ -24871,6 +24900,10 @@ var KoreChat = class _KoreChat extends React112.Component {
     });
   };
   getMessages = () => {
+    const { inverted } = this.props;
+    if (inverted === false) {
+      return [...this.state.messages].reverse();
+    }
     return this.state.messages;
   };
   setIsFirstLayout = (value) => {
@@ -25513,7 +25546,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     if (!value) {
       return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
     }
-    return /* @__PURE__ */ React112.createElement(View94, { style: styles87.stt_main }, /* @__PURE__ */ React112.createElement(View94, null, /* @__PURE__ */ React112.createElement(Text71, { numberOfLines: 0, style: styles87.stt_text }, value)));
+    return /* @__PURE__ */ React112.createElement(View94, { style: styles87.stt_main }, /* @__PURE__ */ React112.createElement(View94, null, /* @__PURE__ */ React112.createElement(Text70, { numberOfLines: 0, style: styles87.stt_text }, value)));
   }
   refreshView = () => {
     this.resetInputToolbar();
@@ -25554,7 +25587,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           style: styles87.close_btn_con,
           onPress: () => this.setState({ modalVisible: false, viewMoreObj: void 0 })
         },
-        /* @__PURE__ */ React112.createElement(Text71, { style: styles87.close_btn_txt }, "X")
+        /* @__PURE__ */ React112.createElement(Text70, { style: styles87.close_btn_txt }, "X")
       )), /* @__PURE__ */ React112.createElement(View94, { style: styles87.m_main_con }, this.getViewMoreView())))
     );
   };
@@ -25713,7 +25746,7 @@ var KoreChat = class _KoreChat extends React112.Component {
                 )
               ),
               /* @__PURE__ */ React112.createElement(
-                Text71,
+                Text70,
                 {
                   style: {
                     fontSize: 18,
@@ -25738,7 +25771,7 @@ var KoreChat = class _KoreChat extends React112.Component {
       case TEMPLATE_TYPES.LIST_VIEW_TEMPLATE:
         const data = this.state.currentTemplateData;
         const selectedItem = data?.filter((d) => d?.isChecked);
-        return /* @__PURE__ */ React112.createElement(View94, null, /* @__PURE__ */ React112.createElement(View94, null, this.state?.currentTemplateHeading && /* @__PURE__ */ React112.createElement(View94, { style: styles87.sub_container_title1 }, /* @__PURE__ */ React112.createElement(Text71, { style: [styles87.displayTextHeaderStyle, { fontWeight: 600 }] }, this.state?.currentTemplateHeading)), /* @__PURE__ */ React112.createElement(View94, { style: { flexDirection: "row" } }, data?.map((tab, index) => {
+        return /* @__PURE__ */ React112.createElement(View94, null, /* @__PURE__ */ React112.createElement(View94, null, this.state?.currentTemplateHeading && /* @__PURE__ */ React112.createElement(View94, { style: styles87.sub_container_title1 }, /* @__PURE__ */ React112.createElement(Text70, { style: [styles87.displayTextHeaderStyle, { fontWeight: 600 }] }, this.state?.currentTemplateHeading)), /* @__PURE__ */ React112.createElement(View94, { style: { flexDirection: "row" } }, data?.map((tab, index) => {
           return /* @__PURE__ */ React112.createElement(
             TouchableOpacity47,
             {
@@ -25767,7 +25800,7 @@ var KoreChat = class _KoreChat extends React112.Component {
               style: [styles87.tab_title_main]
             },
             /* @__PURE__ */ React112.createElement(
-              Text71,
+              Text70,
               {
                 style: [
                   styles87.tab_title,
@@ -25887,7 +25920,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           },
           style: { padding: 15, backgroundColor: Color_default.white, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" }
         },
-        /* @__PURE__ */ React112.createElement(Text71, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn.title)
+        /* @__PURE__ */ React112.createElement(Text70, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn.title)
       );
     }));
   }
@@ -25978,7 +26011,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           },
           style: { padding: 15, backgroundColor: Color_default.white, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" }
         },
-        /* @__PURE__ */ React112.createElement(Text71, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn?.title)
+        /* @__PURE__ */ React112.createElement(Text70, { style: { fontSize: normalize(16), color: Color_default.text_color } }, btn?.title)
       );
     }));
   }
@@ -26187,7 +26220,7 @@ var KoreChat = class _KoreChat extends React112.Component {
           size: 25,
           color: "#517BD2"
         }
-      ), /* @__PURE__ */ React112.createElement(View94, { style: styles87.indicator_sub }, /* @__PURE__ */ React112.createElement(Text71, { style: styles87.loader_text }, "Please wait")));
+      ), /* @__PURE__ */ React112.createElement(View94, { style: styles87.indicator_sub }, /* @__PURE__ */ React112.createElement(Text70, { style: styles87.loader_text }, "Please wait")));
     }
     return /* @__PURE__ */ React112.createElement(React112.Fragment, null);
   };
@@ -26246,7 +26279,7 @@ var KoreChat = class _KoreChat extends React112.Component {
     const cancelText = this.props.leaveChatCancelText || this.getLocalizedString("no_stay_in_chat") || "No, stay in chat";
     const primaryColor = this.props.leaveChatPrimaryColor || "#1B365D";
     const textAlign = this.props.leaveChatTextAlign || "left";
-    return /* @__PURE__ */ React112.createElement(View94, { style: styles87.leave_modal_container }, /* @__PURE__ */ React112.createElement(View94, { style: styles87.leave_modal_card }, /* @__PURE__ */ React112.createElement(Text71, { style: [styles87.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React112.createElement(Text71, { style: [styles87.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React112.createElement(
+    return /* @__PURE__ */ React112.createElement(View94, { style: styles87.leave_modal_container }, /* @__PURE__ */ React112.createElement(View94, { style: styles87.leave_modal_card }, /* @__PURE__ */ React112.createElement(Text70, { style: [styles87.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React112.createElement(Text70, { style: [styles87.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React112.createElement(
       TouchableOpacity47,
       {
         style: [
@@ -26256,7 +26289,7 @@ var KoreChat = class _KoreChat extends React112.Component {
         activeOpacity: 0.8,
         onPress: this.handleDialogClose
       },
-      /* @__PURE__ */ React112.createElement(Text71, { style: styles87.leave_modal_btn_primary_text }, confirmText)
+      /* @__PURE__ */ React112.createElement(Text70, { style: styles87.leave_modal_btn_primary_text }, confirmText)
     ), /* @__PURE__ */ React112.createElement(
       TouchableOpacity47,
       {
@@ -26268,7 +26301,7 @@ var KoreChat = class _KoreChat extends React112.Component {
         onPress: this.handleDialogCancel
       },
       /* @__PURE__ */ React112.createElement(
-        Text71,
+        Text70,
         {
           style: [
             styles87.leave_modal_btn_secondary_text,
@@ -26360,11 +26393,11 @@ var styles87 = StyleSheet85.create({
   },
   scrollView: {
     backgroundColor: Color_default.white,
-    width: windowWidth30,
+    width: windowWidth29,
     marginBottom: normalize(50)
   },
   line: {
-    width: windowWidth30 * 0.9,
+    width: windowWidth29 * 0.9,
     height: StyleSheet85.hairlineWidth,
     backgroundColor: Color_default.black,
     marginBottom: 10,
@@ -26728,7 +26761,7 @@ KoreChat.defaultProps = {
   onInputTextChanged: null,
   maxInputLength: null,
   forceGetKeyboardHeight: false,
-  inverted: true,
+  inverted: false,
   extraData: null,
   minComposerHeight: MIN_COMPOSER_HEIGHT,
   maxComposerHeight: MAX_COMPOSER_HEIGHT,

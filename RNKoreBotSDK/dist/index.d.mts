@@ -1160,6 +1160,7 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     private _renderActions;
     renderSend(): any;
     private getSendButtonBgColor;
+    private getSendButtonTextColor;
     private _renderSend;
     renderComposer(): any;
     onSpeechStart: () => void;

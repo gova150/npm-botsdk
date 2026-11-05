@@ -108,14 +108,14 @@ export const KeyboardIcon = (props: SvgProps) => {
 };
 
 export const SendIcon = (props: SvgProps) => {
-  let width = props.width || normalize(WIDTH);
-  let height = props.height || normalize(HEIGHT);
+  let width = props.width || 14;
+  let height = props.height || 14;
   let strokeColor = props.color || Color.white;
 
   return (
-    <Svg width={width} height={height} viewBox="0 0 15 14" fill="none">
+    <Svg width={width} height={height} viewBox="0 0 512 512" fill="none">
       <Path
-        d="M1.67123 5.0568C1.30302 5.19159 1.27011 5.69959 1.61729 5.88181L6.20644 8.29374L8.61632 12.8819C8.79859 13.2289 9.30601 13.1953 9.44085 12.8272L13.5965 1.4834C13.7288 1.12213 13.378 0.771245 13.0167 0.903509L1.67123 5.0568ZM2.9406 5.55723L11.4048 2.45618L6.45612 7.40487L2.9406 5.55723ZM7.0953 8.04405L12.044 3.09537L8.94544 11.5621L7.0953 8.04405Z"
+        d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3.3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"
         fill={strokeColor}
       />
     </Svg>
@@ -150,3 +150,23 @@ export const HappyIcon = (props: SvgProps) => {
     </Svg>
   );
 };
+
+export const UserSilhouetteIcon = (props: {
+  width?: number;
+  height?: number;
+  color?: string;
+}) => {
+  const width = props.width || 14;
+  const height = props.height || 14;
+  const color = props.color || '#111827';
+
+  return (
+    <Svg width={width} height={height} viewBox="0 0 16 16" fill="none">
+      <Path
+        d="M8 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-5 6.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5v.5H3v-.5Z"
+        fill={color}
+      />
+    </Svg>
+  );
+};
+

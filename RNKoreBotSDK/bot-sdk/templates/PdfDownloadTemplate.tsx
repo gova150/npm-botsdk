@@ -13,6 +13,7 @@ import {botStyles, TEMPLATE_STYLE_VALUES} from '../theme/styles';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {TEMPLATE_TYPES, BubbleTheme, ButtonTheme} from '../constants/Constant';
 import {getWindowWidth} from '../charts';
+import ArcSpinnerLoader from '../components/ArcSpinnerLoader';
 import PdfDownloadLoaderManager, {
   showPdfDownloadLoader,
   hidePdfDownloadLoader,
@@ -248,27 +249,36 @@ export default class PdfDownloadTemplate extends BaseView<
     const isBackgroundInverted = payload?.variation === 'backgroundInverted';
     const isTextInverted = payload?.variation === 'textInverted';
 
+    const bodyBtn =
+      (this.props?.theme?.v3?.body as any)?.buttons ||
+      (this.props?.theme?.v3?.body as any)?.button;
+    const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor;
+    const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor;
+
     let buttonBgColor =
+      bodyBtnBg ||
+      btheme.ACTIVE_BG_COLOR ||
       bbtheme.BUBBLE_RIGHT_BG_COLOR ||
-      this.props?.theme?.v3?.body?.buttons?.bg_color ||
       '#205493';
     let buttonBorderColor =
+      bodyBtnBg ||
+      btheme.ACTIVE_BG_COLOR ||
       bbtheme.BUBBLE_LEFT_BG_COLOR ||
-      bbtheme.BUBBLE_RIGHT_BG_COLOR ||
       '#205493';
     let buttonTextColor =
+      bodyBtnColor ||
+      btheme.ACTIVE_TXT_COLOR ||
       bbtheme.BUBBLE_RIGHT_TEXT_COLOR ||
-      this.props?.theme?.v3?.body?.buttons?.color ||
       Color.white;
 
     if (isBackgroundInverted) {
-      buttonBgColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
-      buttonTextColor = bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
-      buttonBorderColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonBgColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
+      buttonBorderColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
     } else if (isTextInverted) {
-      buttonBgColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
-      buttonTextColor = bbtheme.BUBBLE_RIGHT_BG_COLOR;
-      buttonBorderColor = bbtheme.BUBBLE_LEFT_BG_COLOR;
+      buttonBgColor = Color.white;
+      buttonTextColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      buttonBorderColor = bodyBtnBg || bbtheme.BUBBLE_LEFT_BG_COLOR;
     }
 
     const themeSeparator =
@@ -303,7 +313,7 @@ export default class PdfDownloadTemplate extends BaseView<
         {this.state.isLoading && (
           <View style={styles.overlayLoader} pointerEvents="auto">
             <View style={styles.loaderBox}>
-              <ActivityIndicator size="small" color={buttonBgColor} />
+              <ArcSpinnerLoader size={42} strokeWidth={3.8} color={buttonBgColor} />
             </View>
           </View>
         )}

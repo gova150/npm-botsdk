@@ -19,15 +19,38 @@ export default class CompactHeader extends BaseHeader<
 
   render() {
     const theme = this.context as ThemeType;
-    const height: number = MIN_HEADER_HEIGHT || 45;
-    const headerColor = theme?.v3?.header?.bg_color || '#EAECF0';
+    const headerColor = theme?.v3?.header?.bg_color || '#FFFFFF';
+
+    const titleName = theme?.v3?.header?.title?.name;
+    const subTitleName = theme?.v3?.header?.sub_title?.name;
+
+    let topText = 'DIGITAL CHAT';
+    let bottomText = 'Digital Advocate';
+
+    if (subTitleName?.toLowerCase().includes('chat')) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName) || 'Digital Advocate';
+    } else if (titleName?.toLowerCase().includes('chat')) {
+      topText = titleName;
+      bottomText = this.getBotTitleName(subTitleName) || 'Digital Advocate';
+    } else if (subTitleName && titleName) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName);
+    } else {
+      topText = subTitleName || 'DIGITAL CHAT';
+      bottomText = this.getBotTitleName(titleName) || 'Digital Advocate';
+    }
+
+    if (bottomText.toUpperCase() === 'DIGITAL ADVOCATE') {
+      bottomText = 'Digital Advocate';
+    }
+    topText = topText.toUpperCase();
 
     return (
       <View
         style={[
           styles.main,
           {
-            height: normalize(height),
             backgroundColor: headerColor,
           },
         ]}>
@@ -49,9 +72,9 @@ export default class CompactHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_text,
-                    {color: theme?.v3?.header?.title?.color || '#000000'},
+                    {color: theme?.v3?.header?.sub_title?.color || '#6B7280'},
                   ]}>
-                  {this.getBotTitleName(theme?.v3?.header?.title?.name)}
+                  {topText}
                 </Text>
               </View>
               <View style={styles.title_sub_con1}>
@@ -59,25 +82,22 @@ export default class CompactHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_sub_text,
-                    {color: theme?.v3?.header?.sub_title?.color || '#000000'},
+                    {color: theme?.v3?.header?.title?.color || '#111827'},
                   ]}>
-                  {theme?.v3?.header?.sub_title?.name}
+                  {bottomText}
                 </Text>
               </View>
             </View>
           </View>
           <View style={styles.right_icon_container}>
-            {theme?.v3?.header?.buttons &&
-              this.renderRightSideIcons(
-                theme,
-                {},
-                {},
-                theme?.v3?.header?.icons_color ||
-                  invertColor(headerColor, true),
-              )}
+            {this.renderRightSideIcons(
+              theme,
+              {},
+              {},
+              theme?.v3?.header?.icons_color || invertColor(headerColor, true),
+            )}
           </View>
         </View>
-        <View style={styles.line} />
       </View>
     );
   }
@@ -87,51 +107,61 @@ const styles = StyleSheet.create({
   sub_con1: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
     marginStart: 0,
   },
   title_sub_text: {
     fontWeight: '700',
-    fontSize: normalize(15),
+    fontSize: 16,
     fontStyle: 'normal',
-    lineHeight: 22.5,
+    lineHeight: 22,
+    color: '#111827',
   },
   title_sub_con1: {
-    flex: 1,
+    justifyContent: 'center',
   },
   title_text: {
-    fontWeight: '500',
-    fontSize: normalize(10), 
+    fontWeight: '600',
+    fontSize: 11,
     fontStyle: 'normal',
     lineHeight: 15,
     letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: '#6B7280',
   },
   title_sub_con: {
-    flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
-  title_main: {flexDirection: 'column', flex: 1, marginStart: 5},
-  sub_con: {flex: 1, flexDirection: 'row'},
+  title_main: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  sub_con: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   main: {
     width: '100%',
-
-    marginBottom: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    borderStyle: 'solid',
+    backgroundColor: '#FFFFFF',
   },
   back_icon_container: {
-    height: '100%',
     width: normalize(33),
     alignItems: 'center',
     justifyContent: 'center',
+    marginEnd: 8,
   },
   right_icon_container: {
-    //backgroundColor: 'green',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginEnd: 5,
   },
   line: {
-    backgroundColor: Color.black,
-    opacity: 0.3,
-    height: StyleSheet.hairlineWidth,
-    width: '100%',
+    display: 'none',
   },
 });

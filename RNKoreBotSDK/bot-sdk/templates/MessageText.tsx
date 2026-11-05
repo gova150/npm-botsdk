@@ -48,11 +48,10 @@ const WWW_URL_PATTERN = /^www\./i;
 
 const textStyle: TextStyle = {
   fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-  // lineHeight: 20,
-  marginTop: 5,
-  marginBottom: 5,
-  marginLeft: 10,
-  marginRight: 10,
+  marginTop: 0,
+  marginBottom: 0,
+  marginLeft: 0,
+  marginRight: 0,
 };
 
 const styles = {
@@ -60,9 +59,9 @@ const styles = {
     container: {
       marginRight: 30,
       minHeight: 20,
-      justifyContent: 'flex-end',
-      paddingBottom: 5,
-      paddingTop: 5,
+      justifyContent: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
     } as ViewStyle,
     text: {
       color: Color.black,
@@ -74,7 +73,10 @@ const styles = {
     } as TextStyle,
   }),
   center: StyleSheet.create({
-    container: {} as ViewStyle,
+    container: {
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    } as ViewStyle,
     text: {
       color: Color.white,
       ...textStyle,
@@ -90,14 +92,13 @@ const styles = {
       marginLeft: 30,
       minHeight: 20,
       minWidth: 40,
-      justifyContent: 'flex-end',
-      paddingBottom: 5,
-      paddingTop: 5,
+      justifyContent: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
     },
     text: {
       color: Color.white,
       ...textStyle,
-      alignSelf: 'center',
     } as TextStyle,
     link: {
       color: Color.white,

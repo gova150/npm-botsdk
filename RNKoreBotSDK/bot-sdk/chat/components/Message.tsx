@@ -79,10 +79,10 @@ const styles = {
   left: StyleSheet.create({
     container: {
       flexDirection: 'row',
-      alignItems: 'flex-end',
+      alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      marginLeft: 8,
-      marginRight: 0,
+      marginLeft: 16,
+      marginRight: 16,
     },
   }),
   center: StyleSheet.create({
@@ -99,8 +99,8 @@ const styles = {
       flexDirection: 'row',
       alignItems: 'flex-end',
       justifyContent: 'flex-end',
-      marginLeft: 0,
-      marginRight: 8,
+      marginLeft: 16,
+      marginRight: 16,
     },
   }),
 };
@@ -235,11 +235,11 @@ export default class Message extends React.Component<MessageProps> {
       currentMessage?.type !== 'bot_response' ||
       !theme?.v3?.body?.icon?.show
     ) {
-      return <View style={{ width: normalize(5) }} />;
+      return null;
     }
 
     if (!theme?.v3?.body?.icon?.bot_icon) {
-      return <View style={{ width: normalize(5) }} />;
+      return null;
     }
 
     const newPosition = position ? position : 'left';
@@ -300,16 +300,14 @@ export default class Message extends React.Component<MessageProps> {
       const sameUser = isSameUser(currentMessage, nextMessage);
       const newPosition = position ? position : 'left';
       return (
-        <View>
+        <View style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: 'column' }}>
             {this.renderDay()}
-            <View style={{ flexDirection: 'row', marginBottom: normalize(5) }}>
+            <View style={{ flexDirection: 'row' }}>
               {this.renderBotAvatarSlot()}
               <View
                 style={[
                   styles[newPosition].container,
-                  { marginBottom: sameUser ? 2 : 10 },
-                  !this.props.inverted && { marginBottom: 2 },
                   containerStyle &&
                     containerStyle[position ? position : 'left'],
                   { flex: 1 },
@@ -319,7 +317,7 @@ export default class Message extends React.Component<MessageProps> {
                       marginLeft: 0,
                     },
                   position === 'right' && {
-                    marginRight: normalize(8),
+                    marginRight: 0,
                   },
                 ]}
               >

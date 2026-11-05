@@ -128,8 +128,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   send_container1: {
-    backgroundColor: Color.bot_blue,
-    borderRadius: 7,
+    backgroundColor: '#1B365D',
+    borderRadius: 8,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
@@ -142,27 +144,41 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
   },
   send_container: {
-    width: normalize(40),
-    height: normalize(40),
-    borderRadius: 6,
+    width: 38,
+    height: 38,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   send_main_container: {
-    width: normalize(40),
-    height: normalize(40),
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 6,
+    marginHorizontal: 0,
     backgroundColor: Color.red,
   },
   container: {
     justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 6,
   },
   primary: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  disclaimerText: {
+    fontSize: 11,
+    fontWeight: '400',
+    textAlign: 'center',
+    color: '#666666',
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   accessory: {
     height: 44,
@@ -327,10 +343,26 @@ export default class InputToolbar extends React.Component<
   }
 
   private getSendButtonBgColor = (theme?: IThemeType) => {
+    const bodyBtn =
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
     return (
-      theme?.v3?.body?.user_message?.bg_color ||
-      theme?.v3?.general?.colors?.primary ||
-      '#0D6EFD'
+      bodyBtn?.bg_color ||
+      bodyBtn?.bgColor ||
+      (theme?.v3?.footer?.buttons as any)?.send?.bg_color ||
+      '#1B365D'
+    );
+  };
+
+  private getSendButtonTextColor = (theme?: IThemeType) => {
+    const bodyBtn =
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
+    return (
+      bodyBtn?.color ||
+      bodyBtn?.textColor ||
+      (theme?.v3?.footer?.buttons as any)?.send?.color ||
+      '#FFFFFF'
     );
   };
 
@@ -340,7 +372,6 @@ export default class InputToolbar extends React.Component<
       theme?.v3?.footer?.buttons?.microphone?.show === true &&
       !this.props?.alwaysShowSend &&
       !props?.alwaysShowSend;
-    const height = normalize(36);
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
     return (
       <Send {...props} alwaysShowSend={true} disabled={false}>
@@ -354,8 +385,8 @@ export default class InputToolbar extends React.Component<
               }}>
               <SvgIcon
                 name={this.state.isSTTViewShow ? 'KeyboardIcon' : 'MicIcon'}
-                width={normalize(22)}
-                height={normalize(22)}
+                width={14}
+                height={14}
                 color={
                   theme?.v3?.footer?.buttons?.attachment?.icon_color ||
                   theme?.v3?.footer?.icons_color ||
@@ -371,19 +402,16 @@ export default class InputToolbar extends React.Component<
               styles.send_container1,
               {
                 backgroundColor: sendButtonBgColor,
-                width: normalize(height),
-                height: normalize(height),
+                width: 38,
+                height: 38,
+                borderRadius: 8,
               },
             ]}>
             <SvgIcon
               name={'SendIcon'}
-              width={normalize(16)}
-              height={normalize(16)}
-              color={
-                theme?.v3?.body?.user_message?.color
-                  ? theme?.v3?.body?.user_message?.color
-                  : Color.white
-              }
+              width={14}
+              height={14}
+              color={this.getSendButtonTextColor(theme)}
             />
           </View>
         )}
@@ -722,13 +750,16 @@ export default class InputToolbar extends React.Component<
 
   render() {
     const theme = this.context as IThemeType;
-    const minHeight: number =
-      this.state.isSTTViewShow &&
-      this.state.recordState === RECORD_STATE.onSpeechStop
-        ? 52
-        : MIN_TOOL_BAR_HEIGHT || 72;
+    const footerBgColor = theme?.v3?.footer?.bg_color || '#FFFFFF';
     return (
-      <View style={[styles.container, this.props.containerStyle]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: footerBgColor,
+          },
+          this.props.containerStyle,
+        ]}>
         <View style={{flexDirection: 'column'}}>
           {this.renderSuggestionsView()}
           {this.renderMediaView()}
@@ -738,8 +769,7 @@ export default class InputToolbar extends React.Component<
               styles.primary,
               this.props.primaryStyle as ViewStyle,
               {
-                minHeight: normalize(minHeight),
-                backgroundColor: theme?.v3?.footer?.bg_color || '#6975860D',
+                backgroundColor: 'transparent',
               },
             ]}>
             {this.isShowActions() && this.renderActions()}
@@ -750,6 +780,9 @@ export default class InputToolbar extends React.Component<
               : this.renderComposer()}
             {this.isShowActions() && this.renderSend()}
           </View>
+          <Text style={styles.disclaimerText}>
+            AI responses may occasionally be incorrect or outdated.
+          </Text>
         </View>
         {this.renderAccessory()}
         {this.renderSpeechToText()}

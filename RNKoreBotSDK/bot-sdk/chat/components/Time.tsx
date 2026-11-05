@@ -112,19 +112,21 @@ export default class Time extends BaseView<TimeProps, TimeState> {
     const now = dayjs();
     const date = dayjs(myDate);
     const diffInDays = date.diff(now, 'day');
+    const timeStr = date.format('hh:mm');
+    const ampm = date.format('A') === 'PM' ? 'p.m.' : 'a.m.';
 
     if (diffInDays === -1) {
-      return date.format('hh:mm A, [Yesterday]');
+      return `${timeStr} ${ampm} Yesterday`;
     } else if (diffInDays === 0) {
-      return date.format('hh:mm A, [Today]');
+      return `${timeStr} ${ampm} Today`;
     } else if (diffInDays === 1) {
-      return date.format('hh:mm A, [Tomorrow]');
+      return `${timeStr} ${ampm} Tomorrow`;
     } else if (diffInDays < -1 && diffInDays >= -7) {
-      return date.format('[Last] dddd');
+      return `${timeStr} ${ampm} ` + date.format('dddd');
     } else if (diffInDays > 1 && diffInDays <= 7) {
-      return date.format('hh:mm A, dddd');
+      return `${timeStr} ${ampm} ` + date.format('dddd');
     } else {
-      return date.format('MM/DD/YYYY');
+      return `${timeStr} ${ampm} ` + date.format('MM/DD/YYYY');
     }
   };
 
@@ -135,32 +137,19 @@ export default class Time extends BaseView<TimeProps, TimeState> {
 
     if (createdOn && position) {
       return (
-        <View
-          style={[
-            styles[position].container,
-          ]}>
+        <View style={{backgroundColor: 'transparent'}}>
           <Text
             style={[
               {
-                fontSize: normalize(10),
-                backgroundColor: 'transparent',
-                marginTop: normalize(3),
-                opacity: 0.8,
-              },
-              {
-                color: this.props?.theme?.v3?.body?.time_stamp?.color || '#1d2939',
-                fontFamily: this.props?.theme?.v3?.body?.font?.family || 'Inter',
-              },
-              {
-                fontSize: normalize(9),
+                fontSize: 12,
+                color:
+                  this.props?.theme?.v3?.body?.time_stamp?.color || '#6B7280',
+                fontFamily:
+                  this.props?.theme?.v3?.body?.font?.family || 'Inter',
+                fontWeight: '400',
               },
             ]}>
-            {' '}
             {this.dateToFromNowDaily(createdOn)}
-            {/* {dayjs(currentMessage.createdOn)
-              //.locale(this.actionSheet.getLocale())
-              .locale('en')
-              .format(timeFormat)} */}
           </Text>
         </View>
       );

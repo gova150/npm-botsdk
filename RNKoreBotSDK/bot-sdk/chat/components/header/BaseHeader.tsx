@@ -124,8 +124,8 @@ export default abstract class BaseHeader<
   protected renderIcon = (
     id: any = undefined,
     iconName?: string,
-    width: number = 17,
-    height: number = 17,
+    width: number = 14,
+    height: number = 14,
     styleProps?: any,
     iconColor?: any,
   ) => {
@@ -140,9 +140,9 @@ export default abstract class BaseHeader<
         onPress={() => this.onHeaderIconPress(id)}>
         <SvgIcon
           name={iconName}
-          width={normalize(width)}
-          height={normalize(height)}
-          color={iconColor ? iconColor : '#697586'}
+          width={width}
+          height={height}
+          color={iconColor ? iconColor : '#1F2A44'}
         />
       </Wrapper>
     );
@@ -272,13 +272,29 @@ export default abstract class BaseHeader<
     }
 
     return (
-      <View style={[{flexDirection: 'row'}, stylePropsMain]}>
-        {buttons?.help?.show &&
+      <View
+        style={[
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+          },
+          stylePropsMain,
+        ]}>
+        {this.renderIcon(
+          HeaderIconsId.MINIMISE,
+          'HeaderMenu',
+          14,
+          14,
+          styleProps,
+          iconColor,
+        )}
+        {buttons?.help?.show !== false &&
           this.renderIcon(
             HeaderIconsId.HELP,
             'HeaderHelp',
-            17,
-            17,
+            14,
+            14,
             styleProps,
             iconColor,
           )}
@@ -286,8 +302,8 @@ export default abstract class BaseHeader<
           this.renderIcon(
             HeaderIconsId.LIVE_AGENT,
             'HeaderTalk',
-            17,
-            17,
+            14,
+            14,
             styleProps,
             iconColor,
           )}
@@ -295,25 +311,17 @@ export default abstract class BaseHeader<
           this.renderIcon(
             HeaderIconsId.RECONNECT,
             'HeaderReconnect',
-            17,
-            17,
+            14,
+            14,
             styleProps,
             iconColor,
           )}
-        {this.renderIcon(
-          HeaderIconsId.MINIMISE,
-          'HeaderMenu',
-          17,
-          17,
-          styleProps,
-          iconColor,
-        )}
-        {buttons?.close?.show &&
+        {buttons?.close?.show !== false &&
           this.renderIcon(
             HeaderIconsId.CLOSE,
             'HeaderClose',
-            17,
-            17,
+            14,
+            14,
             styleProps,
             iconColor,
           )}
@@ -414,11 +422,7 @@ const styles = StyleSheet.create({
     width: normalize(40),
   },
   icon_container: {
-    paddingHorizontal: normalize(4),
-    flexWrap: 'wrap',
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginStart: 5,
   },
 });

@@ -57,7 +57,7 @@ export function Composer({
   isTTSenable = false,
   sendButtonBgColor,
 }: ComposerProps): React.ReactElement {
-  const dimensionsRef = useRef<{width: number; height: number}>();
+  const dimensionsRef = useRef<{width: number; height: number} | undefined>(undefined);
   const [isTTS, setTTS] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   //onSpeakerClicked(false);
@@ -95,51 +95,38 @@ export function Composer({
   }: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) =>
     determineInputSizeChange(contentSize);
   const maxHeight = MAX_TOOL_BAR_HEIGHT || 180;
-  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || Color.white;
-  const defaultOutlineColor =
-    theme?.v3?.footer?.compose_bar?.['outline-color'] || Color.gray;
+  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || '#F3F4F6';
   const sendButtonColor =
     sendButtonBgColor ||
     theme?.v3?.body?.user_message?.bg_color ||
     theme?.v3?.general?.colors?.primary ||
-    '#0D6EFD';
-  const outLineColor = isFocused ? sendButtonColor : defaultOutlineColor;
-  const currentBorderWidth = isFocused ? 2 : StyleSheet.hairlineWidth;
+    '#1B365D';
+  const focusBorderColor =
+    theme?.v3?.footer?.compose_bar?.['outline-color'] || sendButtonColor;
+  const outLineColor = isFocused ? focusBorderColor : bgColor;
+  const currentBorderWidth = 1;
   //const bubbleTheme = getBubbleTheme(theme);
   const textColor = invertColor(bgColor, true);
   return (
     <View
-      style={[
-        {
+      style={{
+        justifyContent: 'center',
+        backgroundColor: Color.transparent,
+        flex: 1,
+      }}>
+      <View
+        style={{
           justifyContent: 'center',
-          alignItems: 'stretch',
-          backgroundColor: Color.transparent,
-        },
-        isIOS && {
+          maxHeight: normalize(maxHeight),
+          flexDirection: 'row',
+          alignItems: 'center',
           borderWidth: currentBorderWidth,
           borderColor: outLineColor,
           borderStyle: 'solid',
-          borderRadius: 4,
+          borderRadius: 8,
           backgroundColor: bgColor,
-          minHeight: normalize(composerHeightNew + 16),
-        },
-      ]}>
-      <View
-        style={[
-          {
-            justifyContent: 'center',
-            maxHeight: normalize(maxHeight),
-            flexDirection: 'row',
-          },
-          isAndroid && {
-            borderWidth: currentBorderWidth,
-            borderColor: outLineColor,
-            borderStyle: 'solid',
-            borderRadius: 4,
-            backgroundColor: bgColor,
-            minHeight: normalize(composerHeightNew + 16),
-          },
-        ]}>
+          minHeight: 38,
+        }}>
         <TextInput
           testID={placeholder}
           accessible
@@ -147,7 +134,7 @@ export function Composer({
           placeholder={
             theme?.v3?.footer?.compose_bar?.placeholder || placeholder
           }
-          placeholderTextColor={placeholderTextColor}
+          placeholderTextColor={'#9CA3AF'}
           selectionColor={textColor}
           multiline={multiline}
           maxLength={MAX_INPUT_TEXT_LENGTH}
@@ -156,13 +143,13 @@ export function Composer({
           onChangeText={onTextChanged}
           style={[
             styles.textInput,
-
             {
-              minHeight: normalize(composerHeightNew),
-              paddingRight: theme?.v3?.footer?.buttons?.emoji?.show ? 4 : 8,
-            },
-            {
-              color: textColor, //bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,
+              paddingVertical: 9,
+              paddingHorizontal: 12,
+              fontSize: 14,
+              fontWeight: '400',
+              color: textColor,
+              minHeight: 38,
             },
           ]}
           autoFocus={textInputAutoFocus}
@@ -242,11 +229,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    fontSize: normalize(16),
-    paddingLeft: 8,
-    paddingRight: 8,
-    minHeight: normalize(isIOS ? 34 : 36),
-    paddingVertical: isIOS ? 8 : 6,
+    fontSize: 14,
+    fontWeight: '400',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    minHeight: 38,
     textAlignVertical: 'center',
     color: Color.text_color,
   },

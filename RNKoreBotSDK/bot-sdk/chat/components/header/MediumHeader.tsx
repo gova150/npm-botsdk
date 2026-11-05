@@ -23,31 +23,50 @@ export default class MediumHeader extends BaseHeader<
 
   render() {
     const theme = this.context as ThemeType;
-    const height: number = MIN_HEADER_HEIGHT || 45;
-    const extraHeight = isIOS ? height + 25 : height + 35;
-    const headerColor = theme?.v3?.header?.bg_color || '#EAECF0';
+    const headerColor = theme?.v3?.header?.bg_color || '#FFFFFF';
+
+    const titleName = theme?.v3?.header?.title?.name;
+    const subTitleName = theme?.v3?.header?.sub_title?.name;
+
+    let topText = 'DIGITAL CHAT';
+    let bottomText = 'Digital Advocate';
+
+    if (subTitleName?.toLowerCase().includes('chat')) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName) || 'Digital Advocate';
+    } else if (titleName?.toLowerCase().includes('chat')) {
+      topText = titleName;
+      bottomText = this.getBotTitleName(subTitleName) || 'Digital Advocate';
+    } else if (subTitleName && titleName) {
+      topText = subTitleName;
+      bottomText = this.getBotTitleName(titleName);
+    } else {
+      topText = subTitleName || 'DIGITAL CHAT';
+      bottomText = this.getBotTitleName(titleName) || 'Digital Advocate';
+    }
+
+    if (bottomText.toUpperCase() === 'DIGITAL ADVOCATE') {
+      bottomText = 'Digital Advocate';
+    }
+    topText = topText.toUpperCase();
+
     return (
       <View
         style={[
           styles.main,
           {
-            height: normalize(extraHeight),
             backgroundColor: headerColor,
           },
         ]}>
-        <View style={[styles.sub_con]}>
+        <View style={styles.sub_con}>
           {this.renderBackIcon(
             {},
-            {...styles.back_icon, height: normalize(height)},
+            {},
             theme?.v3?.header?.icons_color || invertColor(headerColor, true),
           )}
-          <View style={[styles.sub_con1, {}]}>
+          <View style={styles.sub_con1}>
             {theme?.v3?.header?.icon?.show && (
-              <View style={[styles.back_icon_container]}>
-                {/* {this.renderIcon(undefined, 'HeaderAvatar', 30, 30, {
-                  height: normalize(height - (isIOS ? 15 : 10)),
-                  ...styles.render_icon,
-                })} */}
+              <View style={styles.back_icon_container}>
                 {this.renderHeaderIcon(theme, {
                   marginStart: 0,
                 })}
@@ -59,9 +78,9 @@ export default class MediumHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_text,
-                    {color: theme?.v3?.header?.title?.color || '#000000'},
+                    {color: theme?.v3?.header?.sub_title?.color || '#6B7280'},
                   ]}>
-                  {this.getBotTitleName(theme?.v3?.header?.title?.name)}
+                  {topText}
                 </Text>
               </View>
               <View style={styles.title_sub_con1}>
@@ -69,25 +88,22 @@ export default class MediumHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_sub_text,
-                    {color: theme?.v3?.header?.sub_title?.color || '#000000'},
+                    {color: theme?.v3?.header?.title?.color || '#111827'},
                   ]}>
-                  {theme?.v3?.header?.sub_title?.name}
+                  {bottomText}
                 </Text>
               </View>
             </View>
           </View>
           <View style={styles.right_icon_container}>
-            {theme?.v3?.header?.buttons &&
-              this.renderRightSideIcons(
-                theme,
-                {height: height},
-                styles.itemProps,
-                theme?.v3?.header?.icons_color ||
-                  invertColor(headerColor, true),
-              )}
+            {this.renderRightSideIcons(
+              theme,
+              {},
+              {},
+              theme?.v3?.header?.icons_color || invertColor(headerColor, true),
+            )}
           </View>
         </View>
-        <View style={styles.line} />
       </View>
     );
   }
@@ -95,74 +111,75 @@ export default class MediumHeader extends BaseHeader<
 
 const styles = StyleSheet.create({
   itemProps: {
-    position: 'absolute',
-    end: 0,
-    marginEnd: 5,
+    marginEnd: 0,
   },
   render_icon: {
     paddingHorizontal: 0,
-    flexWrap: 'wrap',
-
-    marginStart: 0,
-    marginBottom: 5,
-
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   back_icon: {
-    position: 'absolute',
-    left: 0,
-    zIndex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sub_con1: {
     flex: 1,
-    //flexDirection: 'column',
-    //backgroundColor: 'yellow',
-    //marginStart: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginStart: 0,
   },
   title_sub_con1: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
-    title_sub_text: {
+  title_sub_text: {
     fontWeight: '700',
-    fontSize: normalize(15),
+    fontSize: 16,
     fontStyle: 'normal',
-    lineHeight: 22.5,
+    lineHeight: 22,
+    color: '#111827',
   },
   title_text: {
-    fontWeight: '500',
-    fontSize: normalize(10), 
+    fontWeight: '600',
+    fontSize: 11,
     fontStyle: 'normal',
     lineHeight: 15,
     letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: '#6B7280',
   },
   title_sub_con: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
-  title_main: {flexDirection: 'column', flex: 1, marginStart: 5},
-  sub_con: {flex: 1, flexDirection: 'row', alignSelf: 'flex-start'},
+  title_main: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  sub_con: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   main: {
     width: '100%',
-
-    marginBottom: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    borderStyle: 'solid',
+    backgroundColor: '#FFFFFF',
   },
   back_icon_container: {
+    width: normalize(33),
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginTop: 8,
+    justifyContent: 'center',
+    marginEnd: 8,
   },
   right_icon_container: {
-    //backgroundColor: 'green',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   line: {
-    backgroundColor: Color.black,
-    opacity: 0.3,
-    height: StyleSheet.hairlineWidth,
-    width: '100%',
+    display: 'none',
   },
 });

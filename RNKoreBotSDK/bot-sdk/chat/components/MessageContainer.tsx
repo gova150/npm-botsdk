@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
     elevation: 4, // Android shadow
   },
   contentContainerStyle: {
-    //flexGrow: 1,
-    //justifyContent: 'flex-end',
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   emptyChatContainer: {
     flex: 1,
@@ -150,7 +150,7 @@ export default class MessageContainer extends PureComponent<
     renderMessage: null,
     onLoadEarlier: () => {},
     onQuickReply: () => {},
-    inverted: true,
+    inverted: false,
     loadEarlier: false,
     listViewProps: {},
     invertibleScrollViewProps: {},
@@ -301,7 +301,7 @@ export default class MessageContainer extends PureComponent<
         inverted,
         nextMessage,
         itemIndex: index,
-        isFirstMsz: totalLength - 1 === index,
+        isFirstMsz: inverted ? totalLength - 1 === index : index === 0,
         position: position,
         onListItemClick: this.onListItemClick,
         onSendText: this.props.onSendText,
@@ -331,11 +331,11 @@ export default class MessageContainer extends PureComponent<
   renderChatEmpty = (): any => {
     if (this.props.renderChatEmpty) {
       return this.props.inverted ? (
-        this.props.renderChatEmpty()
-      ) : (
         <View style={styles.emptyChatContainer}>
           {this.props.renderChatEmpty()}
         </View>
+      ) : (
+        this.props.renderChatEmpty()
       );
     }
     return <View style={styles.container} />;

@@ -32,6 +32,7 @@ import BotTemplate from '../../templates/BotTemplate';
 import KoraBotClient from 'rn-kore-bot-socket-lib-v79';
 import CustomTemplate from '../../templates/CustomTemplate';
 import {isAndroid, isIOS} from '../../utils/PlatformCheck';
+import {UserSilhouetteIcon} from '../../assets/composebarIcons';
 
 export interface BubbleProps {
   user: {
@@ -504,71 +505,89 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
   private renderTime = () => {
     let createdOn: any =
       this.props.currentMessage?.createdOn ||
-      this.props.currentMessage.message?.[0]?.component?.payload?.createdOn;
-    if (createdOn) {
-      const {
-        position = 'left',
-        containerStyle,
-        wrapperStyle,
-        textStyle,
-        ...timeProps
-      } = this.props;
-      if (this.props.renderTime) {
-        return this.props.renderTime(timeProps);
-      }
-      const theme = this.context as ThemeType;
+      this.props.currentMessage?.created_at ||
+      this.props.currentMessage?.timeMillis ||
+      this.props.currentMessage.message?.[0]?.component?.payload?.createdOn ||
+      this.props.currentMessage.message?.[0]?.createdOn ||
+      new Date().toISOString();
 
-      const isUserMessage = this.props.currentMessage?.type === 'user_message';
+    const {
+      position = 'left',
+      containerStyle,
+      wrapperStyle,
+      textStyle,
+      ...timeProps
+    } = this.props;
 
+    if (this.props.renderTime) {
+      return this.props.renderTime(timeProps);
+    }
+    const theme = this.context as ThemeType;
+
+    const isUserMessage = this.props.currentMessage?.type === 'user_message';
+    const botName =
+      KoraBotClient.getInstance().getBotName() || 'Digital Advocate';
+    const primaryTextColor =
+      theme?.v3?.general?.colors?.primary_text || '#111827';
+    const fontFamily = theme?.v3?.body?.font?.family || 'Inter';
+
+    if (isUserMessage) {
       return (
-        <View style={{flexDirection: 'row'}}>
-          {isUserMessage && (
-            <Time
-              createdOn={createdOn}
-              {...timeProps}
-              theme={theme as IThemeType}
-            />
-          )}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            marginBottom: 6,
+          }}>
+          <Time
+            createdOn={createdOn}
+            {...timeProps}
+            position="right"
+            theme={theme as IThemeType}
+          />
           <Text
-            style={[
-              {
-                fontSize: normalize(10),
-                textAlign: 'center',
-                opacity: 0.8,
-                marginStart:
-                  position === 'left'
-                    ? theme?.v3?.body?.icon?.show
-                      ? 5
-                      : 0
-                    : 5,
-              },
-              isUserMessage && {
-                marginEnd: 10,
-              },
-              {
-                color: theme?.v3?.body?.time_stamp?.color || '#1d2939',
-                fontFamily: theme?.v3?.body?.font?.family || 'Inter',
-                opacity: 1,
-              },
-              {
-                fontWeight: '700',
-                alignSelf:'center',
-                fontSize: normalize(10),
-              },
-            ]}>
-            {isUserMessage ? 'You' : KoraBotClient.getInstance().getBotName()}
+            style={{
+              fontSize: 12,
+              fontWeight: '700',
+              color: primaryTextColor,
+              fontFamily: fontFamily,
+              marginLeft: 6,
+              marginRight: 6,
+            }}>
+            You
           </Text>
-          {!isUserMessage && (
-            <Time
-              createdOn={createdOn}
-              {...timeProps}
-              theme={theme as IThemeType}
-            />
-          )}
+          <UserSilhouetteIcon width={14} height={14} color={primaryTextColor} />
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            marginBottom: 6,
+          }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: '700',
+              color: primaryTextColor,
+              fontFamily: fontFamily,
+              marginRight: 6,
+            }}>
+            {botName}
+          </Text>
+          <Time
+            createdOn={createdOn}
+            {...timeProps}
+            position="left"
+            theme={theme as IThemeType}
+          />
         </View>
       );
     }
-    return <></>;
   };
 
   private isBotTextMessage = () => {
@@ -593,8 +612,8 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
           styles[position].container,
           containerStyle && containerStyle[position],
         ]}>
-        {theme?.v3?.body?.time_stamp?.show &&
-          theme?.v3?.body?.time_stamp?.position === 'top' &&
+        {theme?.v3?.body?.time_stamp?.show !== false &&
+          theme?.v3?.body?.time_stamp?.position !== 'bottom' &&
           this.renderTime()}
 
         <View

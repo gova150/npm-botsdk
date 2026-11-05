@@ -25,11 +25,11 @@ interface SendProps extends ViewProps {
 
 const styles = StyleSheet.create({
   container: {
-    width: normalize(38),
-    height: normalize(38),
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 8,
+    marginStart: 8,
   },
   text: {
     color: Color.defaultBlue,

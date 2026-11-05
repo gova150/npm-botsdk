@@ -58,6 +58,31 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
     bbtheme: BubbleTheme,
     payload: any
   ) => {
+    const bodyBtn =
+      (this.props?.theme?.v3?.body as any)?.buttons ||
+      (this.props?.theme?.v3?.body as any)?.button;
+    const bodyBtnBg =
+      bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
+    const bodyBtnColor =
+      bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
+
+    const isBackgroundInverted = payload.variation === 'backgroundInverted';
+    const isTextInverted = payload.variation === 'textInverted';
+
+    let btnBgColor = bodyBtnBg || '#1B365D';
+    let btnBorderColor = bodyBtnBg || '#1B365D';
+    let btnTextColor = bodyBtnColor || '#FFFFFF';
+
+    if (isTextInverted) {
+      btnBgColor = Color.white;
+      btnBorderColor = bodyBtnBg || '#1B365D';
+      btnTextColor = bodyBtnBg || '#1B365D';
+    } else if (isBackgroundInverted) {
+      btnBgColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      btnBorderColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
+      btnTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
+    }
+
     return (
       <View key={index + ''} style={styles.item_container}>
         <TouchableOpacity
@@ -66,9 +91,9 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
             styles.btn_view,
             {
               width: payload.fullWidth ? getWindowWidth() * 0.75 : undefined,
-              backgroundColor: payload.variation == 'backgroundInverted' ? bbtheme.BUBBLE_RIGHT_BG_COLOR : payload.variation == 'textInverted' ? bbtheme?.BUBBLE_LEFT_BG_COLOR : Color.white,
-              borderColor: bbtheme?.BUBBLE_LEFT_BG_COLOR || '#3F51B5',
-              borderWidth: payload.variation == 'backgroundInverted' ? 0 : 1,
+              backgroundColor: btnBgColor,
+              borderColor: btnBorderColor,
+              borderWidth: isTextInverted ? 1 : 0,
             },
           ]}
           onPress={() => {
@@ -76,15 +101,14 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
               this.props.onListItemClick(
                 this.props.payload.template_type,
                 item,
-  );
-
+              );
             }
           }}>
           <Text
             style={[
               styles.item_text,
               {
-                color: payload.variation == 'backgroundInverted' ? bbtheme.BUBBLE_RIGHT_TEXT_COLOR : payload.variation == 'textInverted' ? bbtheme.BUBBLE_RIGHT_BG_COLOR : btheme.ACTIVE_TXT_COLOR,
+                color: btnTextColor,
                 fontFamily:
                   this.props?.theme?.v3?.body?.font?.family || 'Inter',
               },

@@ -49,7 +49,7 @@ export default class ChatHeader extends React.Component<
       case ChatHeaderType.REGULAR:
         return <MediumHeader {...this.props} theme={theme} />;
       case ChatHeaderType.LARGE:
-        return <LargeHeader {...this.props} theme={theme} />;
+        return <CompactHeader {...this.props} theme={theme} />;
       case ChatHeaderType.COMPACT:
         return <CompactHeader {...this.props} theme={theme} />;
 

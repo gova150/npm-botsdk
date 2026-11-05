@@ -762,11 +762,10 @@ export default class KoreChat extends React.Component<
 
     if (
       inverted === false &&
-      messages &&
-      prevProps.messages &&
-      messages?.length !== prevProps.messages?.length
+      (messages?.length !== prevProps.messages?.length ||
+        this.state.messages?.length !== prevState.messages?.length)
     ) {
-      setTimeout(() => this.scrollToBottom(false), 200);
+      setTimeout(() => this.scrollToBottom(true), 150);
     }
 
     if (text !== prevProps.text) {
@@ -965,7 +964,12 @@ export default class KoreChat extends React.Component<
       }
     }
     
-    this.setMessages(KoreChat.append(this.state.messages, modifiedMessages))
+    this.setMessages(KoreChat.append(this.state.messages, modifiedMessages));
+    if (this.props.inverted === false) {
+      setTimeout(() => {
+        this.scrollToBottom(true);
+      }, 100);
+    }
     if (!isStreamChunk) {
       setTimeout(() => {
         this.textToSpeech(newMessages);
@@ -1158,6 +1162,10 @@ export default class KoreChat extends React.Component<
   };
 
   private getMessages = () => {
+    const {inverted} = this.props;
+    if (inverted === false) {
+      return [...this.state.messages].reverse();
+    }
     return this.state.messages;
   };
 
@@ -3269,7 +3277,7 @@ KoreChat.defaultProps = {
   onInputTextChanged: null,
   maxInputLength: null,
   forceGetKeyboardHeight: false,
-  inverted: true,
+  inverted: false,
   extraData: null,
   minComposerHeight: MIN_COMPOSER_HEIGHT,
   maxComposerHeight: MAX_COMPOSER_HEIGHT,

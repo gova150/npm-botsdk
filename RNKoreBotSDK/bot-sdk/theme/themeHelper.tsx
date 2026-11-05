@@ -4,14 +4,15 @@ import {IThemeType} from './IThemeType';
 export function getButtonTheme(
   propsTheme: IThemeType | undefined,
 ): ButtonTheme {
-  // editor.putString(BotResponseConstants.BUTTON_ACTIVE_BG_COLOR, brandingModel.general.colors.primary) //#ffffff"
-  // editor.putString(BotResponseConstants.BUTTON_ACTIVE_TXT_COLOR, brandingModel.general.colors.primaryText)//"#505968"
-  // editor.putString(BotResponseConstants.BUTTON_INACTIVE_BG_COLOR, brandingModel.general.colors.secondary)
-  // editor.putString(BotResponseConstants.BUTTON_INACTIVE_TXT_COLOR, brandingModel.general.colors.secondaryText)
+  const bodyBtn =
+    (propsTheme?.v3?.body as any)?.buttons ||
+    (propsTheme?.v3?.body as any)?.button;
+  const btnBg = bodyBtn?.bg_color || bodyBtn?.bgColor;
+  const btnColor = bodyBtn?.color || bodyBtn?.textColor;
 
   let theme: ButtonTheme = {
-    ACTIVE_BG_COLOR: '#a37645',
-    ACTIVE_TXT_COLOR: '#505968',
+    ACTIVE_BG_COLOR: btnBg || '#1B365D',
+    ACTIVE_TXT_COLOR: btnColor || '#FFFFFF',
     INACTIVE_BG_COLOR: '#101828',
     INACTIVE_TXT_COLOR: '#1d2939',
   };
@@ -20,23 +21,25 @@ export function getButtonTheme(
     return theme;
   }
 
-  //   console.log(
-  //     'propsTheme.v3?.general?.colors ---->:',
-  //     propsTheme.v3?.general?.colors,
-  //   );
-
   if (propsTheme.v3?.general?.colors?.useColorPaletteOnly) {
     theme = {
       ...theme,
-      ACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.primary || '#ffffff',
+      ACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.primary || theme.ACTIVE_BG_COLOR,
       ACTIVE_TXT_COLOR:
-        propsTheme.v3?.general?.colors?.primary_text || '#505968',
+        propsTheme.v3?.general?.colors?.primary_text || theme.ACTIVE_TXT_COLOR,
       INACTIVE_BG_COLOR: propsTheme.v3?.general?.colors?.secondary || '#101828',
       INACTIVE_TXT_COLOR:
         propsTheme.v3?.general?.colors?.secondary_text || '#1d2939',
     };
   }
-  //console.log('theme ---->:', theme);
+
+  if (btnBg) {
+    theme.ACTIVE_BG_COLOR = btnBg;
+  }
+  if (btnColor) {
+    theme.ACTIVE_TXT_COLOR = btnColor;
+  }
+
   return theme;
 }
 
