@@ -24315,6 +24315,54 @@ var TemplateBottomSheet = class extends import_react52.PureComponent {
 
 // bot-sdk/chat/KoreChat.tsx
 init_LazyLoader();
+try {
+  const clientInstance = import_rn_kore_bot_socket_lib_v797.default.getInstance();
+  const proto = Object.getPrototypeOf(clientInstance);
+  if (proto && !proto.__hasJwtPatch) {
+    proto.__hasJwtPatch = true;
+    proto.initializeBotClient = function(config, isFirstTime) {
+      if (!config) {
+        throw new Error("BotConfigModel object cannot be null");
+      }
+      if (config.jwtToken || typeof config.getJwtToken === "function") {
+        if (!config.botId || !config.botUrl || !config.botName) {
+          throw new Error(
+            "BotConfigModel requires botName, botId, and botUrl when jwtToken is provided"
+          );
+        }
+      } else {
+        if (!config.botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
+          throw new Error("BotConfigModel object has some values are missing");
+        }
+      }
+      this.connectToBot(config, isFirstTime);
+    };
+    const originalCreateJwtToken = proto.createJwtToken;
+    proto.createJwtToken = async function(config, isFirstTime = true) {
+      if (!this.botConfig)
+        return;
+      if (typeof this.botConfig.getJwtToken === "function") {
+        try {
+          this.jwtToken = await this.botConfig.getJwtToken();
+          if (!this.botConfig?.isWebHook) {
+            await this.connectWithJwToken(this.jwtToken, !isFirstTime);
+          } else {
+            this.getWebhookMeta(this.botConfig, isFirstTime);
+          }
+          return;
+        } catch (err) {
+          this.emit(import_rn_kore_bot_socket_lib_v797.RTM_EVENT.ERROR, {
+            message: "Failed to get JWT token: " + (err?.message || err),
+            isBack: false
+          });
+          return;
+        }
+      }
+      return originalCreateJwtToken.call(this, config, isFirstTime);
+    };
+  }
+} catch (e) {
+}
 var Sound = null;
 try {
   Sound = require("react-native-sound").default;

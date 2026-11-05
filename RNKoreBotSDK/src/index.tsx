@@ -17,7 +17,7 @@ import KoreChat from '../bot-sdk/chat/KoreChat';
 
 // Public socket/configuration API used by host applications.
 export {default as KoreBotClient, RTM_EVENT, APP_STATE} from 'rn-kore-bot-socket-lib-v79';
-export type {BotConfigModel} from 'rn-kore-bot-socket-lib-v79';
+export type {BotConfigModel} from '../bot-sdk/models/BotConfigModel';
 
 export {default as QuickReplies} from '../bot-sdk/templates/QuickReplies';
 export {default as PdfDownloadTemplate} from '../bot-sdk/templates/PdfDownloadTemplate';

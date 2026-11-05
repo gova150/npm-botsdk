@@ -1,7 +1,6 @@
 import * as React from 'react';
 import React__default, { Component, RefObject } from 'react';
-import { BotConfigModel } from 'rn-kore-bot-socket-lib-v79';
-export { APP_STATE, BotConfigModel, default as KoreBotClient, RTM_EVENT } from 'rn-kore-bot-socket-lib-v79';
+export { APP_STATE, default as KoreBotClient, RTM_EVENT } from 'rn-kore-bot-socket-lib-v79';
 import * as react_native_sound from 'react-native-sound';
 
 declare const MAX_SOURCE_LIMIT = 1;
@@ -708,6 +707,30 @@ declare class CustomTemplate<T extends CustomViewProps, S extends CustomViewStat
         onBottomSheetClose: undefined;
     };
     constructor(props: T);
+}
+
+/**
+ * Bot configuration model for Kore.ai Bot SDK.
+ * Supports:
+ * 1. Pre-fetched static JWT token (`jwtToken`)
+ * 2. Enterprise dynamic token callback for expiry & reconnects (`getJwtToken`)
+ * 3. Legacy STS credentials (`clientId`, `clientSecret`, `identity`, `value_aud`)
+ */
+interface BotConfigModel {
+    botName: string;
+    botId: string;
+    botUrl: string;
+    jwtToken?: string;
+    getJwtToken?: () => Promise<string> | string;
+    clientId?: string;
+    clientSecret?: string;
+    identity?: string;
+    jwtServerUrl?: string;
+    value_aud?: string;
+    isWebHook?: boolean;
+    isHeaderVisible?: boolean;
+    isFooterVisible?: boolean;
+    [key: string]: any;
 }
 
 type Props = {
@@ -1424,4 +1447,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };

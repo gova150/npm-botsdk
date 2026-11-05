@@ -15,7 +15,8 @@ import { ThemeType } from '../../theme/ThemeType';
 import { ThemeContext } from '../../theme/ThemeContext';
 import { IThemeType } from '../../theme/IThemeType';
 import { TEMPLATE_TYPES } from '../../constants/Constant';
-import KoreBotClient, { ApiService, BotConfigModel } from 'rn-kore-bot-socket-lib-v79';
+import KoreBotClient, { ApiService } from 'rn-kore-bot-socket-lib-v79';
+import { BotConfigModel } from '../../models/BotConfigModel';
 import { getWindowWidth } from '../../charts';
 import { LocalizationManager } from '../../constants/Localization';
 

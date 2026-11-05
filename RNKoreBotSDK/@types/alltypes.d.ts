@@ -8,18 +8,28 @@ declare module '@govardhanboli/rn-kore-bot-sdk-v79' {
 
   // Bot Configuration
   export interface BotConfigModel {
-    botId: string;
-    chatBotName: string;
-    serverUrl: string;
-    brandingAPIUrl: string;
+    botName?: string;
+    botId?: string;
+    chatBotName?: string;
+    botUrl?: string;
+    serverUrl?: string;
+    brandingAPIUrl?: string;
+    jwtToken?: string;
+    getJwtToken?: () => Promise<string> | string;
     clientId?: string;
     clientSecret?: string;
     identity?: string;
+    jwtServerUrl?: string;
+    value_aud?: string;
+    isWebHook?: boolean;
+    isHeaderVisible?: boolean;
+    isFooterVisible?: boolean;
     isReconnect?: boolean;
     isAnonymous?: boolean;
     meta?: any;
     userAccessToken?: string;
     customData?: any;
+    [key: string]: any;
   }
 
   // Theme Configuration
@@ -196,6 +206,7 @@ interface KoreBotClientInstance {
   sendMessage(text: any, data?: any, dataType?: any): any;
   disconnect(): void;
   getBotUrl?(): string;
+  getBotName?(): string;
   getAuthorization?(): string;
   on(event: string, listener: (...args: any[]) => void): this;
   once(event: string, listener: (...args: any[]) => void): this;
@@ -218,8 +229,11 @@ declare module 'rn-kore-bot-socket-lib-v79' {
   export const ApiService: any;
   export interface BotConfigModel {
     botId?: string;
+    botName?: string;
     chatBotName?: string;
     serverUrl?: string;
+    jwtToken?: string;
+    getJwtToken?: () => Promise<string> | string;
     [key: string]: any;
   }
 }
@@ -235,8 +249,11 @@ declare module 'rn-kore-bot-socket-lib-v79-test' {
   export const ApiService: any;
   export interface BotConfigModel {
     botId?: string;
+    botName?: string;
     chatBotName?: string;
     serverUrl?: string;
+    jwtToken?: string;
+    getJwtToken?: () => Promise<string> | string;
     [key: string]: any;
   }
 }
