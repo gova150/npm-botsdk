@@ -81,10 +81,17 @@ import KoreChat, { BotConfigModel } from '@govardhanboli/rn-kore-bot-sdk-v79';
 
 const App = () => {
   const botConfig: BotConfigModel = {
-    botId: 'your-bot-id',
-    chatBotName: 'Assistant',
-    serverUrl: 'https://your.server.url',
-    brandingAPIUrl: 'https://your.branding.url',
+    botName: 'Corporate Bot',
+    botId: 'st-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    botUrl: 'https://bots.kore.ai',
+    // Dynamic token resolver (Enterprise Recommended)
+    getJwtToken: async () => {
+      const res = await fetch('https://api.yourcompany.com/auth/kore-jwt');
+      const data = await res.json();
+      return data.jwtToken;
+    },
+    // Or pass a pre-fetched static token:
+    // jwtToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   };
 
   return (
@@ -481,25 +488,116 @@ const MyCustomButton = new CustomTemplate({
 ### BotConfigModel Interface
 
 ```tsx
-interface BotConfigModel {
-  // Required fields
-  botId: string;              // Bot identifier
-  chatBotName: string;        // Display name for the bot
-  serverUrl: string;          // Server URL (without trailing slash)
-  brandingAPIUrl: string;     // Branding API URL (without trailing slash)
-  
-  // Authentication
-  customerId?: string;        // Customer identifier
+export interface BotConfigModel {
+  // Required core fields
+  botName: string;            // Bot display name
+  botId: string;              // Bot identifier (e.g., 'st-xxxxxxxx-xxxx')
+  botUrl: string;             // Kore.ai platform URL (e.g., 'https://bots.kore.ai')
+
+  // Authentication: Pre-fetched static JWT token
+  jwtToken?: string;          // Pre-fetched JWT string from your backend API
+
+  // Authentication: Enterprise recommended dynamic token resolver
+  getJwtToken?: () => Promise<string> | string; // Fresh token resolver called on connect & reconnect
+
+  // Legacy STS fields (only needed if generating test tokens via Kore STS)
   clientId?: string;          // OAuth client ID
   clientSecret?: string;      // OAuth client secret
-  identity?: string;          // User identity
-  
-  // Configuration
+  identity?: string;          // User identity (e.g., email or user ID)
+  jwtServerUrl?: string;      // STS server endpoint
+  value_aud?: string;         // JWT audience (e.g., 'https://idproxy.kore.com/authorize')
+
+  // UI & Feature flags
+  isHeaderVisible?: boolean;  // Toggle chat header (default: true)
+  isFooterVisible?: boolean;  // Toggle composer/input footer (default: true)
+  isWebHook?: boolean;        // Webhook channel mode
   isAnonymous?: boolean;      // Anonymous user mode
-  isPlatform?: boolean;       // Platform integration mode
-  enableHistory?: boolean;    // Chat history feature
-  allowAttachments?: boolean; // File attachment feature
+  [key: string]: any;
 }
+```
+
+### 🔑 Authentication Examples
+
+#### 1. Dynamic Token Resolver with `getJwtToken` (Recommended for Enterprise)
+JWT tokens typically expire after 15 to 60 minutes. Providing `getJwtToken` ensures that when the user's connection drops, Wi-Fi toggles, or the token expires, the SDK automatically calls your callback function to retrieve a fresh token and seamlessly reconnects without user disruption:
+
+```tsx
+import React from 'react';
+import { View } from 'react-native';
+import KoreChat, { BotConfigModel } from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+const botConfig: BotConfigModel = {
+  botName: 'Corporate Bot',
+  botId: 'st-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  botUrl: 'https://bots.kore.ai',
+  
+  // Async callback: Invoked initially and automatically whenever the socket reconnects or refreshes
+  getJwtToken: async () => {
+    const response = await fetch('https://api.yourcompany.com/auth/kore-jwt', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer YOUR_APP_USER_SESSION_TOKEN',
+      },
+      body: JSON.stringify({
+        userId: 'john.doe@company.com',
+      }),
+    });
+    
+    const data = await response.json();
+    return data.jwtToken; // Returns Promise<string>
+  },
+};
+
+const App = () => (
+  <View style={{ flex: 1 }}>
+    <KoreChat botConfig={botConfig} />
+  </View>
+);
+
+export default App;
+```
+
+#### 2. Static Token with `jwtToken`
+If your host application already fetches a JWT token before opening the chatbot screen:
+
+```tsx
+import React from 'react';
+import { View } from 'react-native';
+import KoreChat, { BotConfigModel } from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+const App = ({ userToken }: { userToken: string }) => {
+  const botConfig: BotConfigModel = {
+    botName: 'Corporate Bot',
+    botId: 'st-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    botUrl: 'https://bots.kore.ai',
+    jwtToken: userToken, // Pre-fetched JWT token string
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <KoreChat botConfig={botConfig} />
+    </View>
+  );
+};
+
+export default App;
+```
+
+#### 3. Legacy STS Authentication (Development & Testing)
+If generating tokens via Kore.ai STS endpoint:
+
+```tsx
+const botConfig: BotConfigModel = {
+  botName: 'Test Bot',
+  botId: 'st-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  botUrl: 'https://bots.kore.ai',
+  clientId: 'cs-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  clientSecret: 'YOUR_CLIENT_SECRET',
+  identity: 'user@example.com',
+  jwtServerUrl: 'https://your-jwt-service.url',
+  value_aud: 'https://idproxy.kore.com/authorize',
+};
 ```
 
 ---
