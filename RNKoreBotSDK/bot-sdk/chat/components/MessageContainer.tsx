@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   contentContainerStyle: {
     paddingTop: 16,
     paddingBottom: 16,
+    paddingHorizontal: 16,
   },
   emptyChatContainer: {
     flex: 1,
@@ -532,7 +533,10 @@ export default class MessageContainer extends PureComponent<
           inverted={inverted}
           showsVerticalScrollIndicator={false}
           data={this.props.messages}
-          contentContainerStyle={styles.contentContainerStyle}
+          contentContainerStyle={[
+            styles.contentContainerStyle,
+            this.props.listViewProps?.contentContainerStyle,
+          ]}
           renderItem={this.renderRow}
           {...this.props.invertibleScrollViewProps}
           ListEmptyComponent={this.renderChatEmpty}

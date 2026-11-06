@@ -20551,8 +20551,7 @@ var Bubble = class extends React91.Component {
             styles70[position].wrapper,
             this.styledBubbleToNext(),
             this.styledBubbleToPrevious(),
-            wrapperStyle && wrapperStyle[position],
-            theme?.v3?.body?.icon?.show && position === "left" && { marginLeft: 5 }
+            wrapperStyle && wrapperStyle[position]
           ]
         },
         /* @__PURE__ */ React91.createElement(
@@ -20614,7 +20613,7 @@ var styles70 = {
       alignItems: "flex-end"
     },
     wrapper: {
-      marginRight: normalize(5)
+      marginRight: 0
     },
     containerToNext: {
       borderBottomRightRadius: 3
@@ -20743,8 +20742,8 @@ var styles72 = {
     borderRadius: 100
   },
   bot_icon_con: {
-    marginLeft: normalize(10),
-    marginEnd: normalize(-2)
+    marginLeft: 0,
+    marginEnd: 8
   },
   image: {
     height: normalize(25),
@@ -20757,8 +20756,8 @@ var styles72 = {
       flexDirection: "row",
       alignItems: "flex-start",
       justifyContent: "flex-start",
-      marginLeft: 16,
-      marginRight: 16
+      marginLeft: 0,
+      marginRight: 0
     }
   }),
   center: StyleSheet70.create({
@@ -20775,8 +20774,8 @@ var styles72 = {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "flex-end",
-      marginLeft: 16,
-      marginRight: 16
+      marginLeft: 0,
+      marginRight: 0
     }
   })
 };
@@ -20956,13 +20955,7 @@ var Message = class extends React93.Component {
           style: [
             styles72[newPosition].container,
             containerStyle2 && containerStyle2[position ? position : "left"],
-            { flex: 1 },
-            this.props?.theme?.v3?.body?.icon?.show && currentMessage?.type === "bot_response" && position === "left" && {
-              marginLeft: 0
-            },
-            position === "right" && {
-              marginRight: 0
-            }
+            { flex: 1 }
           ]
         },
         this.renderBubble()
@@ -21017,7 +21010,8 @@ var styles73 = StyleSheet71.create({
   },
   contentContainerStyle: {
     paddingTop: 16,
-    paddingBottom: 16
+    paddingBottom: 16,
+    paddingHorizontal: 16
   },
   emptyChatContainer: {
     flex: 1,
@@ -21357,7 +21351,10 @@ var MessageContainer = class extends PureComponent {
           inverted,
           showsVerticalScrollIndicator: false,
           data: this.props.messages,
-          contentContainerStyle: styles73.contentContainerStyle,
+          contentContainerStyle: [
+            styles73.contentContainerStyle,
+            this.props.listViewProps?.contentContainerStyle
+          ],
           renderItem: this.renderRow,
           ...this.props.invertibleScrollViewProps,
           ListEmptyComponent: this.renderChatEmpty,
@@ -21854,7 +21851,7 @@ var styles76 = StyleSheet74.create({
     justifyContent: "center"
   },
   bot_icon_con: {
-    marginLeft: 6
+    marginLeft: 16
   },
   main: {
     //height: normalize(22),

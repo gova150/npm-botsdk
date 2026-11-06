@@ -20760,8 +20760,7 @@ var Bubble = class extends React93.Component {
             styles72[position].wrapper,
             this.styledBubbleToNext(),
             this.styledBubbleToPrevious(),
-            wrapperStyle && wrapperStyle[position],
-            theme?.v3?.body?.icon?.show && position === "left" && { marginLeft: 5 }
+            wrapperStyle && wrapperStyle[position]
           ]
         },
         /* @__PURE__ */ React93.createElement(
@@ -20823,7 +20822,7 @@ var styles72 = {
       alignItems: "flex-end"
     },
     wrapper: {
-      marginRight: normalize(5)
+      marginRight: 0
     },
     containerToNext: {
       borderBottomRightRadius: 3
@@ -20948,8 +20947,8 @@ var styles74 = {
     borderRadius: 100
   },
   bot_icon_con: {
-    marginLeft: normalize(10),
-    marginEnd: normalize(-2)
+    marginLeft: 0,
+    marginEnd: 8
   },
   image: {
     height: normalize(25),
@@ -20962,8 +20961,8 @@ var styles74 = {
       flexDirection: "row",
       alignItems: "flex-start",
       justifyContent: "flex-start",
-      marginLeft: 16,
-      marginRight: 16
+      marginLeft: 0,
+      marginRight: 0
     }
   }),
   center: import_react_native90.StyleSheet.create({
@@ -20980,8 +20979,8 @@ var styles74 = {
       flexDirection: "row",
       alignItems: "flex-end",
       justifyContent: "flex-end",
-      marginLeft: 16,
-      marginRight: 16
+      marginLeft: 0,
+      marginRight: 0
     }
   })
 };
@@ -21161,13 +21160,7 @@ var Message = class extends React95.Component {
           style: [
             styles74[newPosition].container,
             containerStyle2 && containerStyle2[position ? position : "left"],
-            { flex: 1 },
-            this.props?.theme?.v3?.body?.icon?.show && currentMessage?.type === "bot_response" && position === "left" && {
-              marginLeft: 0
-            },
-            position === "right" && {
-              marginRight: 0
-            }
+            { flex: 1 }
           ]
         },
         this.renderBubble()
@@ -21222,7 +21215,8 @@ var styles75 = import_react_native91.StyleSheet.create({
   },
   contentContainerStyle: {
     paddingTop: 16,
-    paddingBottom: 16
+    paddingBottom: 16,
+    paddingHorizontal: 16
   },
   emptyChatContainer: {
     flex: 1,
@@ -21562,7 +21556,10 @@ var MessageContainer = class extends import_react40.PureComponent {
           inverted,
           showsVerticalScrollIndicator: false,
           data: this.props.messages,
-          contentContainerStyle: styles75.contentContainerStyle,
+          contentContainerStyle: [
+            styles75.contentContainerStyle,
+            this.props.listViewProps?.contentContainerStyle
+          ],
           renderItem: this.renderRow,
           ...this.props.invertibleScrollViewProps,
           ListEmptyComponent: this.renderChatEmpty,
@@ -22047,7 +22044,7 @@ var styles78 = import_react_native94.StyleSheet.create({
     justifyContent: "center"
   },
   bot_icon_con: {
-    marginLeft: 6
+    marginLeft: 16
   },
   main: {
     //height: normalize(22),

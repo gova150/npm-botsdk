@@ -67,8 +67,8 @@ const styles = {
     borderRadius: 100,
   },
   bot_icon_con: {
-    marginLeft: normalize(10),
-    marginEnd: normalize(-2),
+    marginLeft: 0,
+    marginEnd: 8,
   },
   image: {
     height: normalize(25),
@@ -81,8 +81,8 @@ const styles = {
       flexDirection: 'row',
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      marginLeft: 16,
-      marginRight: 16,
+      marginLeft: 0,
+      marginRight: 0,
     },
   }),
   center: StyleSheet.create({
@@ -99,8 +99,8 @@ const styles = {
       flexDirection: 'row',
       alignItems: 'flex-end',
       justifyContent: 'flex-end',
-      marginLeft: 16,
-      marginRight: 16,
+      marginLeft: 0,
+      marginRight: 0,
     },
   }),
 };
@@ -311,14 +311,6 @@ export default class Message extends React.Component<MessageProps> {
                   containerStyle &&
                     containerStyle[position ? position : 'left'],
                   { flex: 1 },
-                  this.props?.theme?.v3?.body?.icon?.show &&
-                    currentMessage?.type === 'bot_response' &&
-                    position === 'left' && {
-                      marginLeft: 0,
-                    },
-                  position === 'right' && {
-                    marginRight: 0,
-                  },
                 ]}
               >
                 {this.renderBubble()}

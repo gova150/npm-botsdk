@@ -622,8 +622,6 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
             this.styledBubbleToNext(),
             this.styledBubbleToPrevious(),
             wrapperStyle && wrapperStyle[position],
-            theme?.v3?.body?.icon?.show &&
-              position === 'left' && {marginLeft: 5},
           ]}>
           <TouchableWithoutFeedback
             onLongPress={(event: any) =>
@@ -683,7 +681,7 @@ const styles = {
       alignItems: 'flex-end',
     },
     wrapper: {
-      marginRight: normalize(5),
+      marginRight: 0,
     },
     containerToNext: {
       borderBottomRightRadius: 3,

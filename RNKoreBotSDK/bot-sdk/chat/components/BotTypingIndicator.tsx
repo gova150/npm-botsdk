@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bot_icon_con: {
-    marginLeft: 6,
+    marginLeft: 16,
   },
   main: {
     //height: normalize(22),
