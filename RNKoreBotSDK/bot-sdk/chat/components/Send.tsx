@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
     height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    marginStart: 8,
+    alignSelf: 'flex-end',
+    marginStart: 0,
   },
   text: {
     color: Color.defaultBlue,

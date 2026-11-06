@@ -1126,6 +1126,8 @@ interface InputToolbarProps {
     alwaysShowSend?: boolean;
     onSTTValue?: any;
     onSendSTTClick?: any;
+    onInputSizeChanged?: any;
+    composerHeight?: number;
 }
 interface InputToolbarStates {
     isSTTViewShow?: boolean;
@@ -1134,6 +1136,7 @@ interface InputToolbarStates {
     isRecordingstart?: boolean;
     recordState?: string;
     STT_value?: any;
+    composerHeight?: number;
 }
 declare class InputToolbar extends React.Component<InputToolbarProps, InputToolbarStates> {
     static contextType: React.Context<ThemeType>;
@@ -1152,6 +1155,7 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
         isRecordingstart: boolean;
         recordState: string;
         STT_value: string;
+        composerHeight: number;
     };
     fadeInToBottomRef?: any;
     renderSuggestionsView(): any;
@@ -1162,6 +1166,10 @@ declare class InputToolbar extends React.Component<InputToolbarProps, InputToolb
     private getSendButtonBgColor;
     private getSendButtonTextColor;
     private _renderSend;
+    handleInputSizeChanged: (dimensions: {
+        width: number;
+        height: number;
+    }) => void;
     renderComposer(): any;
     onSpeechStart: () => void;
     onSpeechRecognized: () => void;

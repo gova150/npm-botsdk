@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 
 import {Composer} from './Composer';
@@ -43,6 +45,8 @@ interface InputToolbarProps {
   alwaysShowSend?: boolean;
   onSTTValue?: any;
   onSendSTTClick?: any;
+  onInputSizeChanged?: any;
+  composerHeight?: number;
 }
 
 interface InputToolbarStates {
@@ -52,6 +56,7 @@ interface InputToolbarStates {
   isRecordingstart?: boolean;
   recordState?: string;
   STT_value?: any;
+  composerHeight?: number;
 }
 
 const RECORD_STATE = {
@@ -134,7 +139,7 @@ const styles = StyleSheet.create({
     height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
+    alignSelf: 'flex-end',
   },
   goTextStyle: {
     color: '#ffffff',
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
+    alignSelf: 'flex-end',
   },
   send_main_container: {
     width: 38,
@@ -166,11 +171,11 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
     paddingHorizontal: 12,
     paddingTop: 12,
-    paddingBottom: 6,
+    paddingBottom: Platform.OS === 'ios' ? 16 : 8,
   },
   primary: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   disclaimerText: {
     fontSize: 11,
@@ -203,6 +208,26 @@ export default class InputToolbar extends React.Component<
   }
 
   componentDidUpdate(prevProps: InputToolbarProps) {
+    if (
+      this.props.composerHeight &&
+      this.props.composerHeight !== prevProps.composerHeight &&
+      this.state.composerHeight !== this.props.composerHeight
+    ) {
+      if (
+        Platform.OS === 'android' &&
+        UIManager.setLayoutAnimationEnabledExperimental
+      ) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+        },
+      });
+      this.setState({composerHeight: this.props.composerHeight});
+    }
+
     if (
       this.props.isMediaAddedToSend &&
       !prevProps.isMediaAddedToSend &&
@@ -256,6 +281,7 @@ export default class InputToolbar extends React.Component<
     isRecordingstart: false,
     recordState: RECORD_STATE.onSpeechStop,
     STT_value: '',
+    composerHeight: 38,
   };
 
   fadeInToBottomRef?: any;
@@ -419,16 +445,42 @@ export default class InputToolbar extends React.Component<
     );
   };
 
+  handleInputSizeChanged = (dimensions: {width: number; height: number}) => {
+    if (this.state.composerHeight !== dimensions.height) {
+      if (
+        Platform.OS === 'android' &&
+        UIManager.setLayoutAnimationEnabledExperimental
+      ) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+        },
+      });
+      this.setState({composerHeight: dimensions.height});
+    }
+    if (this.props.onInputSizeChanged) {
+      this.props.onInputSizeChanged(dimensions);
+    }
+  };
+
   renderComposer() {
     if (this.props.renderComposer) {
       return this.props.renderComposer(this.props);
     }
     const theme = this.context as IThemeType;
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
+    const currentComposerHeight =
+      this.state.composerHeight || this.props.composerHeight || 38;
     return (
       <View
         style={{
           flex: 1,
+          marginRight: 8,
+          justifyContent: 'flex-end',
+          minHeight: currentComposerHeight,
         }}>
         <FadeInToBottom
           getRef={(ref: any) => {
@@ -438,6 +490,7 @@ export default class InputToolbar extends React.Component<
             theme={theme}
             sendButtonBgColor={sendButtonBgColor}
             {...this.props}
+            onInputSizeChanged={this.handleInputSizeChanged}
           />
         </FadeInToBottom>
       </View>
@@ -751,6 +804,8 @@ export default class InputToolbar extends React.Component<
   render() {
     const theme = this.context as IThemeType;
     const footerBgColor = theme?.v3?.footer?.bg_color || '#FFFFFF';
+    const currentComposerHeight =
+      this.state.composerHeight || this.props.composerHeight || 38;
     return (
       <View
         style={[
@@ -767,10 +822,11 @@ export default class InputToolbar extends React.Component<
           <View
             style={[
               styles.primary,
-              this.props.primaryStyle as ViewStyle,
               {
+                minHeight: currentComposerHeight,
                 backgroundColor: 'transparent',
               },
+              this.props.primaryStyle as ViewStyle,
             ]}>
             {this.isShowActions() && this.renderActions()}
             {theme?.v3?.footer?.buttons?.microphone?.show

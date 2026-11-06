@@ -18206,6 +18206,7 @@ var import_react_native85 = require("react-native");
 init_cjs_shims();
 var import_react34 = __toESM(require("react"));
 var import_react_native78 = require("react-native");
+init_PlatformCheck();
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
   disableComposer = false,
@@ -18226,13 +18227,24 @@ function Composer({
   isTTSenable = false,
   sendButtonBgColor
 }) {
-  const dimensionsRef = (0, import_react34.useRef)(void 0);
+  const MIN_HEIGHT = 38;
+  const MAX_HEIGHT = 98;
+  const LINE_HEIGHT = 20;
+  const dimensionsRef = (0, import_react34.useRef)(
+    void 0
+  );
   const [isTTS, setTTS] = (0, import_react34.useState)(false);
   const [isFocused, setIsFocused] = (0, import_react34.useState)(false);
+  const [inputText, setInputText] = (0, import_react34.useState)(text || "");
+  const inputTextRef = (0, import_react34.useRef)(text || "");
+  const [containerWidth, setContainerWidth] = (0, import_react34.useState)(0);
+  const [lineCount, setLineCount] = (0, import_react34.useState)(1);
+  const lineCountRef = (0, import_react34.useRef)(1);
+  lineCountRef.current = lineCount;
+  const animatedHeight = (0, import_react34.useRef)(new import_react_native78.Animated.Value(MIN_HEIGHT)).current;
   (0, import_react34.useEffect)(() => {
     setTTS(isTTSenable);
   }, [isTTSenable]);
-  const composerHeightNew = composerHeight || 35;
   const determineInputSizeChange = (0, import_react34.useCallback)(
     (dimensions) => {
       if (!dimensions) {
@@ -18245,10 +18257,130 @@ function Composer({
     },
     [onInputSizeChanged]
   );
-  const handleContentSizeChange = ({
-    nativeEvent: { contentSize }
-  }) => determineInputSizeChange(contentSize);
-  const maxHeight = MAX_TOOL_BAR_HEIGHT || 180;
+  const updateLineCountAndHeight = (0, import_react34.useCallback)(
+    (newLineCount) => {
+      const clampedLines = Math.max(1, Math.min(newLineCount, 5));
+      const targetHeight = Math.min(
+        MAX_HEIGHT,
+        MIN_HEIGHT + (Math.min(clampedLines, 4) - 1) * LINE_HEIGHT
+      );
+      setLineCount(clampedLines);
+      import_react_native78.Animated.timing(animatedHeight, {
+        toValue: targetHeight,
+        duration: 150,
+        easing: import_react_native78.Easing.ease,
+        useNativeDriver: false
+      }).start();
+      determineInputSizeChange({
+        width: dimensionsRef.current?.width || 0,
+        height: targetHeight
+      });
+    },
+    [animatedHeight, determineInputSizeChange]
+  );
+  const calculateLines = (0, import_react34.useCallback)(
+    (val, width8) => {
+      if (!val || val.trim().length === 0) {
+        return 1;
+      }
+      const speakerOffset = theme?.v3?.footer?.buttons?.speaker?.show ? 35 : 0;
+      const usableWidth = width8 > 0 ? width8 - 24 - speakerOffset : 310;
+      const charsPerLine = Math.max(25, Math.floor(usableWidth / 7.2));
+      const paragraphs = val.split("\n");
+      let totalLines = 0;
+      for (const p of paragraphs) {
+        if (p.length === 0) {
+          totalLines += 1;
+        } else {
+          totalLines += Math.max(1, Math.ceil(p.length / charsPerLine));
+        }
+      }
+      return Math.max(1, totalLines);
+    },
+    [theme]
+  );
+  (0, import_react34.useEffect)(() => {
+    const currentVal = text || "";
+    inputTextRef.current = currentVal;
+    setInputText(currentVal);
+    if (!currentVal || currentVal.trim().length === 0) {
+      if (lineCountRef.current !== 1) {
+        updateLineCountAndHeight(1);
+      }
+    } else {
+      const calculated = calculateLines(currentVal, containerWidth);
+      if (calculated !== lineCountRef.current) {
+        updateLineCountAndHeight(calculated);
+      }
+    }
+  }, [text, containerWidth, calculateLines, updateLineCountAndHeight]);
+  const handleNativeHeightChange = (0, import_react34.useCallback)(
+    (contentHeight) => {
+      if (!contentHeight || contentHeight <= 0)
+        return;
+      if (!inputTextRef.current || inputTextRef.current.trim().length === 0) {
+        if (lineCountRef.current !== 1) {
+          updateLineCountAndHeight(1);
+        }
+        return;
+      }
+      let detectedLines = 1;
+      if (isAndroid) {
+        if (contentHeight > 102) {
+          detectedLines = 5;
+        } else if (contentHeight > 82) {
+          detectedLines = 4;
+        } else if (contentHeight > 62) {
+          detectedLines = 3;
+        } else if (contentHeight > 42) {
+          detectedLines = 2;
+        } else {
+          detectedLines = 1;
+        }
+      } else {
+        if (contentHeight > 84) {
+          detectedLines = 5;
+        } else if (contentHeight > 64) {
+          detectedLines = 4;
+        } else if (contentHeight > 44) {
+          detectedLines = 3;
+        } else if (contentHeight > 24) {
+          detectedLines = 2;
+        } else {
+          detectedLines = 1;
+        }
+      }
+      const estLines = calculateLines(inputTextRef.current, containerWidth);
+      const finalLines = Math.max(detectedLines, estLines);
+      if (finalLines !== lineCountRef.current) {
+        updateLineCountAndHeight(finalLines);
+      }
+    },
+    [calculateLines, containerWidth, updateLineCountAndHeight]
+  );
+  const handleContentSizeChange = (e) => {
+    const contentHeight = e.nativeEvent.contentSize?.height;
+    handleNativeHeightChange(contentHeight);
+  };
+  const handleNativeChange = (e) => {
+    const contentHeight = e.nativeEvent?.contentSize?.height;
+    if (contentHeight) {
+      handleNativeHeightChange(contentHeight);
+    }
+  };
+  const handleChangeText = (newText) => {
+    inputTextRef.current = newText;
+    setInputText(newText);
+    if (!newText || newText.trim().length === 0) {
+      updateLineCountAndHeight(1);
+    } else {
+      const calculated = calculateLines(newText, containerWidth);
+      if (calculated !== lineCountRef.current) {
+        updateLineCountAndHeight(calculated);
+      }
+    }
+    onTextChanged(newText);
+  };
   const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
   const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#1B365D";
   const focusBorderColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || sendButtonColor;
@@ -18259,25 +18391,33 @@ function Composer({
     import_react_native78.View,
     {
       style: {
-        justifyContent: "center",
+        justifyContent: "flex-end",
         backgroundColor: Color_default.transparent,
         flex: 1
       }
     },
     /* @__PURE__ */ import_react34.default.createElement(
-      import_react_native78.View,
+      import_react_native78.Animated.View,
       {
+        onLayout: (e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - containerWidth) > 5) {
+            setContainerWidth(w);
+          }
+        },
         style: {
+          height: animatedHeight,
           justifyContent: "center",
-          maxHeight: normalize(maxHeight),
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "flex-start",
           borderWidth: currentBorderWidth,
           borderColor: outLineColor,
           borderStyle: "solid",
           borderRadius: 8,
           backgroundColor: bgColor,
-          minHeight: 38
+          minHeight: MIN_HEIGHT,
+          maxHeight: MAX_HEIGHT,
+          overflow: "hidden"
         }
       },
       /* @__PURE__ */ import_react34.default.createElement(
@@ -18290,19 +18430,25 @@ function Composer({
           placeholderTextColor: "#9CA3AF",
           selectionColor: textColor,
           multiline,
+          scrollEnabled: lineCount >= 4,
           maxLength: MAX_INPUT_TEXT_LENGTH,
           editable: !disableComposer,
           onContentSizeChange: handleContentSizeChange,
-          onChangeText: onTextChanged,
+          onChange: handleNativeChange,
+          onChangeText: handleChangeText,
           style: [
             styles64.textInput,
             {
-              paddingVertical: 9,
+              paddingTop: 9,
+              paddingBottom: 9,
               paddingHorizontal: 12,
               fontSize: 14,
+              lineHeight: 20,
               fontWeight: "400",
               color: textColor,
-              minHeight: 38
+              minHeight: MIN_HEIGHT,
+              maxHeight: MAX_HEIGHT,
+              textAlignVertical: "top"
             }
           ],
           autoFocus: textInputAutoFocus,
@@ -18333,7 +18479,8 @@ function Composer({
             padding: 10,
             backgroundColor: Color_default.transparent,
             alignItems: "center",
-            justifyContent: "center"
+            justifyContent: "center",
+            alignSelf: "flex-end"
           }
         },
         /* @__PURE__ */ import_react34.default.createElement(
@@ -18361,20 +18508,18 @@ var styles64 = import_react_native78.StyleSheet.create({
   },
   card_main: {
     backgroundColor: "#FAFAFA"
-    //height: normalize(80),
-    //position: 'absolute',
-    // bottom: 10,
-    //alignSelf: 'center',
-    //justifyContent: 'center',
   },
   textInput: {
     flex: 1,
     fontSize: 14,
+    lineHeight: 20,
     fontWeight: "400",
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    paddingTop: 9,
+    paddingBottom: 9,
     minHeight: 38,
-    textAlignVertical: "center",
+    maxHeight: 98,
+    textAlignVertical: "top",
     color: Color_default.text_color
   }
 });
@@ -18390,7 +18535,8 @@ var styles65 = import_react_native79.StyleSheet.create({
     height: 38,
     alignItems: "center",
     justifyContent: "center",
-    marginStart: 8
+    alignSelf: "flex-end",
+    marginStart: 0
   },
   text: {
     color: Color_default.defaultBlue,
@@ -19347,7 +19493,7 @@ var styles69 = import_react_native85.StyleSheet.create({
     height: 38,
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "flex-end"
   },
   goTextStyle: {
     color: "#ffffff",
@@ -19362,7 +19508,7 @@ var styles69 = import_react_native85.StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "flex-end"
   },
   send_main_container: {
     width: 38,
@@ -19379,11 +19525,11 @@ var styles69 = import_react_native85.StyleSheet.create({
     borderTopColor: "#E5E7EB",
     paddingHorizontal: 12,
     paddingTop: 12,
-    paddingBottom: 6
+    paddingBottom: import_react_native85.Platform.OS === "ios" ? 16 : 8
   },
   primary: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "flex-end"
   },
   disclaimerText: {
     fontSize: 11,
@@ -19409,6 +19555,18 @@ var InputToolbar = class extends React89.Component {
     }
   }
   componentDidUpdate(prevProps) {
+    if (this.props.composerHeight && this.props.composerHeight !== prevProps.composerHeight && this.state.composerHeight !== this.props.composerHeight) {
+      if (import_react_native85.Platform.OS === "android" && import_react_native85.UIManager.setLayoutAnimationEnabledExperimental) {
+        import_react_native85.UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      import_react_native85.LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: import_react_native85.LayoutAnimation.Types.easeInEaseOut
+        }
+      });
+      this.setState({ composerHeight: this.props.composerHeight });
+    }
     if (this.props.isMediaAddedToSend && !prevProps.isMediaAddedToSend && this.state.isSTTViewShow) {
       this.setState(
         {
@@ -19453,7 +19611,8 @@ var InputToolbar = class extends React89.Component {
     showAttachedPopover: false,
     isRecordingstart: false,
     recordState: RECORD_STATE.onSpeechStop,
-    STT_value: ""
+    STT_value: "",
+    composerHeight: 38
   };
   fadeInToBottomRef;
   renderSuggestionsView() {
@@ -19587,17 +19746,38 @@ var InputToolbar = class extends React89.Component {
       )
     ));
   };
+  handleInputSizeChanged = (dimensions) => {
+    if (this.state.composerHeight !== dimensions.height) {
+      if (import_react_native85.Platform.OS === "android" && import_react_native85.UIManager.setLayoutAnimationEnabledExperimental) {
+        import_react_native85.UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      import_react_native85.LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: import_react_native85.LayoutAnimation.Types.easeInEaseOut
+        }
+      });
+      this.setState({ composerHeight: dimensions.height });
+    }
+    if (this.props.onInputSizeChanged) {
+      this.props.onInputSizeChanged(dimensions);
+    }
+  };
   renderComposer() {
     if (this.props.renderComposer) {
       return this.props.renderComposer(this.props);
     }
     const theme = this.context;
     const sendButtonBgColor = this.getSendButtonBgColor(theme);
+    const currentComposerHeight = this.state.composerHeight || this.props.composerHeight || 38;
     return /* @__PURE__ */ React89.createElement(
       import_react_native85.View,
       {
         style: {
-          flex: 1
+          flex: 1,
+          marginRight: 8,
+          justifyContent: "flex-end",
+          minHeight: currentComposerHeight
         }
       },
       /* @__PURE__ */ React89.createElement(
@@ -19612,7 +19792,8 @@ var InputToolbar = class extends React89.Component {
           {
             theme,
             sendButtonBgColor,
-            ...this.props
+            ...this.props,
+            onInputSizeChanged: this.handleInputSizeChanged
           }
         )
       )
@@ -19870,6 +20051,7 @@ var InputToolbar = class extends React89.Component {
   render() {
     const theme = this.context;
     const footerBgColor = theme?.v3?.footer?.bg_color || "#FFFFFF";
+    const currentComposerHeight = this.state.composerHeight || this.props.composerHeight || 38;
     return /* @__PURE__ */ React89.createElement(
       import_react_native85.View,
       {
@@ -19886,10 +20068,11 @@ var InputToolbar = class extends React89.Component {
         {
           style: [
             styles69.primary,
-            this.props.primaryStyle,
             {
+              minHeight: currentComposerHeight,
               backgroundColor: "transparent"
-            }
+            },
+            this.props.primaryStyle
           ]
         },
         this.isShowActions() && this.renderActions(),
@@ -25587,6 +25770,23 @@ var KoreChat = class _KoreChat extends React114.Component {
     });
   };
   onInputSizeChanged = (_size) => {
+    if (this.state.composerHeight !== _size.height) {
+      if (import_react_native109.Platform.OS === "android" && import_react_native109.UIManager.setLayoutAnimationEnabledExperimental) {
+        import_react_native109.UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      import_react_native109.LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: import_react_native109.LayoutAnimation.Types.easeInEaseOut
+        }
+      });
+      this.setState({ composerHeight: _size.height });
+    }
+    if (this._messageContainerRef && this._messageContainerRef.current) {
+      setTimeout(() => {
+        this.scrollToBottom(true);
+      }, 50);
+    }
   };
   onInputTextChanged = (text) => {
     if (isAgentConnect == true) {

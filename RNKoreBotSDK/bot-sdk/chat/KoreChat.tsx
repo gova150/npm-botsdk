@@ -15,7 +15,9 @@ import {
   Dimensions,
   StatusBar,
   BackHandler,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import uuid from '../utils/uuid';
 import dayjs from 'dayjs';
@@ -1753,7 +1755,28 @@ export default class KoreChat extends React.Component<
     });
   };
 
-  private onInputSizeChanged = (_size: {height: number; width: number}) => {};
+  private onInputSizeChanged = (_size: {height: number; width: number}) => {
+    if (this.state.composerHeight !== _size.height) {
+      if (
+        Platform.OS === 'android' &&
+        UIManager.setLayoutAnimationEnabledExperimental
+      ) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      LayoutAnimation.configureNext({
+        duration: 150,
+        update: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+        },
+      });
+      this.setState({composerHeight: _size.height});
+    }
+    if (this._messageContainerRef && this._messageContainerRef.current) {
+      setTimeout(() => {
+        this.scrollToBottom(true);
+      }, 50);
+    }
+  };
 
   private onInputTextChanged = (text: string) => {
 
