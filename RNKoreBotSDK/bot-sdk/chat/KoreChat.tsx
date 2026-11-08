@@ -287,6 +287,8 @@ export default class KoreChat extends React.Component<
   backHandler: any;
   unsubscribeNavigation: any;
   allowNavigation: boolean = false;
+  keyboardListener: any;
+  keyboardHideListener: any;
   static defaultProps: {
     messagesContainerStyle: null;
     text: null;
@@ -736,6 +738,17 @@ export default class KoreChat extends React.Component<
     this.setTextFromProp(text);
     this.stopTTS();
 
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    this.keyboardListener = Keyboard.addListener(showEvent, () => {
+      setTimeout(() => this.scrollToBottom(true), 150);
+    });
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    this.keyboardHideListener = Keyboard.addListener(hideEvent, () => {
+      setTimeout(() => this.scrollToBottom(false), 100);
+    });
+
     setTimeout(() => {
       this.init();
     }, 1000);
@@ -747,6 +760,12 @@ export default class KoreChat extends React.Component<
 
   componentWillUnmount() {
     this.setisChatMounted(false);
+    if (this.keyboardListener) {
+      this.keyboardListener.remove();
+    }
+    if (this.keyboardHideListener) {
+      this.keyboardHideListener.remove();
+    }
     const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
     botClient.removeAllListeners(RTM_EVENT.CONNECTING);
     botClient.removeAllListeners(RTM_EVENT.ON_OPEN);
@@ -1770,11 +1789,12 @@ export default class KoreChat extends React.Component<
         },
       });
       this.setState({composerHeight: _size.height});
-    }
-    if (this._messageContainerRef && this._messageContainerRef.current) {
-      setTimeout(() => {
-        this.scrollToBottom(true);
-      }, 50);
+
+      if (this._messageContainerRef && this._messageContainerRef.current) {
+        setTimeout(() => {
+          this.scrollToBottom(true);
+        }, 50);
+      }
     }
   };
 

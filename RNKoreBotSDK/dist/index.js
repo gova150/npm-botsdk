@@ -18206,7 +18206,6 @@ var import_react_native85 = require("react-native");
 init_cjs_shims();
 var import_react34 = __toESM(require("react"));
 var import_react_native78 = require("react-native");
-init_PlatformCheck();
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
   disableComposer = false,
@@ -18260,11 +18259,15 @@ function Composer({
   const updateLineCountAndHeight = (0, import_react34.useCallback)(
     (newLineCount) => {
       const clampedLines = Math.max(1, Math.min(newLineCount, 5));
+      if (clampedLines === lineCountRef.current) {
+        return;
+      }
+      lineCountRef.current = clampedLines;
+      setLineCount(clampedLines);
       const targetHeight = Math.min(
         MAX_HEIGHT,
         MIN_HEIGHT + (Math.min(clampedLines, 4) - 1) * LINE_HEIGHT
       );
-      setLineCount(clampedLines);
       import_react_native78.Animated.timing(animatedHeight, {
         toValue: targetHeight,
         duration: 150,
@@ -18284,8 +18287,8 @@ function Composer({
         return 1;
       }
       const speakerOffset = theme?.v3?.footer?.buttons?.speaker?.show ? 35 : 0;
-      const usableWidth = width8 > 0 ? width8 - 24 - speakerOffset : 310;
-      const charsPerLine = Math.max(25, Math.floor(usableWidth / 7.2));
+      const usableWidth = width8 > 0 ? width8 - 24 - speakerOffset : 280;
+      const charsPerLine = Math.max(24, Math.floor(usableWidth / 7.5));
       const paragraphs = val.split("\n");
       let totalLines = 0;
       for (const p of paragraphs) {
@@ -18314,8 +18317,9 @@ function Composer({
       }
     }
   }, [text, containerWidth, calculateLines, updateLineCountAndHeight]);
-  const handleNativeHeightChange = (0, import_react34.useCallback)(
-    (contentHeight) => {
+  const handleContentSizeChange = (0, import_react34.useCallback)(
+    (e) => {
+      const contentHeight = e.nativeEvent.contentSize?.height;
       if (!contentHeight || contentHeight <= 0)
         return;
       if (!inputTextRef.current || inputTextRef.current.trim().length === 0) {
@@ -18325,30 +18329,16 @@ function Composer({
         return;
       }
       let detectedLines = 1;
-      if (isAndroid) {
-        if (contentHeight > 102) {
-          detectedLines = 5;
-        } else if (contentHeight > 82) {
-          detectedLines = 4;
-        } else if (contentHeight > 62) {
-          detectedLines = 3;
-        } else if (contentHeight > 42) {
-          detectedLines = 2;
-        } else {
-          detectedLines = 1;
-        }
+      if (contentHeight > 100) {
+        detectedLines = 5;
+      } else if (contentHeight > 80) {
+        detectedLines = 4;
+      } else if (contentHeight > 60) {
+        detectedLines = 3;
+      } else if (contentHeight > 40) {
+        detectedLines = 2;
       } else {
-        if (contentHeight > 84) {
-          detectedLines = 5;
-        } else if (contentHeight > 64) {
-          detectedLines = 4;
-        } else if (contentHeight > 44) {
-          detectedLines = 3;
-        } else if (contentHeight > 24) {
-          detectedLines = 2;
-        } else {
-          detectedLines = 1;
-        }
+        detectedLines = 1;
       }
       const estLines = calculateLines(inputTextRef.current, containerWidth);
       const finalLines = Math.max(detectedLines, estLines);
@@ -18358,21 +18348,13 @@ function Composer({
     },
     [calculateLines, containerWidth, updateLineCountAndHeight]
   );
-  const handleContentSizeChange = (e) => {
-    const contentHeight = e.nativeEvent.contentSize?.height;
-    handleNativeHeightChange(contentHeight);
-  };
-  const handleNativeChange = (e) => {
-    const contentHeight = e.nativeEvent?.contentSize?.height;
-    if (contentHeight) {
-      handleNativeHeightChange(contentHeight);
-    }
-  };
   const handleChangeText = (newText) => {
     inputTextRef.current = newText;
     setInputText(newText);
     if (!newText || newText.trim().length === 0) {
-      updateLineCountAndHeight(1);
+      if (lineCountRef.current !== 1) {
+        updateLineCountAndHeight(1);
+      }
     } else {
       const calculated = calculateLines(newText, containerWidth);
       if (calculated !== lineCountRef.current) {
@@ -18434,11 +18416,12 @@ function Composer({
           maxLength: MAX_INPUT_TEXT_LENGTH,
           editable: !disableComposer,
           onContentSizeChange: handleContentSizeChange,
-          onChange: handleNativeChange,
           onChangeText: handleChangeText,
           style: [
             styles64.textInput,
             {
+              flex: 1,
+              flexShrink: 1,
               paddingTop: 9,
               paddingBottom: 9,
               paddingHorizontal: 12,
@@ -18446,8 +18429,7 @@ function Composer({
               lineHeight: 20,
               fontWeight: "400",
               color: textColor,
-              minHeight: MIN_HEIGHT,
-              maxHeight: MAX_HEIGHT,
+              alignSelf: "stretch",
               textAlignVertical: "top"
             }
           ],
@@ -18511,14 +18493,14 @@ var styles64 = import_react_native78.StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    flexShrink: 1,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: "400",
     paddingHorizontal: 12,
     paddingTop: 9,
     paddingBottom: 9,
-    minHeight: 38,
-    maxHeight: 98,
+    alignSelf: "stretch",
     textAlignVertical: "top",
     color: Color_default.text_color
   }
@@ -24596,6 +24578,8 @@ var KoreChat = class _KoreChat extends React114.Component {
   backHandler;
   unsubscribeNavigation;
   allowNavigation = false;
+  keyboardListener;
+  keyboardHideListener;
   static defaultProps;
   _isChatMounted = false;
   fileUploadQueue;
@@ -24931,6 +24915,14 @@ var KoreChat = class _KoreChat extends React114.Component {
     this.initLocale();
     this.setTextFromProp(text);
     this.stopTTS();
+    const showEvent = import_react_native109.Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    this.keyboardListener = import_react_native109.Keyboard.addListener(showEvent, () => {
+      setTimeout(() => this.scrollToBottom(true), 150);
+    });
+    const hideEvent = import_react_native109.Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    this.keyboardHideListener = import_react_native109.Keyboard.addListener(hideEvent, () => {
+      setTimeout(() => this.scrollToBottom(false), 100);
+    });
     setTimeout(() => {
       this.init();
     }, 1e3);
@@ -24940,6 +24932,12 @@ var KoreChat = class _KoreChat extends React114.Component {
   };
   componentWillUnmount() {
     this.setisChatMounted(false);
+    if (this.keyboardListener) {
+      this.keyboardListener.remove();
+    }
+    if (this.keyboardHideListener) {
+      this.keyboardHideListener.remove();
+    }
     const botClient = import_rn_kore_bot_socket_lib_v797.default.getInstance();
     botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v797.RTM_EVENT.CONNECTING);
     botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v797.RTM_EVENT.ON_OPEN);
@@ -25778,11 +25776,11 @@ var KoreChat = class _KoreChat extends React114.Component {
         }
       });
       this.setState({ composerHeight: _size.height });
-    }
-    if (this._messageContainerRef && this._messageContainerRef.current) {
-      setTimeout(() => {
-        this.scrollToBottom(true);
-      }, 50);
+      if (this._messageContainerRef && this._messageContainerRef.current) {
+        setTimeout(() => {
+          this.scrollToBottom(true);
+        }, 50);
+      }
     }
   };
   onInputTextChanged = (text) => {

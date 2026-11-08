@@ -106,12 +106,16 @@ export function Composer({
   const updateLineCountAndHeight = useCallback(
     (newLineCount: number) => {
       const clampedLines = Math.max(1, Math.min(newLineCount, 5));
+      if (clampedLines === lineCountRef.current) {
+        return;
+      }
+      lineCountRef.current = clampedLines;
+      setLineCount(clampedLines);
+
       const targetHeight = Math.min(
         MAX_HEIGHT,
         MIN_HEIGHT + (Math.min(clampedLines, 4) - 1) * LINE_HEIGHT,
       );
-
-      setLineCount(clampedLines);
 
       Animated.timing(animatedHeight, {
         toValue: targetHeight,
@@ -134,9 +138,9 @@ export function Composer({
         return 1;
       }
       const speakerOffset = theme?.v3?.footer?.buttons?.speaker?.show ? 35 : 0;
-      const usableWidth = width > 0 ? width - 24 - speakerOffset : 310;
-      // Average character width for 14px font on mobile is ~7.2px
-      const charsPerLine = Math.max(25, Math.floor(usableWidth / 7.2));
+      const usableWidth = width > 0 ? width - 24 - speakerOffset : 280;
+      // Average character width for 14px font on mobile is ~7.5px
+      const charsPerLine = Math.max(24, Math.floor(usableWidth / 7.5));
 
       const paragraphs = val.split('\n');
       let totalLines = 0;
@@ -169,11 +173,12 @@ export function Composer({
     }
   }, [text, containerWidth, calculateLines, updateLineCountAndHeight]);
 
-  const handleNativeHeightChange = useCallback(
-    (contentHeight?: number) => {
+  const handleContentSizeChange = useCallback(
+    (e: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
+      const contentHeight = e.nativeEvent.contentSize?.height;
       if (!contentHeight || contentHeight <= 0) return;
 
-      // If text is empty or blank, ALWAYS reset to 1 line!
+      // If text is empty or blank, ALWAYS reset to 1 line
       if (!inputTextRef.current || inputTextRef.current.trim().length === 0) {
         if (lineCountRef.current !== 1) {
           updateLineCountAndHeight(1);
@@ -181,33 +186,22 @@ export function Composer({
         return;
       }
 
+      // 1 line:  ~35-38px (<= 40)
+      // 2 lines: ~46-58px (41 to 60)
+      // 3 lines: ~66-78px (61 to 80)
+      // 4 lines: ~86-98px (81 to 100)
+      // 5+ lines: > 100
       let detectedLines = 1;
-      if (isAndroid) {
-        // Android contentHeight includes ~18px padding (1 line is ~36-40px)
-        if (contentHeight > 102) {
-          detectedLines = 5;
-        } else if (contentHeight > 82) {
-          detectedLines = 4;
-        } else if (contentHeight > 62) {
-          detectedLines = 3;
-        } else if (contentHeight > 42) {
-          detectedLines = 2;
-        } else {
-          detectedLines = 1;
-        }
+      if (contentHeight > 100) {
+        detectedLines = 5;
+      } else if (contentHeight > 80) {
+        detectedLines = 4;
+      } else if (contentHeight > 60) {
+        detectedLines = 3;
+      } else if (contentHeight > 40) {
+        detectedLines = 2;
       } else {
-        // iOS contentHeight is pure text height without padding (1 line is ~20px)
-        if (contentHeight > 84) {
-          detectedLines = 5;
-        } else if (contentHeight > 64) {
-          detectedLines = 4;
-        } else if (contentHeight > 44) {
-          detectedLines = 3;
-        } else if (contentHeight > 24) {
-          detectedLines = 2;
-        } else {
-          detectedLines = 1;
-        }
+        detectedLines = 1;
       }
 
       const estLines = calculateLines(inputTextRef.current, containerWidth);
@@ -219,25 +213,13 @@ export function Composer({
     [calculateLines, containerWidth, updateLineCountAndHeight],
   );
 
-  const handleContentSizeChange = (
-    e: NativeSyntheticEvent<TextInputContentSizeChangeEventData>,
-  ) => {
-    const contentHeight = e.nativeEvent.contentSize?.height;
-    handleNativeHeightChange(contentHeight);
-  };
-
-  const handleNativeChange = (e: any) => {
-    const contentHeight = e.nativeEvent?.contentSize?.height;
-    if (contentHeight) {
-      handleNativeHeightChange(contentHeight);
-    }
-  };
-
   const handleChangeText = (newText: string) => {
     inputTextRef.current = newText;
     setInputText(newText);
     if (!newText || newText.trim().length === 0) {
-      updateLineCountAndHeight(1);
+      if (lineCountRef.current !== 1) {
+        updateLineCountAndHeight(1);
+      }
     } else {
       const calculated = calculateLines(newText, containerWidth);
       if (calculated !== lineCountRef.current) {
@@ -301,11 +283,12 @@ export function Composer({
           maxLength={MAX_INPUT_TEXT_LENGTH}
           editable={!disableComposer}
           onContentSizeChange={handleContentSizeChange}
-          onChange={handleNativeChange}
           onChangeText={handleChangeText}
           style={[
             styles.textInput,
             {
+              flex: 1,
+              flexShrink: 1,
               paddingTop: 9,
               paddingBottom: 9,
               paddingHorizontal: 12,
@@ -313,8 +296,7 @@ export function Composer({
               lineHeight: 20,
               fontWeight: '400',
               color: textColor,
-              minHeight: MIN_HEIGHT,
-              maxHeight: MAX_HEIGHT,
+              alignSelf: 'stretch',
               textAlignVertical: 'top',
             },
           ]}
@@ -376,14 +358,14 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    flexShrink: 1,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '400',
     paddingHorizontal: 12,
     paddingTop: 9,
     paddingBottom: 9,
-    minHeight: 38,
-    maxHeight: 98,
+    alignSelf: 'stretch',
     textAlignVertical: 'top',
     color: Color.text_color,
   },

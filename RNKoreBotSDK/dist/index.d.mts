@@ -846,6 +846,8 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     backHandler: any;
     unsubscribeNavigation: any;
     allowNavigation: boolean;
+    keyboardListener: any;
+    keyboardHideListener: any;
     static defaultProps: {
         messagesContainerStyle: null;
         text: null;
