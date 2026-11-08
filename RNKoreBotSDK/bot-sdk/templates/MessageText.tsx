@@ -145,20 +145,43 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
   };
 
   onUrlPress = (url: string) => {
-    if (WWW_URL_PATTERN.test(url)) {
-      this.onUrlPress(`http://${url}`);
-    } else {
-      Linking.canOpenURL(url).then(supported => {
-        if (!supported) {
-          console.log('No handler for URL:', url);
-          try {
-            Linking.openURL(url);
-          } catch (e) {}
-        } else {
-          Linking.openURL(url);
-        }
-      });
+    if (!url || typeof url !== 'string') {
+      return;
     }
+    let targetUrl = url.trim();
+    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (markdownMatch && markdownMatch[2]) {
+      targetUrl = markdownMatch[2].trim();
+    }
+    if (WWW_URL_PATTERN.test(targetUrl)) {
+      targetUrl = `https://${targetUrl}`;
+    } else if (
+      !targetUrl.startsWith('http://') &&
+      !targetUrl.startsWith('https://') &&
+      !targetUrl.includes('://') &&
+      !targetUrl.startsWith('mailto:') &&
+      !targetUrl.startsWith('tel:')
+    ) {
+      targetUrl = `https://${targetUrl}`;
+    }
+    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
+    Linking.canOpenURL(targetUrl)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL:', targetUrl, err);
+          });
+        } else {
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL via fallback:', targetUrl, err);
+          });
+        }
+      })
+      .catch(() => {
+        Linking.openURL(targetUrl).catch(err => {
+          console.warn('Cannot open URL:', targetUrl, err);
+        });
+      });
   };
 
   onPhonePress = (_phone: string) => {
@@ -277,8 +300,11 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
     // );
     // console.log('========================');
     let parseList: any = [];
-    if (this.props.parsePatterns && this.props.parsePatterns(linkStyle)) {
-      parseList = {...this.props.parsePatterns(linkStyle)};
+    if (this.props.parsePatterns) {
+      const customPatterns = this.props.parsePatterns(linkStyle);
+      if (Array.isArray(customPatterns)) {
+        parseList = customPatterns;
+      }
     }
     const position = this.props.position ? this.props.position : 'left';
 

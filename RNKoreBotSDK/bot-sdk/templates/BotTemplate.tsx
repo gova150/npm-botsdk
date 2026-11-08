@@ -39,6 +39,7 @@ import LinkTemplate from './LinkTemplate';
 import DigitalFormTemplate from './DigitalFormTemplate';
 import PdfDownloadTemplate from './PdfDownloadTemplate';
 import PdfDataResponseTemplate from './PdfDataResponseTemplate';
+import InternalAppNavigationTemplate from './InternalAppNavigationTemplate';
 export interface BotTemplateProps {
   templateType: string;
   textContainerStyle?: any;
@@ -185,6 +186,15 @@ export default class BotTemplate extends React.Component<
           return <DigitalFormTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
           return <PdfDownloadTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
+      case TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE:
+          return (
+            <InternalAppNavigationTemplate
+              payload={payload}
+              theme={theme}
+              currentMessage={this.props.currentMessage}
+              onListItemClick={this.props.onListItemClick}
+            />
+          );
       case TEMPLATE_TYPES.PDF_DATA_RESPONSE:
           return (
             <PdfDataResponseTemplate

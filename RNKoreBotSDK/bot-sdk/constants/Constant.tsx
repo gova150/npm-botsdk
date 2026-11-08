@@ -137,6 +137,7 @@ export const TEMPLATE_TYPES = {
   DIGITALFORM_TEMPLATE: 'digitalform',
   PDF_DOWNLOAD_TEMPLATE: 'pdf_download',
   PDF_DATA_RESPONSE: 'pdf_dataResponse',
+  INTERNAL_APP_NAVIGATION_TEMPLATE: 'internal_app_navigation',
 };
 
 export const RENDER_KORA_BUBBLE = 'RENDER_KORA_BUBBLE';

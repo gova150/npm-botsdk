@@ -85,6 +85,7 @@ declare const TEMPLATE_TYPES: {
     DIGITALFORM_TEMPLATE: string;
     PDF_DOWNLOAD_TEMPLATE: string;
     PDF_DATA_RESPONSE: string;
+    INTERNAL_APP_NAVIGATION_TEMPLATE: string;
 };
 declare const RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 declare const KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -791,6 +792,7 @@ interface KoraChatProps {
     navigation?: any;
     route?: any;
     statusBarColor?: (colorCode: any) => void;
+    onAppNavigation?: (navigationUrl: string, item: any) => void;
     leaveChatTitle?: string;
     leaveChatDescription?: string;
     leaveChatConfirmText?: string;
@@ -979,6 +981,8 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     private renderInternalMediaView;
     private clearQuickReplies;
     private onSend;
+    private resolveRouteNameFromUrl;
+    private handleInternalAppNavigation;
     private computePostBack;
     private onListItemClick;
     private getDateRangeText;
@@ -1073,6 +1077,36 @@ declare class PdfDownloadTemplate extends BaseView<PdfDownloadTemplateProps, Pdf
     constructor(props: PdfDownloadTemplateProps);
     componentDidMount(): void;
     componentWillUnmount(): void;
+    private renderButton;
+    render(): React.JSX.Element;
+}
+
+interface InternalAppNavigationButtonItem {
+    type?: string;
+    title?: string;
+    navigationUrl?: string;
+    [key: string]: any;
+}
+interface InternalAppNavigationPayloadData {
+    template_type?: string;
+    title?: string;
+    text?: string;
+    heading?: string;
+    buttons?: InternalAppNavigationButtonItem[];
+    payload?: any;
+    variation?: string;
+    [key: string]: any;
+}
+interface InternalAppNavigationTemplateProps extends BaseViewProps {
+    payload?: InternalAppNavigationPayloadData;
+    onListItemClick?: (type: string, item: any) => void;
+    theme?: any;
+    currentMessage?: any;
+}
+interface InternalAppNavigationTemplateState extends BaseViewState {
+}
+declare class InternalAppNavigationTemplate extends BaseView<InternalAppNavigationTemplateProps, InternalAppNavigationTemplateState> {
+    constructor(props: InternalAppNavigationTemplateProps);
     private renderButton;
     render(): React.JSX.Element;
 }
@@ -1458,4 +1492,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };

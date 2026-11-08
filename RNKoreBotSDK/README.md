@@ -18,6 +18,8 @@
 - [📦 Installation](#-installation)
 - [🎯 Basic Usage](#-basic-usage)
 - [🎨 Customization](#-customization)
+- [🧭 App Navigation (ChatBot to Root App)](#-app-navigation-chatbot-to-root-application)
+- [🔗 External Links & Browser Opening](#-external-links--browser-opening)
 - [📚 API Reference](#-api-reference)
 - [🛠️ Advanced Configuration](#️-advanced-configuration)
 - [🔐 Permissions Setup](#-permissions-setup)
@@ -369,6 +371,14 @@ Add to `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.CAMERA" />
+
+<!-- Recommended for Android 11+ (API 30+) web links resolution -->
+<queries>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="https" />
+    </intent>
+</queries>
 ```
 
 </details>
@@ -473,6 +483,93 @@ const MyCustomButton = new CustomTemplate({
 
 ---
 
+## 🧭 App Navigation (ChatBot to Root Application)
+
+The SDK provides built-in support for the `internal_app_navigation` template. It renders a title message and one or more full-width action buttons that navigate the user from the SDK ChatBot directly to a target screen in the root host application.
+
+### 🛠️ Root App Integration
+
+#### 1. Default Integration (Zero Code Changes Required)
+
+If your root application already renders `<KoreChat />` with your existing React Navigation `navigation` prop:
+
+```tsx
+<KoreChat
+  botConfig={botConfig}
+  navigation={navigation}
+/>
+```
+
+**No changes are needed.** The SDK automatically handles the transition using the existing `navigation` prop:
+* **Deep Link URL (contains `://`):** If the bot sends a deep link URL (e.g. `"myapp://profile"`), the SDK opens it using `Linking.openURL(navigationUrl)`.
+* **Screen Route Name:** If the bot sends a screen route name (e.g. `"SettingsScreen"`), the SDK navigates directly using `navigation.navigate(navigationUrl, { data: item })`.
+
+#### 2. Optional Custom Callback Integration
+
+If the root app developers prefer custom control over the transition (such as closing a modal first, switching a bottom tab, or triggering analytics), they can supply the `onAppNavigation` callback prop:
+
+```tsx
+import KoreChat from '@govardhanboli/rn-kore-bot-sdk-v79';
+import { Linking } from 'react-native';
+
+export default function ChatScreen({ navigation }) {
+  const handleAppNavigation = (navigationUrl: string, item: any) => {
+    // Takes the dynamic URL/route directly from the template JSON:
+    if (navigationUrl.includes('://')) {
+      Linking.openURL(navigationUrl).catch(err => {
+        console.warn('Could not open navigation URL:', navigationUrl, err);
+      });
+    } else {
+      navigation.navigate(navigationUrl, { data: item });
+    }
+  };
+
+  return (
+    <KoreChat
+      botConfig={botConfig}
+      navigation={navigation}
+      onAppNavigation={handleAppNavigation}
+    />
+  );
+}
+```
+
+---
+
+## 🔗 External Links & Browser Opening
+
+The SDK automatically detects and renders both formatted markdown links (e.g., `[Google](https://www.google.com)`) and direct plain URLs (e.g., `https://kore.ai`, `www.google.com`). Tapping a link opens the destination in the device's default web browser.
+
+### 💡 What to Ask the Root App Developers (Optional Recommendation)
+
+While the SDK includes built-in fallbacks to launch URLs directly, Android 11+ (API Level 30+) enforces **Package Visibility** restrictions that can prevent `Linking.canOpenURL` from querying installed web browsers.
+
+For optimal OS-level intent resolution and standard Android compatibility, recommend that the root app developers add the following intent filter to their `android/app/src/main/AndroidManifest.xml` (inside the `<manifest>` tag, alongside any existing queries):
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    ...
+    <!-- Recommended for Android 11+ (API 30+) Package Visibility for Web Links -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+    </queries>
+    ...
+</manifest>
+```
+
+> [!NOTE]
+> * **Cleartext Traffic**: Android 9+ (API 28+) blocks unencrypted HTTP (`http://`) traffic in release builds by default. Ensure all URLs provided by the bot use secure `https://`.
+> * **Fallback Handling**: If `<queries>` is not declared in the root app, the SDK automatically falls back to `Linking.openURL` so links will still launch in the default browser.
+
+---
+
 ## 📚 API Reference
 
 ### KoreChat Component Props
@@ -480,6 +577,8 @@ const MyCustomButton = new CustomTemplate({
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `botConfig` | `BotConfigModel` | ✅ | Bot configuration object |
+| `navigation` | `any` | ❌ | React Navigation object for goBack() and root screen navigation |
+| `onAppNavigation` | `(navigationUrl: string, item: any) => void` | ❌ | Callback for internal app navigation actions |
 | `onListItemClick` | `(item: any) => void` | ❌ | Callback for list item interactions |
 | `onHeaderActionsClick` | `(action: any) => void` | ❌ | Callback for header action buttons |
 | `templateInjection` | `Map<string, CustomTemplate>` | ❌ | Custom template injection map |

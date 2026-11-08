@@ -21,6 +21,7 @@ export type {BotConfigModel} from '../bot-sdk/models/BotConfigModel';
 
 export {default as QuickReplies} from '../bot-sdk/templates/QuickReplies';
 export {default as PdfDownloadTemplate} from '../bot-sdk/templates/PdfDownloadTemplate';
+export {default as InternalAppNavigationTemplate} from '../bot-sdk/templates/InternalAppNavigationTemplate';
 export {
   default as PdfDataResponseTemplate,
   downloadPdfDataResponse,

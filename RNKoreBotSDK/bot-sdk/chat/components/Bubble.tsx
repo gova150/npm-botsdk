@@ -439,7 +439,8 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
       payloadProps = this.props?.currentMessage?.message?.[0]?.component;
     } else {
       payloadProps =
-        this.props?.currentMessage?.message?.[0]?.component?.payload?.payload;
+        this.props?.currentMessage?.message?.[0]?.component?.payload?.payload ||
+        this.props?.currentMessage?.message?.[0]?.component?.payload;
     }
 
     if (!payloadProps) {

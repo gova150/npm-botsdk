@@ -86,7 +86,7 @@ export function getParseList(): [] {
   const renderLink = (matchingString: string, matches: string[]) => (
     <Text
       style={styles1.link}
-      onPress={() => console.log('Link pressed:', matches[2])}>
+      onPress={() => onUrlPress(matches[2] || matchingString)}>
       {matches[1]}
     </Text>
   );
@@ -275,7 +275,7 @@ export function getParseList(): [] {
     <Text
       key={matchingString}
       style={styles1.link}
-      onPress={() => onUrlPress(matches[2])}>
+      onPress={() => onUrlPress(matches[2] || matchingString)}>
       {matches[1]}
     </Text>
   );
@@ -292,20 +292,52 @@ export function getParseList(): [] {
   };
 
   const onUrlPress = (url: string) => {
-    if (WWW_URL_PATTERN.test(url)) {
-      onUrlPress(`http://${url}`);
-    } else {
-      Linking.canOpenURL(url).then(supported => {
-        if (!supported) {
-          console.log('No handler for URL:', url);
-          try {
-            Linking.openURL(url);
-          } catch (e) {}
-        } else {
-          Linking.openURL(url);
-        }
-      });
+    if (!url || typeof url !== 'string') {
+      return;
     }
+    let targetUrl = url.trim();
+
+    // If it's a markdown link [label](url), extract the target URL
+    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (markdownMatch && markdownMatch[2]) {
+      targetUrl = markdownMatch[2].trim();
+    }
+
+    // Handle www. or missing scheme
+    if (WWW_URL_PATTERN.test(targetUrl)) {
+      targetUrl = `https://${targetUrl}`;
+    } else if (
+      !targetUrl.startsWith('http://') &&
+      !targetUrl.startsWith('https://') &&
+      !targetUrl.includes('://') &&
+      !targetUrl.startsWith('mailto:') &&
+      !targetUrl.startsWith('tel:')
+    ) {
+      targetUrl = `https://${targetUrl}`;
+    }
+
+    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
+
+    Linking.canOpenURL(targetUrl)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL:', targetUrl, err);
+          });
+        } else {
+          // On Android 11+ (API 30+), canOpenURL may return false if <queries>
+          // is not declared in AndroidManifest.xml, but openURL still opens the default browser.
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL via fallback:', targetUrl, err);
+          });
+        }
+      })
+      .catch(err => {
+        // Fallback: directly attempt openURL
+        Linking.openURL(targetUrl).catch(openErr => {
+          console.warn('Cannot open URL:', targetUrl, openErr);
+        });
+      });
   };
 
   const onPhonePress = async (phone: string) => {
@@ -492,14 +524,14 @@ export function getParseList(): [] {
       onPress: onPhonePress,
     },
     {
-      pattern: /\[([^\]]+)\]\(([^)]+)\)/g,
-      renderText: renderUrl_2,
+      pattern: /\[([^\]]+)\]\(([^)]+)\)/,
+      style: styles1.link,
+      renderText: (_matchingString: string, matches: string[]) => matches[1],
       onPress: onUrlPress,
     },
     {
-      pattern:
-        /https?:\/\/[a-zA-Z0-9.-]+\/[a-zA-Z0-9\/.-]+\?(?:[a-zA-Z0-9]+=[a-zA-Z0-9$+=\/]+&?)+/,
-      renderText: renderUrl,
+      type: 'url',
+      style: styles1.url,
       onPress: onUrlPress,
     },
     {

@@ -223,6 +223,7 @@ interface KoraChatProps {
   navigation?: any;
   route?: any;
   statusBarColor?: (colorCode: any) => void;
+  onAppNavigation?: (navigationUrl: string, item: any) => void;
   leaveChatTitle?: string;
   leaveChatDescription?: string;
   leaveChatConfirmText?: string;
@@ -1501,6 +1502,82 @@ export default class KoreChat extends React.Component<
     }
   };
 
+  private resolveRouteNameFromUrl = (url: string): string => {
+    if (!url) {
+      return '';
+    }
+    // Deep link scheme: e.g. "myapp://profile" -> "profile"
+    if (url.includes('://')) {
+      const parts = url.split('://');
+      const path = parts[1] || '';
+      return path.split('?')[0].replace(/^\/+|\/+$/g, '');
+    }
+    // Path: e.g. "/profile" -> "profile"
+    if (url.startsWith('/')) {
+      return url.slice(1).split('?')[0];
+    }
+    // Direct route name: "ProfileScreen"
+    return url;
+  };
+
+  private handleInternalAppNavigation = (item: any = {}, template_type = '') => {
+    const navUrl =
+      item?.navigationUrl ||
+      item?.url ||
+      item?.route ||
+      item?.actionUrl ||
+      '';
+
+    // 1. If host provided an onAppNavigation callback, invoke it:
+    if (this.props.onAppNavigation) {
+      this.props.onAppNavigation(navUrl, item);
+      return;
+    }
+
+    if (!navUrl) {
+      this.computePostBack(item, template_type);
+      return;
+    }
+
+    // 2. If it's a deep link URL scheme (e.g. "myapp://profile")
+    if (navUrl.includes('://')) {
+      Linking.canOpenURL(navUrl)
+        .then(supported => {
+          if (supported) {
+            Linking.openURL(navUrl);
+          } else if (this.props.navigation?.navigate) {
+            const routeName = this.resolveRouteNameFromUrl(navUrl);
+            this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
+          }
+        })
+        .catch(err => {
+          console.warn('Linking error for navUrl:', navUrl, err);
+          if (this.props.navigation?.navigate) {
+            const routeName = this.resolveRouteNameFromUrl(navUrl);
+            try {
+              this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
+            } catch (e) {
+              console.warn('Fallback navigation failed:', e);
+            }
+          }
+        });
+      return;
+    }
+
+    // 3. If it's a route name or path (e.g. "ProfileScreen" or "details")
+    if (this.props.navigation?.navigate) {
+      const routeName = this.resolveRouteNameFromUrl(navUrl);
+      if (routeName) {
+        try {
+          this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
+          return;
+        } catch (e) {
+          console.warn('Direct navigation attempt failed:', e);
+        }
+      }
+    }
+  };
+
   private computePostBack = (item: any = {}, template_type = '') => {
     if (!item) {
       return;
@@ -1561,6 +1638,7 @@ export default class KoreChat extends React.Component<
           if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
             url = 'http://' + url;
           }
+          console.log('🔗 [Link Clicked]:', url);
           Linking.openURL(url);
         }
         if (item?.link) {
@@ -1568,6 +1646,7 @@ export default class KoreChat extends React.Component<
           if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
             url = 'http://' + url;
           }
+          console.log('🔗 [Link Clicked]:', url);
           Linking.openURL(url);
         } else if (item?.redirectUrl) {
           let dweb = item?.redirectUrl?.dweb;
@@ -1666,6 +1745,12 @@ export default class KoreChat extends React.Component<
             data_type: 'postback',
             isDisplayUserMessage: false,
           });
+        }
+
+        break;
+      case TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE:
+        if (!isFromViewMore) {
+          this.handleInternalAppNavigation(item, template_type);
         }
 
         break;

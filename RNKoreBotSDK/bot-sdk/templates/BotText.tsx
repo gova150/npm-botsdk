@@ -56,22 +56,45 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
   };
 
   private onUrlPress = (url: string) => {
-    // When someone sends a message that includes a website address beginning with "www." (omitting the scheme),
-    // react-native-parsed-text recognizes it as a valid url, but Linking fails to open due to the missing scheme.
-    if (WWW_URL_PATTERN.test(url)) {
-      this.onUrlPress(`http://${url}`);
-    } else {
-      Linking.canOpenURL(url).then(supported => {
-        if (!supported) {
-          try {
-            Linking.openURL(url);
-          } catch (e) {}
-          console.log('No handler for URL:', url);
-        } else {
-          Linking.openURL(url);
-        }
-      });
+    if (!url || typeof url !== 'string') {
+      return false;
     }
+    let targetUrl = url.trim();
+    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (markdownMatch && markdownMatch[2]) {
+      targetUrl = markdownMatch[2].trim();
+    }
+    if (WWW_URL_PATTERN.test(targetUrl)) {
+      targetUrl = `https://${targetUrl}`;
+    } else if (
+      !targetUrl.startsWith('http://') &&
+      !targetUrl.startsWith('https://') &&
+      !targetUrl.includes('://') &&
+      !targetUrl.startsWith('mailto:') &&
+      !targetUrl.startsWith('tel:')
+    ) {
+      targetUrl = `https://${targetUrl}`;
+    }
+
+    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
+
+    Linking.canOpenURL(targetUrl)
+      .then(supported => {
+        if (supported) {
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL:', targetUrl, err);
+          });
+        } else {
+          Linking.openURL(targetUrl).catch(err => {
+            console.warn('Cannot open URL via fallback:', targetUrl, err);
+          });
+        }
+      })
+      .catch(() => {
+        Linking.openURL(targetUrl).catch(err => {
+          console.warn('Cannot open URL:', targetUrl, err);
+        });
+      });
     return true;
   };
 
