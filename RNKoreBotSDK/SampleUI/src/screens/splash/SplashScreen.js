@@ -19,7 +19,7 @@ class SplashScreen extends React.Component {
   componentDidMount() {
     RNBootSplash.hide({fade: true});
     setTimeout(() => {
-      this.props.navigation.replace(ROUTE_NAMES.WELCOME_SCREEN);
+      this.props.navigation.replace(ROUTE_NAMES.MAIN_HOME);
     }, 2000);
   }
 

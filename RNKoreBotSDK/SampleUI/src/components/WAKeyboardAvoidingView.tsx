@@ -6,19 +6,35 @@ import {
   StyleSheet,
 } from 'react-native';
 import {useHeaderHeight} from '@react-navigation/elements';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const BEHAVIOR = Platform.OS === 'ios' ? 'padding' : undefined;
+const DEFAULT_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
 
-export const WAKeyboardAvoidingView = (props: any) => {
-  const headerHeight = useHeaderHeight();
-  const statusBarHeight = StatusBar.currentHeight || 0;
+export const WAKeyboardAvoidingView = ({
+  behavior,
+  keyboardVerticalOffset,
+  style,
+  children,
+  ...rest
+}: any) => {
+  const headerHeight = useHeaderHeight() || 0;
+  const insets = useSafeAreaInsets();
+  const statusBarHeight = Math.max(StatusBar.currentHeight || 0, insets.top || 0);
+  const defaultOffset =
+    Platform.OS === 'ios' ? headerHeight : headerHeight + statusBarHeight;
+  const offset =
+    keyboardVerticalOffset !== undefined
+      ? keyboardVerticalOffset
+      : defaultOffset;
+
   return (
     <KeyboardAvoidingView
-      style={[styles.container, props.style]}
-      behavior={BEHAVIOR}
-      keyboardVerticalOffset={headerHeight + statusBarHeight}
-      {...props}
-    />
+      style={[styles.container, style]}
+      behavior={behavior || DEFAULT_BEHAVIOR}
+      keyboardVerticalOffset={offset}
+      {...rest}>
+      {children}
+    </KeyboardAvoidingView>
   );
 };
 

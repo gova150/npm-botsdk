@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {SafeAreaView, View} from 'react-native';
+import {SafeAreaView, Linking} from 'react-native';
 import styles from './styles';
 import KoreChat from 'rn-kore-bot-sdk-v79';
 import {botConfig} from '../../config/BotConfig';
+import {ROUTE_NAMES} from '../../navigation/RouteNames';
 
 import WAKeyboardAvoidingView from '../../components/WAKeyboardAvoidingView';
 import {
@@ -30,6 +31,20 @@ class Home extends React.Component<HomeProps, homeState> {
     };
   }
 
+  handleAppNavigation = (navigationUrl: string, item: any) => {
+    if (!navigationUrl) {
+      return;
+    }
+    // Take the dynamic URL directly from the template JSON
+    if (navigationUrl.includes('://')) {
+      Linking.openURL(navigationUrl).catch(err => {
+        console.warn('Could not open navigation URL:', navigationUrl, err);
+      });
+    } else {
+      this.props.navigation?.navigate(navigationUrl, { data: item });
+    }
+  };
+
   render() {
     let config: any = botConfig;
     if (this.props.route?.params?.botConfig) {
@@ -41,21 +56,17 @@ class Home extends React.Component<HomeProps, homeState> {
           <KoreChat
             botConfig={config}
             alwaysShowSend={true}
-            //onListItemClick={this.onListItemClick}
-            //renderTypingIndicator={this.renderTypingIndicator}
-
-            //scrollToBottom={true}
-            //renderQuickRepliesView={renderQuickRepliesView}
-            //onSend={onSend}
-            // onLongPress={onLongPress}
-            // isTyping={false}
-            //renderSuggestionsView={this.renderSuggestionsView}
-            //initialText={'Help'}
-            //templateInjection={this.getCustomTemplates()}
+            onAppNavigation={this.handleAppNavigation}
+            onClose={() => {
+              if (this.props.navigation?.canGoBack?.()) {
+                this.props.navigation.goBack();
+              } else {
+                this.props.navigation.navigate(ROUTE_NAMES.MAIN_HOME);
+              }
+            }}
             statusBarColor={(color: any) => {
               this.props.onStatusBarColor(color);
             }}
-            //onHeaderActionsClick={this.onHeaderActionsClick}
             {...this.props}
           />
         </WAKeyboardAvoidingView>

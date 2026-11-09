@@ -22,7 +22,7 @@ import {
 
 import { BotConfigModel } from 'rn-kore-bot-socket-lib-v79';
 import { ROUTE_NAMES } from '../../navigation/RouteNames';
-import Color from 'rn-kore-bot-sdk-v79';
+import Color from '../../utils/Color';
 import WAKeyboardAvoidingView from '../../components/WAKeyboardAvoidingView';
 
 interface State {
@@ -44,12 +44,12 @@ class WelcomeScreen extends Component<any, State> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      botName: botConfig.botName,
-      botId: botConfig.botId,
-      clientId: botConfig.clientId,
-      clientSecret: botConfig.clientSecret,
-      botUrl: botConfig.botUrl,
-      jwtServerUrl: botConfig.jwtServerUrl,
+      botName: botConfig.botName || '',
+      botId: botConfig.botId || '',
+      clientId: botConfig.clientId || '',
+      clientSecret: botConfig.clientSecret || '',
+      botUrl: botConfig.botUrl || '',
+      jwtServerUrl: botConfig.jwtServerUrl || '',
       permissionsGranted: {
         camera: false,
         microphone: false,
@@ -64,7 +64,7 @@ class WelcomeScreen extends Component<any, State> {
   }
 
   handleChange = (field: keyof State, value: string) => {
-    this.setState({ [field]: value } as Pick<State, keyof State>);
+    this.setState({ [field]: value } as unknown as Pick<State, keyof State>);
   };
 
   private getPermissionsToCheck = (): Permission[] => {
