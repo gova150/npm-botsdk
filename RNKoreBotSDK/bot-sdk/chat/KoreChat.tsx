@@ -12,6 +12,7 @@ import {
   Modal,
   ScrollView,
   Keyboard,
+  KeyboardAvoidingView,
   Dimensions,
   StatusBar,
   BackHandler,
@@ -52,68 +53,10 @@ import KoreBotClient, {
   ApiService,
 } from 'rn-kore-bot-socket-lib-v79';
 import { BotConfigModel } from '../models/BotConfigModel';
+import { applyKoreBotClientPatches } from '../utils/patchKoreBotClient';
 
 // Runtime safeguard to ensure KoreBotClient supports direct jwtToken and dynamic getJwtToken
-try {
-  const clientInstance = KoreBotClient.getInstance();
-  const proto = Object.getPrototypeOf(clientInstance);
-  if (proto && !proto.__hasJwtPatch) {
-    proto.__hasJwtPatch = true;
-
-    proto.initializeBotClient = function (config: any, isFirstTime?: boolean) {
-      if (!config) {
-        throw new Error("BotConfigModel object cannot be null");
-      }
-      if (config.jwtToken || typeof config.getJwtToken === "function") {
-        if (!config.botId || !config.botUrl || !config.botName) {
-          throw new Error(
-            "BotConfigModel requires botName, botId, and botUrl when jwtToken is provided",
-          );
-        }
-      } else {
-        if (
-          !config.botId ||
-          !config.clientId ||
-          !config.clientSecret ||
-          !config.botUrl ||
-          !config.identity ||
-          !config.value_aud
-        ) {
-          throw new Error("BotConfigModel object has some values are missing");
-        }
-      }
-      this.connectToBot(config, isFirstTime);
-    };
-
-    const originalCreateJwtToken = proto.createJwtToken;
-    proto.createJwtToken = async function (
-      config: any,
-      isFirstTime: boolean = true,
-    ) {
-      if (!this.botConfig) return;
-      if (typeof this.botConfig.getJwtToken === "function") {
-        try {
-          this.jwtToken = await this.botConfig.getJwtToken();
-          if (!this.botConfig?.isWebHook) {
-            await this.connectWithJwToken(this.jwtToken, !isFirstTime);
-          } else {
-            this.getWebhookMeta(this.botConfig, isFirstTime);
-          }
-          return;
-        } catch (err: any) {
-          this.emit(RTM_EVENT.ERROR, {
-            message: "Failed to get JWT token: " + (err?.message || err),
-            isBack: false,
-          });
-          return;
-        }
-      }
-      return originalCreateJwtToken.call(this, config, isFirstTime);
-    };
-  }
-} catch (e) {
-  // Fail-safe
-}
+applyKoreBotClientPatches();
 
 // Extend KoreBotClient type to include event emitter methods
 type ExtendedKoreBotClient = ReturnType<typeof KoreBotClient.getInstance> & {
@@ -230,6 +173,8 @@ interface KoraChatProps {
   leaveChatCancelText?: string;
   leaveChatPrimaryColor?: string;
   leaveChatTextAlign?: 'left' | 'center';
+  isKeyboardInternallyHandled?: boolean;
+  bottomOffset?: number;
   templateInjection?: Map<
     string,
     CustomTemplate<CustomViewProps, CustomViewState>
@@ -2940,12 +2885,22 @@ export default class KoreChat extends React.Component<
       const bgColor = this.state.themeData?.v3?.header?.bg_color || '#EAECF0';
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
+      const androidTopPadding =
+        Platform.OS === 'android' && wrapInSafeArea !== false
+          ? StatusBar.currentHeight || 0
+          : 0;
 
       return (
         <ThemeProvider theme={this.state.themeData || null}>
-          <Wrapper style={styles.safeArea}>
+          <Wrapper style={[styles.safeArea, {backgroundColor: bgColor}]}>
             <View
-              style={[styles.container, {flexDirection: 'column'}]}
+              style={[
+                styles.container,
+                {
+                  flexDirection: 'column',
+                  paddingTop: androidTopPadding,
+                },
+              ]}
               onLayout={this.onMainViewLayout}>
               {bgColor && !isWhiteStatus ? (
                 <StatusBar
@@ -2960,21 +2915,42 @@ export default class KoreChat extends React.Component<
               )}
 
               {this.renderHeader()}
-              <View style={styles.chat_body_container}>
-                {this.openFullScreenDialog()}
-                {this.renderMessages()}
-                {this.renderTypingIndicator()}
-                {this.renderSTTview(this.state?.onSTTValue)}
+              {this.props.isKeyboardInternallyHandled !== false ? (
+                <KeyboardAvoidingView
+                  style={styles.chat_body_container}
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  keyboardVerticalOffset={this.props.bottomOffset || 0}>
+                  {this.openFullScreenDialog()}
+                  {this.renderMessages()}
+                  {this.renderTypingIndicator()}
+                  {this.renderSTTview(this.state?.onSTTValue)}
 
-                {this.renderInputToolbar()}
-                {this.state.activetheme && this.renderLoader()}
-                {this.renderAttachedBottomSheet()}
-                {this.renderMenuBottomSheet()}
-                {this.renderSeeMoreBottomSheet()}
-                {this.renderWelcomeScreenModel()}
-                {this.renderBackButtonDialog()}
-                <CustomAlertComponent ref={this.alertRef} />
-              </View>
+                  {this.renderInputToolbar()}
+                  {this.state.activetheme && this.renderLoader()}
+                  {this.renderAttachedBottomSheet()}
+                  {this.renderMenuBottomSheet()}
+                  {this.renderSeeMoreBottomSheet()}
+                  {this.renderWelcomeScreenModel()}
+                  {this.renderBackButtonDialog()}
+                  <CustomAlertComponent ref={this.alertRef} />
+                </KeyboardAvoidingView>
+              ) : (
+                <View style={styles.chat_body_container}>
+                  {this.openFullScreenDialog()}
+                  {this.renderMessages()}
+                  {this.renderTypingIndicator()}
+                  {this.renderSTTview(this.state?.onSTTValue)}
+
+                  {this.renderInputToolbar()}
+                  {this.state.activetheme && this.renderLoader()}
+                  {this.renderAttachedBottomSheet()}
+                  {this.renderMenuBottomSheet()}
+                  {this.renderSeeMoreBottomSheet()}
+                  {this.renderWelcomeScreenModel()}
+                  {this.renderBackButtonDialog()}
+                  <CustomAlertComponent ref={this.alertRef} />
+                </View>
+              )}
             </View>
           </Wrapper>
         </ThemeProvider>

@@ -51,7 +51,7 @@ __export(PermissionsUtils_exports, {
   documentPickIOSPermission: () => documentPickIOSPermission,
   documentPickPermission: () => documentPickPermission
 });
-import { Platform as Platform20, PermissionsAndroid, Alert as Alert7, Linking as Linking7 } from "react-native";
+import { Platform as Platform21, PermissionsAndroid, Alert as Alert7, Linking as Linking7 } from "react-native";
 import {
   PERMISSIONS,
   request,
@@ -60,11 +60,11 @@ import {
 } from "react-native-permissions";
 function documentPickPermission(callback = (isSuccess) => {
 }) {
-  if (Platform20.OS !== "android") {
+  if (Platform21.OS !== "android") {
     callback(false);
     return;
   }
-  const androidVersion = Platform20.Version;
+  const androidVersion = Platform21.Version;
   let permissions = [];
   if (androidVersion >= 33) {
     permissions = [
@@ -116,7 +116,7 @@ function documentPickPermission(callback = (isSuccess) => {
 }
 function documentPickIOSPermission(callback = (isSuccess) => {
 }) {
-  if (Platform20.OS !== "ios") {
+  if (Platform21.OS !== "ios") {
     callback(false);
     return;
   }
@@ -201,7 +201,7 @@ function cameraPermission(callback = (isSuccess) => {
     tryNativeCameraPermission(callback);
     return;
   }
-  const permission = Platform20.select({
+  const permission = Platform21.select({
     android: PERMISSIONS.ANDROID.CAMERA,
     ios: PERMISSIONS.IOS.CAMERA
   });
@@ -18135,7 +18135,7 @@ var CustomTemplate_default = CustomTemplate;
 init_esm_shims();
 import * as React113 from "react";
 import {
-  Platform as Platform21,
+  Platform as Platform22,
   StyleSheet as StyleSheet86,
   View as View95,
   SafeAreaView as SafeAreaView2,
@@ -18146,10 +18146,11 @@ import {
   Modal as Modal9,
   ScrollView as ScrollView5,
   Keyboard as Keyboard5,
+  KeyboardAvoidingView,
   Dimensions as Dimensions36,
   StatusBar as StatusBar3,
   BackHandler as BackHandler2,
-  TouchableWithoutFeedback as TouchableWithoutFeedback3,
+  TouchableWithoutFeedback as TouchableWithoutFeedback4,
   LayoutAnimation as LayoutAnimation2,
   UIManager as UIManager2
 } from "react-native";
@@ -18212,8 +18213,10 @@ import {
   TextInput as TextInput7,
   View as View68,
   TouchableOpacity as TouchableOpacity40,
+  TouchableWithoutFeedback as TouchableWithoutFeedback2,
   Animated as Animated6,
-  Easing as Easing2
+  Easing as Easing2,
+  Platform as Platform14
 } from "react-native";
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
@@ -18245,6 +18248,7 @@ function Composer({
   const [isFocused, setIsFocused] = useState5(false);
   const [inputText, setInputText] = useState5(text || "");
   const inputTextRef = useRef4(text || "");
+  const textInputRef = useRef4(null);
   const [containerWidth, setContainerWidth] = useState5(0);
   const [lineCount, setLineCount] = useState5(1);
   const lineCountRef = useRef4(1);
@@ -18388,100 +18392,109 @@ function Composer({
       }
     },
     /* @__PURE__ */ React83.createElement(
-      Animated6.View,
+      TouchableWithoutFeedback2,
       {
-        onLayout: (e) => {
-          const w = e.nativeEvent.layout.width;
-          if (w > 0 && Math.abs(w - containerWidth) > 5) {
-            setContainerWidth(w);
-          }
-        },
-        style: {
-          height: animatedHeight,
-          justifyContent: "center",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          borderWidth: currentBorderWidth,
-          borderColor: outLineColor,
-          borderStyle: "solid",
-          borderRadius: 8,
-          backgroundColor: bgColor,
-          minHeight: MIN_HEIGHT,
-          maxHeight: MAX_HEIGHT,
-          overflow: "hidden"
-        }
+        onPress: () => textInputRef.current?.focus(),
+        accessible: false
       },
       /* @__PURE__ */ React83.createElement(
-        TextInput7,
+        Animated6.View,
         {
-          testID: placeholder2,
-          accessible: true,
-          accessibilityLabel: placeholder2,
-          placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
-          placeholderTextColor: "#9CA3AF",
-          selectionColor: textColor,
-          multiline,
-          scrollEnabled: lineCount >= 4,
-          maxLength: MAX_INPUT_TEXT_LENGTH,
-          editable: !disableComposer,
-          onContentSizeChange: handleContentSizeChange,
-          onChangeText: handleChangeText,
-          style: [
-            styles63.textInput,
-            {
-              flex: 1,
-              flexShrink: 1,
-              paddingTop: 9,
-              paddingBottom: 9,
-              paddingHorizontal: 12,
-              fontSize: 14,
-              lineHeight: 20,
-              fontWeight: "400",
-              color: textColor,
-              alignSelf: "stretch",
-              textAlignVertical: "top"
+          onLayout: (e) => {
+            const w = e.nativeEvent.layout.width;
+            if (w > 0 && Math.abs(w - containerWidth) > 5) {
+              setContainerWidth(w);
             }
-          ],
-          autoFocus: textInputAutoFocus,
-          value: text,
-          enablesReturnKeyAutomatically: true,
-          underlineColorAndroid: "transparent",
-          keyboardAppearance,
-          ...textInputProps,
-          onFocus: (e) => {
-            setIsFocused(true);
-            textInputProps?.onFocus?.(e);
-          },
-          onBlur: (e) => {
-            setIsFocused(false);
-            textInputProps?.onBlur?.(e);
-          }
-        }
-      ),
-      theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React83.createElement(
-        TouchableOpacity40,
-        {
-          onPress: () => {
-            const spacker = !isTTS;
-            setTTS(spacker);
-            onSpeakerClicked(spacker);
           },
           style: {
-            padding: 10,
-            backgroundColor: Color_default.transparent,
-            alignItems: "center",
+            height: animatedHeight,
             justifyContent: "center",
-            alignSelf: "flex-end"
+            flexDirection: "row",
+            alignItems: "flex-start",
+            borderWidth: currentBorderWidth,
+            borderColor: outLineColor,
+            borderStyle: "solid",
+            borderRadius: 8,
+            backgroundColor: bgColor,
+            minHeight: MIN_HEIGHT,
+            maxHeight: MAX_HEIGHT,
+            overflow: "hidden"
           }
         },
         /* @__PURE__ */ React83.createElement(
-          SvgIcon,
+          TextInput7,
           {
-            name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
-            width: normalize(18),
-            height: normalize(18),
-            color: textColor
+            ref: textInputRef,
+            testID: placeholder2,
+            accessible: true,
+            accessibilityLabel: placeholder2,
+            placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
+            placeholderTextColor: "#9CA3AF",
+            selectionColor: textColor,
+            multiline,
+            scrollEnabled: Platform14.OS === "ios" ? true : lineCount >= 4,
+            maxLength: MAX_INPUT_TEXT_LENGTH,
+            editable: !disableComposer,
+            onContentSizeChange: handleContentSizeChange,
+            onChangeText: handleChangeText,
+            style: [
+              styles63.textInput,
+              {
+                flex: 1,
+                flexShrink: 1,
+                minHeight: MIN_HEIGHT,
+                paddingTop: 9,
+                paddingBottom: 9,
+                paddingHorizontal: 12,
+                fontSize: 14,
+                lineHeight: 20,
+                fontWeight: "400",
+                color: textColor,
+                alignSelf: "stretch",
+                textAlignVertical: "top"
+              }
+            ],
+            autoFocus: textInputAutoFocus,
+            value: text,
+            enablesReturnKeyAutomatically: true,
+            underlineColorAndroid: "transparent",
+            keyboardAppearance,
+            ...textInputProps,
+            onFocus: (e) => {
+              setIsFocused(true);
+              textInputProps?.onFocus?.(e);
+            },
+            onBlur: (e) => {
+              setIsFocused(false);
+              textInputProps?.onBlur?.(e);
+            }
           }
+        ),
+        theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React83.createElement(
+          TouchableOpacity40,
+          {
+            onPress: () => {
+              const spacker = !isTTS;
+              setTTS(spacker);
+              onSpeakerClicked(spacker);
+            },
+            style: {
+              padding: 10,
+              backgroundColor: Color_default.transparent,
+              alignItems: "center",
+              justifyContent: "center",
+              alignSelf: "flex-end"
+            }
+          },
+          /* @__PURE__ */ React83.createElement(
+            SvgIcon,
+            {
+              name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
+              width: normalize(18),
+              height: normalize(18),
+              color: textColor
+            }
+          )
         )
       )
     )
@@ -18503,6 +18516,7 @@ var styles63 = StyleSheet61.create({
   textInput: {
     flex: 1,
     flexShrink: 1,
+    minHeight: 38,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: "400",
@@ -20265,7 +20279,7 @@ import * as React92 from "react";
 import {
   Text as Text57,
   StyleSheet as StyleSheet69,
-  TouchableWithoutFeedback as TouchableWithoutFeedback2,
+  TouchableWithoutFeedback as TouchableWithoutFeedback3,
   View as View76,
   ToastAndroid,
   Platform as Platform18,
@@ -20776,7 +20790,7 @@ var Bubble = class extends React92.Component {
           ]
         },
         /* @__PURE__ */ React92.createElement(
-          TouchableWithoutFeedback2,
+          TouchableWithoutFeedback3,
           {
             onLongPress: (event) => this.onLongPress(event, position === "right"),
             accessibilityRole: "text",
@@ -21624,12 +21638,159 @@ var MessageContainer = class extends PureComponent {
 
 // bot-sdk/chat/KoreChat.tsx
 import NetInfo from "@react-native-community/netinfo";
-import KoreBotClient3, {
+import KoreBotClient4, {
+  RTM_EVENT as RTM_EVENT2,
+  APP_STATE as APP_STATE2,
+  ActiveThemeAPI,
+  ApiService as ApiService3
+} from "rn-kore-bot-socket-lib-v79";
+
+// bot-sdk/utils/patchKoreBotClient.ts
+init_esm_shims();
+import { Platform as Platform20 } from "react-native";
+import KoreBotClient2, {
   RTM_EVENT,
   APP_STATE,
-  ActiveThemeAPI,
   ApiService as ApiService2
 } from "rn-kore-bot-socket-lib-v79";
+function applyKoreBotClientPatches() {
+  try {
+    const clientInstance = KoreBotClient2.getInstance();
+    const proto = Object.getPrototypeOf(clientInstance);
+    if (!proto || proto.__hasJwtPatchV2) {
+      return;
+    }
+    proto.__hasJwtPatchV2 = true;
+    const ensureBotInfo = (client, config) => {
+      const cfg = config || client?.botConfig;
+      if (!cfg)
+        return;
+      const botName = cfg.botName || "";
+      const botId = cfg.botId || "";
+      const identity = cfg.identity || "";
+      const userName = cfg.userName || "";
+      if (!client.botCustomData) {
+        client.botCustomData = /* @__PURE__ */ new Map();
+      }
+      if (client.botCustomData?.set) {
+        client.botCustomData.set("identity", identity);
+        client.botCustomData.set("username", userName);
+      }
+      client.botUrl = cfg.botUrl || client.botUrl || "";
+      client.botInfo = {
+        chatBot: botName,
+        taskBotId: botId,
+        botName,
+        botId,
+        name: botName,
+        _id: botId,
+        customData: {
+          identity,
+          userName
+        },
+        channelClient: Platform20.OS
+      };
+      if (typeof client.initialize === "function") {
+        client.initialize(client.botInfo, client.botCustomData);
+      }
+    };
+    proto.initializeBotClient = function(config, isFirstTime) {
+      if (!config) {
+        throw new Error("BotConfigModel object cannot be null");
+      }
+      const hasDynamicToken = typeof config.getJwtToken === "function" || config.getJwtToken && typeof config.getJwtToken.then === "function";
+      const hasStaticToken = typeof config.jwtToken === "string" && config.jwtToken.length > 0 || typeof config.getJwtToken === "string" && config.getJwtToken.length > 0;
+      if (hasDynamicToken || hasStaticToken) {
+        if (!config.botId || !config.botUrl || !config.botName) {
+          throw new Error(
+            "BotConfigModel requires botName, botId, and botUrl when jwtToken or getJwtToken is provided"
+          );
+        }
+      } else {
+        if (!config.botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
+          throw new Error("BotConfigModel object has some values are missing");
+        }
+      }
+      this.botConfig = config;
+      ensureBotInfo(this, config);
+      this.connectToBot(config, isFirstTime);
+    };
+    const originalCreateJwtToken = proto.createJwtToken;
+    proto.createJwtToken = async function(config, isFirstTime = true) {
+      if (!this.botConfig && config) {
+        this.botConfig = config;
+      }
+      if (!this.botConfig)
+        return;
+      ensureBotInfo(this, config || this.botConfig);
+      const hasDynamicResolver = typeof this.botConfig?.getJwtToken === "function";
+      const hasDirectToken = typeof this.botConfig?.jwtToken === "string" && this.botConfig.jwtToken.length > 0;
+      const hasPromiseToken = this.botConfig?.getJwtToken && typeof this.botConfig.getJwtToken.then === "function" || this.botConfig?.jwtToken && typeof this.botConfig.jwtToken.then === "function";
+      const hasStringGetJwtToken = typeof this.botConfig?.getJwtToken === "string" && this.botConfig.getJwtToken.length > 0;
+      if (hasDynamicResolver || hasDirectToken || hasPromiseToken || hasStringGetJwtToken) {
+        try {
+          if (hasDynamicResolver) {
+            this.jwtToken = await this.botConfig.getJwtToken();
+          } else if (hasPromiseToken) {
+            this.jwtToken = await (this.botConfig.getJwtToken || this.botConfig.jwtToken);
+          } else if (hasDirectToken) {
+            this.jwtToken = this.botConfig.jwtToken;
+          } else {
+            this.jwtToken = this.botConfig.getJwtToken;
+          }
+          if (!this.jwtToken || typeof this.jwtToken !== "string") {
+            throw new Error("Invalid JWT token returned: expected non-empty string");
+          }
+          if (!this.botConfig?.isWebHook) {
+            await this.connectWithJwToken(this.jwtToken, !isFirstTime);
+          } else {
+            this.getWebhookMeta(this.botConfig, isFirstTime);
+          }
+          return;
+        } catch (err) {
+          this.emit(RTM_EVENT.ERROR, {
+            message: "Failed to get JWT token: " + (err?.message || err),
+            isBack: false
+          });
+          return;
+        }
+      }
+      return originalCreateJwtToken.call(this, config, isFirstTime);
+    };
+    proto.connectWithJwToken = async function(jwtToken, isReconnectionAttempt) {
+      if (this.isConnecting) {
+        return false;
+      }
+      this.jwtToken = jwtToken;
+      ensureBotInfo(this);
+      const apiService = new ApiService2(this.botConfig?.botUrl + "", this);
+      await apiService.getJwtGrant(
+        jwtToken,
+        isReconnectionAttempt,
+        () => {
+          this.emit(RTM_EVENT.CONNECTING);
+        },
+        async (response) => {
+          this.userInfo = response.userInfo;
+          this.authorization = response.authorization;
+          this.emit(RTM_EVENT.ON_JWT_TOKEN_AUTHORIZED);
+          if (this.appState === APP_STATE.ACTIVE) {
+            await this.initSocketConnection(isReconnectionAttempt);
+          }
+        },
+        (error) => {
+          this.emit(RTM_EVENT.ERROR, {
+            message: "JWT Grant Authorization Failed: " + (error?.message || error || "Please verify bot configuration and JWT token"),
+            isBack: false
+          });
+        }
+      );
+      return true;
+    };
+  } catch (e) {
+  }
+}
+applyKoreBotClientPatches();
 
 // bot-sdk/templates/QuickReplies.tsx
 init_esm_shims();
@@ -22841,7 +23002,7 @@ var MultipartData_default = MultipartData;
 
 // bot-sdk/FileUploader/FileUploadOnprem.js
 import axios from "axios";
-import KoreBotClient2 from "rn-kore-bot-socket-lib-v79";
+import KoreBotClient3 from "rn-kore-bot-socket-lib-v79";
 import { getUserAgent } from "react-native-user-agent";
 var FileUploadOnprem = class {
   isStopLoading = false;
@@ -22869,7 +23030,7 @@ var FileUploadOnprem = class {
     this.uploadedChunks = null;
     this.successChunks = 0;
     this.isStopLoading = false;
-    this.baseUrl = KoreBotClient2.getInstance().getBotUrl();
+    this.baseUrl = KoreBotClient3.getInstance().getBotUrl();
     this.fileDataCache = null;
     this.cacheFilePath = null;
   }
@@ -23076,7 +23237,7 @@ var FileUploadOnprem = class {
       console.log("getUserAgent error:", error);
       userAgent = "RNApp/1.0";
     }
-    const auth = KoreBotClient2.getInstance().getAuthorization();
+    const auth = KoreBotClient3.getInstance().getAuthorization();
     axios({
       url,
       method: api_constants_default.POST,
@@ -23260,7 +23421,7 @@ var FileUploadOnprem = class {
     });
     console.log(`uploadChunk: Uploading chunk ${chunkNumber}/${_self.fileInfo.totalChunks - 1} for file ${_self.fileInfo.fileName}`);
     let url = this.baseUrl + "/api/1.1/users/" + this.userId + "/file/" + this.fileInfo.fileToken + "/chunk";
-    const auth = KoreBotClient2.getInstance().getAuthorization();
+    const auth = KoreBotClient3.getInstance().getAuthorization();
     axios({
       url,
       data: formData.toString(),
@@ -23299,7 +23460,7 @@ var FileUploadOnprem = class {
       );
       return;
     }
-    const auth = KoreBotClient2.getInstance().getAuthorization();
+    const auth = KoreBotClient3.getInstance().getAuthorization();
     let agent = "RNApp/1.0";
     try {
       agent = getUserAgent() || "RNApp/1.0";
@@ -24556,54 +24717,7 @@ var TemplateBottomSheet = class extends PureComponent2 {
 };
 
 // bot-sdk/chat/KoreChat.tsx
-try {
-  const clientInstance = KoreBotClient3.getInstance();
-  const proto = Object.getPrototypeOf(clientInstance);
-  if (proto && !proto.__hasJwtPatch) {
-    proto.__hasJwtPatch = true;
-    proto.initializeBotClient = function(config, isFirstTime) {
-      if (!config) {
-        throw new Error("BotConfigModel object cannot be null");
-      }
-      if (config.jwtToken || typeof config.getJwtToken === "function") {
-        if (!config.botId || !config.botUrl || !config.botName) {
-          throw new Error(
-            "BotConfigModel requires botName, botId, and botUrl when jwtToken is provided"
-          );
-        }
-      } else {
-        if (!config.botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
-          throw new Error("BotConfigModel object has some values are missing");
-        }
-      }
-      this.connectToBot(config, isFirstTime);
-    };
-    const originalCreateJwtToken = proto.createJwtToken;
-    proto.createJwtToken = async function(config, isFirstTime = true) {
-      if (!this.botConfig)
-        return;
-      if (typeof this.botConfig.getJwtToken === "function") {
-        try {
-          this.jwtToken = await this.botConfig.getJwtToken();
-          if (!this.botConfig?.isWebHook) {
-            await this.connectWithJwToken(this.jwtToken, !isFirstTime);
-          } else {
-            this.getWebhookMeta(this.botConfig, isFirstTime);
-          }
-          return;
-        } catch (err) {
-          this.emit(RTM_EVENT.ERROR, {
-            message: "Failed to get JWT token: " + (err?.message || err),
-            isBack: false
-          });
-          return;
-        }
-      }
-      return originalCreateJwtToken.call(this, config, isFirstTime);
-    };
-  }
-} catch (e) {
-}
+applyKoreBotClientPatches();
 var Sound = null;
 try {
   Sound = __require("react-native-sound").default;
@@ -24766,14 +24880,14 @@ var KoreChat = class _KoreChat extends React113.Component {
       return;
     }
     console.log("this.props.botConfig ------>:", this.props.botConfig);
-    const botClient = KoreBotClient3.getInstance();
-    botClient.setAppState(APP_STATE.ACTIVE);
-    botClient.once(RTM_EVENT.CONNECTING, () => {
+    const botClient = KoreBotClient4.getInstance();
+    botClient.setAppState(APP_STATE2.ACTIVE);
+    botClient.once(RTM_EVENT2.CONNECTING, () => {
       this.setState({
         showLoader: true
       });
     });
-    botClient.on(RTM_EVENT.ERROR, (data) => {
+    botClient.on(RTM_EVENT2.ERROR, (data) => {
       if (this.state.isReconnecting || !this.state.isThemeLoaded) {
         this.setState({
           isReconnecting: false,
@@ -24787,7 +24901,7 @@ var KoreChat = class _KoreChat extends React113.Component {
       this.showAlert("Alert", message, data?.isBack);
       return;
     });
-    botClient.on(RTM_EVENT.ON_OPEN, (data) => {
+    botClient.on(RTM_EVENT2.ON_OPEN, (data) => {
       console.log("-----> SUCCESS TO KORA BOT CONNECTED <------:", data);
       if (isMinimizedWindow) {
         this.loadHistory();
@@ -24907,9 +25021,9 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.setState({ showBackButtonDialog: false });
     try {
       if (isAgentConnect) {
-        KoreBotClient3.getInstance().sendEvent("close_agent_chat");
+        KoreBotClient4.getInstance().sendEvent("close_agent_chat");
       } else {
-        KoreBotClient3.getInstance().sendEvent("close_button_event");
+        KoreBotClient4.getInstance().sendEvent("close_button_event");
       }
     } catch (error) {
       console.warn("Unable to send the close event:", error);
@@ -24934,7 +25048,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   handleDialogMinimize = () => {
     isMinimizedWindow = true;
     this.setState({ showBackButtonDialog: false });
-    KoreBotClient3.getInstance().sendEvent("minimize_button_event");
+    KoreBotClient4.getInstance().sendEvent("minimize_button_event");
     setTimeout(() => {
       try {
         if (this.props.navigation?.canGoBack?.()) {
@@ -24949,7 +25063,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     }, 100);
   };
   componentDidMount() {
-    const botClient = KoreBotClient3.getInstance();
+    const botClient = KoreBotClient4.getInstance();
     this._unsubscribeConn = NetInfo.addEventListener((state) => {
       const { isConnected } = state;
       if (!this.state.isNetConnected && isConnected) {
@@ -24969,11 +25083,11 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.initLocale();
     this.setTextFromProp(text);
     this.stopTTS();
-    const showEvent = Platform21.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const showEvent = Platform22.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
     this.keyboardListener = Keyboard5.addListener(showEvent, () => {
       setTimeout(() => this.scrollToBottom(true), 150);
     });
-    const hideEvent = Platform21.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const hideEvent = Platform22.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
     this.keyboardHideListener = Keyboard5.addListener(hideEvent, () => {
       setTimeout(() => this.scrollToBottom(false), 100);
     });
@@ -24992,10 +25106,10 @@ var KoreChat = class _KoreChat extends React113.Component {
     if (this.keyboardHideListener) {
       this.keyboardHideListener.remove();
     }
-    const botClient = KoreBotClient3.getInstance();
-    botClient.removeAllListeners(RTM_EVENT.CONNECTING);
-    botClient.removeAllListeners(RTM_EVENT.ON_OPEN);
-    botClient.removeAllListeners(RTM_EVENT.ON_MESSAGE);
+    const botClient = KoreBotClient4.getInstance();
+    botClient.removeAllListeners(RTM_EVENT2.CONNECTING);
+    botClient.removeAllListeners(RTM_EVENT2.ON_OPEN);
+    botClient.removeAllListeners(RTM_EVENT2.ON_MESSAGE);
     botClient?.disconnect();
     this.stopTTS();
   }
@@ -25018,17 +25132,17 @@ var KoreChat = class _KoreChat extends React113.Component {
     }
   }
   setBotClientListeners = () => {
-    const botClient = KoreBotClient3.getInstance();
-    botClient?.on(RTM_EVENT.ON_ACK, (data) => {
+    const botClient = KoreBotClient4.getInstance();
+    botClient?.on(RTM_EVENT2.ON_ACK, (data) => {
       if (data.type === "ack") {
       }
     });
-    botClient?.on(RTM_EVENT.ON_EVENTS, (data) => {
+    botClient?.on(RTM_EVENT2.ON_EVENTS, (data) => {
       if (data.type === "events") {
         this.setIsBotResponseLoading(data.message.type === "typing");
       }
     });
-    botClient?.on(RTM_EVENT.ON_MESSAGE, (data) => {
+    botClient?.on(RTM_EVENT2.ON_MESSAGE, (data) => {
       if (data.type === "ack") {
         console.log("Received ACK message, setting loading state");
         this.setIsBotResponseLoading(true);
@@ -25038,7 +25152,7 @@ var KoreChat = class _KoreChat extends React113.Component {
       hidePdfDownloadLoader();
       this.processMessage(data);
       if (isAgentConnect) {
-        KoreBotClient3.getInstance().sendEvent("message_read");
+        KoreBotClient4.getInstance().sendEvent("message_read");
       }
       const quickReplies = this.isQuickReplies(data);
       if (quickReplies) {
@@ -25054,7 +25168,7 @@ var KoreChat = class _KoreChat extends React113.Component {
       return;
     }
     this.setState({ isReconnecting: true }, () => {
-      const botClient = KoreBotClient3.getInstance();
+      const botClient = KoreBotClient4.getInstance();
       try {
         Promise.resolve(botClient.reconnect(true, true)).catch(() => {
           this.setState({
@@ -25563,7 +25677,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     if (this.props.onSend) {
       this.props.onSend(message.text, data_type);
     } else {
-      var messageData = KoreBotClient3.getInstance()?.sendMessage(
+      var messageData = KoreBotClient4.getInstance()?.sendMessage(
         message.text,
         data,
         data_type
@@ -25884,7 +25998,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   };
   onInputSizeChanged = (_size) => {
     if (this.state.composerHeight !== _size.height) {
-      if (Platform21.OS === "android" && UIManager2.setLayoutAnimationEnabledExperimental) {
+      if (Platform22.OS === "android" && UIManager2.setLayoutAnimationEnabledExperimental) {
         UIManager2.setLayoutAnimationEnabledExperimental(true);
       }
       LayoutAnimation2.configureNext({
@@ -25905,10 +26019,10 @@ var KoreChat = class _KoreChat extends React113.Component {
     if (isAgentConnect == true) {
       if (text.length == 0) {
         console.log("stop_typing");
-        KoreBotClient3.getInstance()?.sendEvent("stop_typing", false);
+        KoreBotClient4.getInstance()?.sendEvent("stop_typing", false);
       } else {
         console.log("typing");
-        KoreBotClient3.getInstance()?.sendEvent("typing", false);
+        KoreBotClient4.getInstance()?.sendEvent("typing", false);
       }
     }
     if (this.getIsTypingDisabled()) {
@@ -26170,7 +26284,7 @@ var KoreChat = class _KoreChat extends React113.Component {
         }
       },
       /* @__PURE__ */ React113.createElement(
-        TouchableWithoutFeedback3,
+        TouchableWithoutFeedback4,
         {
           onPress: () => {
             this.setState({ menuItems: void 0 });
@@ -26186,7 +26300,7 @@ var KoreChat = class _KoreChat extends React113.Component {
             }
           },
           /* @__PURE__ */ React113.createElement(
-            TouchableWithoutFeedback3,
+            TouchableWithoutFeedback4,
             {
               onPress: () => {
               }
@@ -26823,10 +26937,17 @@ var KoreChat = class _KoreChat extends React113.Component {
       const bgColor = this.state.themeData?.v3?.header?.bg_color || "#EAECF0";
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
-      return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: styles88.safeArea }, /* @__PURE__ */ React113.createElement(
+      const androidTopPadding = Platform22.OS === "android" && wrapInSafeArea !== false ? StatusBar3.currentHeight || 0 : 0;
+      return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: [styles88.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React113.createElement(
         View95,
         {
-          style: [styles88.container, { flexDirection: "column" }],
+          style: [
+            styles88.container,
+            {
+              flexDirection: "column",
+              paddingTop: androidTopPadding
+            }
+          ],
           onLayout: this.onMainViewLayout
         },
         bgColor && !isWhiteStatus ? /* @__PURE__ */ React113.createElement(
@@ -26843,7 +26964,26 @@ var KoreChat = class _KoreChat extends React113.Component {
           }
         ),
         this.renderHeader(),
-        /* @__PURE__ */ React113.createElement(View95, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
+        this.props.isKeyboardInternallyHandled !== false ? /* @__PURE__ */ React113.createElement(
+          KeyboardAvoidingView,
+          {
+            style: styles88.chat_body_container,
+            behavior: Platform22.OS === "ios" ? "padding" : "height",
+            keyboardVerticalOffset: this.props.bottomOffset || 0
+          },
+          this.openFullScreenDialog(),
+          this.renderMessages(),
+          this.renderTypingIndicator(),
+          this.renderSTTview(this.state?.onSTTValue),
+          this.renderInputToolbar(),
+          this.state.activetheme && this.renderLoader(),
+          this.renderAttachedBottomSheet(),
+          this.renderMenuBottomSheet(),
+          this.renderSeeMoreBottomSheet(),
+          this.renderWelcomeScreenModel(),
+          this.renderBackButtonDialog(),
+          /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+        ) : /* @__PURE__ */ React113.createElement(View95, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
       )));
     }
     return /* @__PURE__ */ React113.createElement(View95, { style: styles88.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
@@ -26861,7 +27001,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.setMessages(newMessages);
   };
   loadHistory = async () => {
-    const apiService = new ApiService2(this.props.botConfig.botUrl, KoreBotClient3.getInstance());
+    const apiService = new ApiService3(this.props.botConfig.botUrl, KoreBotClient4.getInstance());
     await apiService.getBotHistory(0, historyMessages > 20 ? 20 : historyMessages, this.props.botConfig, (response) => {
       if (response == null) {
         console.log("BotHistory null");
@@ -27257,7 +27397,7 @@ KoreChat.defaultProps = {
   onPressActionButton: null,
   bottomOffset: 0,
   minInputToolbarHeight: 44,
-  keyboardShouldPersistTaps: Platform21.select({
+  keyboardShouldPersistTaps: Platform22.select({
     ios: "never",
     android: "always",
     default: "never"
@@ -27286,15 +27426,16 @@ KoreChat.defaultProps = {
 };
 
 // src/index.tsx
-import { default as default2, RTM_EVENT as RTM_EVENT2, APP_STATE as APP_STATE2 } from "rn-kore-bot-socket-lib-v79";
+import { default as default2, RTM_EVENT as RTM_EVENT3, APP_STATE as APP_STATE3 } from "rn-kore-bot-socket-lib-v79";
 try {
   __require("react-native-svg");
 } catch (error) {
   console.warn("react-native-svg not available, SVG features will be disabled");
 }
+applyKoreBotClientPatches();
 var src_default = KoreChat;
 export {
-  APP_STATE2 as APP_STATE,
+  APP_STATE3 as APP_STATE,
   BOT_ICON_URL,
   BRANDING_RESPONSE_FILE,
   BotTemplate,
@@ -27329,13 +27470,14 @@ export {
   PdfDownloadTemplate,
   QuickReplies,
   RENDER_KORA_BUBBLE,
-  RTM_EVENT2 as RTM_EVENT,
+  RTM_EVENT3 as RTM_EVENT,
   SHOW_BUTTONS_LIMIT,
   TEMPLATE_TYPES,
   TIME_FORMAT,
   URL_VERSION,
   UUID,
   WelcomeHeaderConstants,
+  applyKoreBotClientPatches,
   attach_menu_buttons,
   src_default as default,
   downloadPdfDataResponse,

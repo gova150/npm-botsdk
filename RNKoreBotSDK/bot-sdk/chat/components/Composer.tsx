@@ -9,6 +9,7 @@ import {
   TextInputContentSizeChangeEventData,
   View,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Animated,
   Easing,
   Platform,
@@ -72,6 +73,7 @@ export function Composer({
   const [isFocused, setIsFocused] = useState(false);
   const [inputText, setInputText] = useState(text || '');
   const inputTextRef = useRef(text || '');
+  const textInputRef = useRef<TextInput>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [lineCount, setLineCount] = useState(1);
   const lineCountRef = useRef(1);
@@ -248,97 +250,103 @@ export function Composer({
         backgroundColor: Color.transparent,
         flex: 1,
       }}>
-      <Animated.View
-        onLayout={(e) => {
-          const w = e.nativeEvent.layout.width;
-          if (w > 0 && Math.abs(w - containerWidth) > 5) {
-            setContainerWidth(w);
-          }
-        }}
-        style={{
-          height: animatedHeight,
-          justifyContent: 'center',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          borderWidth: currentBorderWidth,
-          borderColor: outLineColor,
-          borderStyle: 'solid',
-          borderRadius: 8,
-          backgroundColor: bgColor,
-          minHeight: MIN_HEIGHT,
-          maxHeight: MAX_HEIGHT,
-          overflow: 'hidden',
-        }}>
-        <TextInput
-          testID={placeholder}
-          accessible
-          accessibilityLabel={placeholder}
-          placeholder={
-            theme?.v3?.footer?.compose_bar?.placeholder || placeholder
-          }
-          placeholderTextColor={'#9CA3AF'}
-          selectionColor={textColor}
-          multiline={multiline}
-          scrollEnabled={lineCount >= 4}
-          maxLength={MAX_INPUT_TEXT_LENGTH}
-          editable={!disableComposer}
-          onContentSizeChange={handleContentSizeChange}
-          onChangeText={handleChangeText}
-          style={[
-            styles.textInput,
-            {
-              flex: 1,
-              flexShrink: 1,
-              paddingTop: 9,
-              paddingBottom: 9,
-              paddingHorizontal: 12,
-              fontSize: 14,
-              lineHeight: 20,
-              fontWeight: '400',
-              color: textColor,
-              alignSelf: 'stretch',
-              textAlignVertical: 'top',
-            },
-          ]}
-          autoFocus={textInputAutoFocus}
-          value={text}
-          enablesReturnKeyAutomatically
-          underlineColorAndroid="transparent"
-          keyboardAppearance={keyboardAppearance}
-          {...textInputProps}
-          onFocus={(e: any) => {
-            setIsFocused(true);
-            textInputProps?.onFocus?.(e);
+      <TouchableWithoutFeedback
+        onPress={() => textInputRef.current?.focus()}
+        accessible={false}>
+        <Animated.View
+          onLayout={(e) => {
+            const w = e.nativeEvent.layout.width;
+            if (w > 0 && Math.abs(w - containerWidth) > 5) {
+              setContainerWidth(w);
+            }
           }}
-          onBlur={(e: any) => {
-            setIsFocused(false);
-            textInputProps?.onBlur?.(e);
-          }}
-        />
-
-        {theme?.v3?.footer?.buttons?.speaker?.show && (
-          <TouchableOpacity
-            onPress={() => {
-              const spacker = !isTTS;
-              setTTS(spacker);
-              onSpeakerClicked(spacker);
+          style={{
+            height: animatedHeight,
+            justifyContent: 'center',
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            borderWidth: currentBorderWidth,
+            borderColor: outLineColor,
+            borderStyle: 'solid',
+            borderRadius: 8,
+            backgroundColor: bgColor,
+            minHeight: MIN_HEIGHT,
+            maxHeight: MAX_HEIGHT,
+            overflow: 'hidden',
+          }}>
+          <TextInput
+            ref={textInputRef}
+            testID={placeholder}
+            accessible
+            accessibilityLabel={placeholder}
+            placeholder={
+              theme?.v3?.footer?.compose_bar?.placeholder || placeholder
+            }
+            placeholderTextColor={'#9CA3AF'}
+            selectionColor={textColor}
+            multiline={multiline}
+            scrollEnabled={Platform.OS === 'ios' ? true : lineCount >= 4}
+            maxLength={MAX_INPUT_TEXT_LENGTH}
+            editable={!disableComposer}
+            onContentSizeChange={handleContentSizeChange}
+            onChangeText={handleChangeText}
+            style={[
+              styles.textInput,
+              {
+                flex: 1,
+                flexShrink: 1,
+                minHeight: MIN_HEIGHT,
+                paddingTop: 9,
+                paddingBottom: 9,
+                paddingHorizontal: 12,
+                fontSize: 14,
+                lineHeight: 20,
+                fontWeight: '400',
+                color: textColor,
+                alignSelf: 'stretch',
+                textAlignVertical: 'top',
+              },
+            ]}
+            autoFocus={textInputAutoFocus}
+            value={text}
+            enablesReturnKeyAutomatically
+            underlineColorAndroid="transparent"
+            keyboardAppearance={keyboardAppearance}
+            {...textInputProps}
+            onFocus={(e: any) => {
+              setIsFocused(true);
+              textInputProps?.onFocus?.(e);
             }}
-            style={{
-              padding: 10,
-              backgroundColor: Color.transparent,
-              alignItems: 'center',
-              justifyContent: 'center',
-              alignSelf: 'flex-end',
-            }}>
-            <SvgIcon
-              name={isTTS ? 'SpeakerIcon' : 'SpeakerOffIcon'}
-              width={normalize(18)}
-              height={normalize(18)}
-              color={textColor}
-            />
-          </TouchableOpacity>
-        )}
-      </Animated.View>
+            onBlur={(e: any) => {
+              setIsFocused(false);
+              textInputProps?.onBlur?.(e);
+            }}
+          />
+
+          {theme?.v3?.footer?.buttons?.speaker?.show && (
+            <TouchableOpacity
+              onPress={() => {
+                const spacker = !isTTS;
+                setTTS(spacker);
+                onSpeakerClicked(spacker);
+              }}
+              style={{
+                padding: 10,
+                backgroundColor: Color.transparent,
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'flex-end',
+              }}>
+              <SvgIcon
+                name={isTTS ? 'SpeakerIcon' : 'SpeakerOffIcon'}
+                width={normalize(18)}
+                height={normalize(18)}
+                color={textColor}
+              />
+            </TouchableOpacity>
+          )}
+        </Animated.View>
+      </TouchableWithoutFeedback>
     </View>
   );
 }
@@ -359,6 +367,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     flexShrink: 1,
+    minHeight: 38,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '400',

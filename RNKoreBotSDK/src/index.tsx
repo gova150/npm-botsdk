@@ -14,8 +14,11 @@ export {default as BotTemplate} from '../bot-sdk/templates/BotTemplate';
 //import BotTemplate from '../bot-sdk/templates/BotTemplate';
 
 import KoreChat from '../bot-sdk/chat/KoreChat';
+import { applyKoreBotClientPatches } from '../bot-sdk/utils/patchKoreBotClient';
 
 // Public socket/configuration API used by host applications.
+applyKoreBotClientPatches();
+export { applyKoreBotClientPatches };
 export {default as KoreBotClient, RTM_EVENT, APP_STATE} from 'rn-kore-bot-socket-lib-v79';
 export type {BotConfigModel} from '../bot-sdk/models/BotConfigModel';
 
