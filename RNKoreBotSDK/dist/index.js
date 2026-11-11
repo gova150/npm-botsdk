@@ -26289,6 +26289,11 @@ var KoreChat = class _KoreChat extends React115.Component {
     if (layout.height <= 0) {
       return;
     }
+    this.initialContainerHeight = Math.max(
+      this.initialContainerHeight || 0,
+      layout.height
+    );
+    this.currentContainerHeight = layout.height;
     this.notifyInputTextReset();
     const initialText = this.props.initialText || "";
     this.setState({
@@ -26297,7 +26302,7 @@ var KoreChat = class _KoreChat extends React115.Component {
     });
   };
   adjustAndroidKeyboardPadding = (keyboardHeight, currentHeight) => {
-    if (import_react_native111.Platform.OS !== "android") {
+    if (import_react_native111.Platform.OS !== "android" || this.props.isKeyboardInternallyHandled === false) {
       return;
     }
     if (!keyboardHeight) {
@@ -26306,14 +26311,20 @@ var KoreChat = class _KoreChat extends React115.Component {
       }
       return;
     }
-    const initialH = this.initialContainerHeight || import_react_native111.Dimensions.get("window").height;
+    const windowHeight = import_react_native111.Dimensions.get("window").height;
+    const initialH = this.initialContainerHeight && this.initialContainerHeight > 0 ? this.initialContainerHeight : windowHeight;
     const currH = currentHeight || initialH;
     const amountAlreadyShrunk = Math.max(0, initialH - currH);
     const bottomOffset = this.props.bottomOffset || 0;
-    const neededPadding = Math.max(
-      0,
-      Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset)
-    );
+    let neededPadding = 0;
+    if (amountAlreadyShrunk >= keyboardHeight - 15) {
+      neededPadding = 0;
+    } else {
+      neededPadding = Math.max(
+        0,
+        Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset)
+      );
+    }
     if (this.state.androidKeyboardPadding !== neededPadding) {
       if (import_react_native111.UIManager.setLayoutAnimationEnabledExperimental) {
         import_react_native111.UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -26332,7 +26343,10 @@ var KoreChat = class _KoreChat extends React115.Component {
     if (height && height > 0) {
       this.currentContainerHeight = height;
       if (!this.isKeyboardVisible) {
-        this.initialContainerHeight = height;
+        this.initialContainerHeight = Math.max(
+          this.initialContainerHeight || 0,
+          height
+        );
       } else if (import_react_native111.Platform.OS === "android") {
         this.adjustAndroidKeyboardPadding(this.currentKeyboardHeight, height);
       }
@@ -27221,7 +27235,7 @@ var KoreChat = class _KoreChat extends React115.Component {
       return /* @__PURE__ */ React115.createElement(import_react_native_safe_area_context.SafeAreaInsetsContext.Consumer, null, (insets) => {
         const rawTopInset = insets?.top ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.top ?? (import_react_native111.Platform.OS === "android" ? import_react_native111.StatusBar.currentHeight || 0 : 0);
         const rawBottomInset = insets?.bottom ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.bottom ?? 0;
-        const androidTopPadding = import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false ? Math.max(rawTopInset, import_react_native111.StatusBar.currentHeight || 0, 38) : 0;
+        const androidTopPadding = import_react_native111.Platform.OS === "android" ? Math.max(rawTopInset || 0, (import_react_native111.StatusBar.currentHeight || 0) + 12, 54) : 0;
         const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
         return /* @__PURE__ */ React115.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React115.createElement(Wrapper, { style: [styles90.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React115.createElement(
           import_react_native111.View,

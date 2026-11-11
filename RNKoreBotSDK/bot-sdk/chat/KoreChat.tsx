@@ -1905,6 +1905,11 @@ export default class KoreChat extends React.Component<
     if (layout.height <= 0) {
       return;
     }
+    this.initialContainerHeight = Math.max(
+      this.initialContainerHeight || 0,
+      layout.height,
+    );
+    this.currentContainerHeight = layout.height;
     this.notifyInputTextReset();
     const initialText = this.props.initialText || '';
     this.setState({
@@ -1917,7 +1922,10 @@ export default class KoreChat extends React.Component<
     keyboardHeight: number,
     currentHeight: number,
   ) => {
-    if (Platform.OS !== 'android') {
+    if (
+      Platform.OS !== 'android' ||
+      this.props.isKeyboardInternallyHandled === false
+    ) {
       return;
     }
     if (!keyboardHeight) {
@@ -1927,15 +1935,29 @@ export default class KoreChat extends React.Component<
       return;
     }
 
+    const windowHeight = Dimensions.get('window').height;
     const initialH =
-      this.initialContainerHeight || Dimensions.get('window').height;
+      this.initialContainerHeight && this.initialContainerHeight > 0
+        ? this.initialContainerHeight
+        : windowHeight;
     const currH = currentHeight || initialH;
     const amountAlreadyShrunk = Math.max(0, initialH - currH);
     const bottomOffset = this.props.bottomOffset || 0;
-    const neededPadding = Math.max(
-      0,
-      Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset),
-    );
+
+    // If native OS window already shrunk (e.g. legacy adjustResize on older Android 10-13),
+    // amountAlreadyShrunk will match keyboardHeight (within a ~15dp threshold).
+    // In that case, neededPadding is 0 to avoid double padding.
+    // On modern Android (Android 14, 15, 16, 17 on Google Pixel / Samsung S24-S26),
+    // edge-to-edge prevents window resizing (amountAlreadyShrunk is ~0), so neededPadding is the full keyboardHeight.
+    let neededPadding = 0;
+    if (amountAlreadyShrunk >= keyboardHeight - 15) {
+      neededPadding = 0;
+    } else {
+      neededPadding = Math.max(
+        0,
+        Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset),
+      );
+    }
 
     if (this.state.androidKeyboardPadding !== neededPadding) {
       if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -1958,7 +1980,10 @@ export default class KoreChat extends React.Component<
     if (height && height > 0) {
       this.currentContainerHeight = height;
       if (!this.isKeyboardVisible) {
-        this.initialContainerHeight = height;
+        this.initialContainerHeight = Math.max(
+          this.initialContainerHeight || 0,
+          height,
+        );
       } else if (Platform.OS === 'android') {
         this.adjustAndroidKeyboardPadding(this.currentKeyboardHeight, height);
       }
@@ -2983,14 +3008,14 @@ export default class KoreChat extends React.Component<
               insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
 
             // On Android devices with a notch, camera cutout, or edge-to-edge:
-            // Camera cutouts and notches on Google Pixel, Samsung Galaxy, etc. extend 38dp-48dp.
+            // Camera cutouts and notches on Google Pixel, Samsung Galaxy S20-S26, etc. extend 40dp-50dp.
             // We ensure the header is strictly below the notch by taking the max of:
             // - The exact physical top inset from SafeAreaInsetsContext
-            // - StatusBar.currentHeight
-            // - A minimum safe threshold of 38dp on Android devices
+            // - StatusBar.currentHeight + 12
+            // - A minimum safe threshold of 54dp on Android devices
             const androidTopPadding =
-              Platform.OS === 'android' && wrapInSafeArea !== false
-                ? Math.max(rawTopInset, StatusBar.currentHeight || 0, 38)
+              Platform.OS === 'android'
+                ? Math.max(rawTopInset || 0, (StatusBar.currentHeight || 0) + 12, 54)
                 : 0;
 
             // When keyboard is not active, ensure bottom navigation pill / gesture bar is respected
