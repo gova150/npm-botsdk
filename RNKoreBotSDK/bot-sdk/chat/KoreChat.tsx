@@ -23,6 +23,10 @@ import {
 import uuid from '../utils/uuid';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import {
+  SafeAreaInsetsContext,
+  initialWindowMetrics,
+} from 'react-native-safe-area-context';
 
 import InputToolbar from './components/InputToolbar';
 import MessageContainer from './components/MessageContainer';
@@ -214,6 +218,7 @@ interface KoraChatState {
   showBackButtonDialog?: boolean;
   showTemplateBottomSheet: boolean;
   messageBottomSheet?: any;
+  androidKeyboardPadding?: number;
 }
 
 export default class KoreChat extends React.Component<
@@ -235,6 +240,10 @@ export default class KoreChat extends React.Component<
   allowNavigation: boolean = false;
   keyboardListener: any;
   keyboardHideListener: any;
+  initialContainerHeight: number = 0;
+  currentContainerHeight: number = 0;
+  isKeyboardVisible: boolean = false;
+  currentKeyboardHeight: number = 0;
   static defaultProps: {
     messagesContainerStyle: null;
     text: null;
@@ -350,7 +359,8 @@ export default class KoreChat extends React.Component<
       showBackButtonDialog: false,
       showTemplateBottomSheet: false,
       messageBottomSheet: null,
-      isTTSenable: false
+      isTTSenable: false,
+      androidKeyboardPadding: 0,
     };
   }
 
@@ -688,12 +698,35 @@ export default class KoreChat extends React.Component<
 
     const showEvent =
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    this.keyboardListener = Keyboard.addListener(showEvent, () => {
+    this.keyboardListener = Keyboard.addListener(showEvent, (e: any) => {
+      if (Platform.OS === 'android') {
+        const keyboardHeight = e?.endCoordinates?.height || 0;
+        this.currentKeyboardHeight = keyboardHeight;
+        this.isKeyboardVisible = true;
+        this.adjustAndroidKeyboardPadding(
+          keyboardHeight,
+          this.currentContainerHeight,
+        );
+      }
       setTimeout(() => this.scrollToBottom(true), 150);
     });
     const hideEvent =
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
     this.keyboardHideListener = Keyboard.addListener(hideEvent, () => {
+      if (Platform.OS === 'android') {
+        this.currentKeyboardHeight = 0;
+        this.isKeyboardVisible = false;
+        if (this.state.androidKeyboardPadding !== 0) {
+          if (UIManager.setLayoutAnimationEnabledExperimental) {
+            UIManager.setLayoutAnimationEnabledExperimental(true);
+          }
+          LayoutAnimation.configureNext({
+            duration: 150,
+            update: {type: LayoutAnimation.Types.easeInEaseOut},
+          });
+          this.setState({androidKeyboardPadding: 0});
+        }
+      }
       setTimeout(() => this.scrollToBottom(false), 100);
     });
 
@@ -1880,9 +1913,56 @@ export default class KoreChat extends React.Component<
     });
   };
 
-  private onMainViewLayout = (_e: {
+  private adjustAndroidKeyboardPadding = (
+    keyboardHeight: number,
+    currentHeight: number,
+  ) => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+    if (!keyboardHeight) {
+      if (this.state.androidKeyboardPadding !== 0) {
+        this.setState({androidKeyboardPadding: 0});
+      }
+      return;
+    }
+
+    const initialH =
+      this.initialContainerHeight || Dimensions.get('window').height;
+    const currH = currentHeight || initialH;
+    const amountAlreadyShrunk = Math.max(0, initialH - currH);
+    const bottomOffset = this.props.bottomOffset || 0;
+    const neededPadding = Math.max(
+      0,
+      Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset),
+    );
+
+    if (this.state.androidKeyboardPadding !== neededPadding) {
+      if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      LayoutAnimation.configureNext({
+        duration: 200,
+        update: {type: LayoutAnimation.Types.easeInEaseOut},
+      });
+      this.setState({androidKeyboardPadding: neededPadding}, () => {
+        setTimeout(() => this.scrollToBottom(true), 100);
+      });
+    }
+  };
+
+  private onMainViewLayout = (e: {
     nativeEvent: {layout: {height: number}};
   }) => {
+    const height = e?.nativeEvent?.layout?.height;
+    if (height && height > 0) {
+      this.currentContainerHeight = height;
+      if (!this.isKeyboardVisible) {
+        this.initialContainerHeight = height;
+      } else if (Platform.OS === 'android') {
+        this.adjustAndroidKeyboardPadding(this.currentKeyboardHeight, height);
+      }
+    }
     if (this.getIsFirstLayout() === true) {
       this.setIsFirstLayout(false);
     }
@@ -2890,75 +2970,134 @@ export default class KoreChat extends React.Component<
       const bgColor = this.state.themeData?.v3?.header?.bg_color || '#EAECF0';
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
-      const androidTopPadding =
-        Platform.OS === 'android' && wrapInSafeArea !== false
-          ? StatusBar.currentHeight || 0
-          : 0;
 
       return (
-        <ThemeProvider theme={this.state.themeData || null}>
-          <Wrapper style={[styles.safeArea, {backgroundColor: bgColor}]}>
-            <View
-              style={[
-                styles.container,
-                {
-                  flexDirection: 'column',
-                  paddingTop: androidTopPadding,
-                },
-              ]}
-              onLayout={this.onMainViewLayout}>
-              {bgColor && !isWhiteStatus ? (
-                <StatusBar
-                  barStyle={isBlackStatus ? 'default' : 'dark-content'}
-                  backgroundColor={bgColor}
-                />
-              ) : (
-                <StatusBar
-                  barStyle="dark-content" // Sets the text/icons to light color
-                  backgroundColor={Color.white} // Sets the status bar background color
-                />
-              )}
+        <SafeAreaInsetsContext.Consumer>
+          {insets => {
+            const rawTopInset =
+              insets?.top ??
+              initialWindowMetrics?.insets?.top ??
+              (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0);
 
-              {this.renderHeader()}
-              {this.props.isKeyboardInternallyHandled !== false ? (
-                <KeyboardAvoidingView
-                  style={styles.chat_body_container}
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                  keyboardVerticalOffset={this.props.bottomOffset || 0}>
-                  {this.openFullScreenDialog()}
-                  {this.renderMessages()}
-                  {this.renderTypingIndicator()}
-                  {this.renderSTTview(this.state?.onSTTValue)}
+            const rawBottomInset =
+              insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
 
-                  {this.renderInputToolbar()}
-                  {this.state.activetheme && this.renderLoader()}
-                  {this.renderAttachedBottomSheet()}
-                  {this.renderMenuBottomSheet()}
-                  {this.renderSeeMoreBottomSheet()}
-                  {this.renderWelcomeScreenModel()}
-                  {this.renderBackButtonDialog()}
-                  <CustomAlertComponent ref={this.alertRef} />
-                </KeyboardAvoidingView>
-              ) : (
-                <View style={styles.chat_body_container}>
-                  {this.openFullScreenDialog()}
-                  {this.renderMessages()}
-                  {this.renderTypingIndicator()}
-                  {this.renderSTTview(this.state?.onSTTValue)}
+            // On Android devices with a notch, camera cutout, or edge-to-edge:
+            // Camera cutouts and notches on Google Pixel, Samsung Galaxy, etc. extend 38dp-48dp.
+            // We ensure the header is strictly below the notch by taking the max of:
+            // - The exact physical top inset from SafeAreaInsetsContext
+            // - StatusBar.currentHeight
+            // - A minimum safe threshold of 38dp on Android devices
+            const androidTopPadding =
+              Platform.OS === 'android' && wrapInSafeArea !== false
+                ? Math.max(rawTopInset, StatusBar.currentHeight || 0, 38)
+                : 0;
 
-                  {this.renderInputToolbar()}
-                  {this.state.activetheme && this.renderLoader()}
-                  {this.renderAttachedBottomSheet()}
-                  {this.renderMenuBottomSheet()}
-                  {this.renderSeeMoreBottomSheet()}
-                  {this.renderWelcomeScreenModel()}
-                  {this.renderBackButtonDialog()}
-                  <CustomAlertComponent ref={this.alertRef} />
-                </View>
-              )}
-            </View>
-          </Wrapper>
-        </ThemeProvider>
+            // When keyboard is not active, ensure bottom navigation pill / gesture bar is respected
+            const defaultBottomPadding =
+              this.state.androidKeyboardPadding === 0 &&
+              Platform.OS === 'android' &&
+              wrapInSafeArea !== false &&
+              rawBottomInset > 0
+                ? rawBottomInset
+                : 0;
+
+            return (
+              <ThemeProvider theme={this.state.themeData || null}>
+                <Wrapper style={[styles.safeArea, {backgroundColor: bgColor}]}>
+                  <View
+                    style={[
+                      styles.container,
+                      {
+                        flexDirection: 'column',
+                        paddingTop: androidTopPadding,
+                      },
+                    ]}
+                    onLayout={this.onMainViewLayout}>
+                    {bgColor && !isWhiteStatus ? (
+                      <StatusBar
+                        barStyle={isBlackStatus ? 'default' : 'dark-content'}
+                        backgroundColor={bgColor}
+                      />
+                    ) : (
+                      <StatusBar
+                        barStyle="dark-content" // Sets the text/icons to light color
+                        backgroundColor={Color.white} // Sets the status bar background color
+                      />
+                    )}
+
+                    {this.renderHeader()}
+                    {Platform.OS === 'ios' ? (
+                      this.props.isKeyboardInternallyHandled !== false ? (
+                        <KeyboardAvoidingView
+                          style={styles.chat_body_container}
+                          behavior="padding"
+                          keyboardVerticalOffset={
+                            (this.props.bottomOffset || 0) + (rawTopInset || 0)
+                          }>
+                          {this.openFullScreenDialog()}
+                          {this.renderMessages()}
+                          {this.renderTypingIndicator()}
+                          {this.renderSTTview(this.state?.onSTTValue)}
+
+                          {this.renderInputToolbar()}
+                          {this.state.activetheme && this.renderLoader()}
+                          {this.renderAttachedBottomSheet()}
+                          {this.renderMenuBottomSheet()}
+                          {this.renderSeeMoreBottomSheet()}
+                          {this.renderWelcomeScreenModel()}
+                          {this.renderBackButtonDialog()}
+                          <CustomAlertComponent ref={this.alertRef} />
+                        </KeyboardAvoidingView>
+                      ) : (
+                        <View style={styles.chat_body_container}>
+                          {this.openFullScreenDialog()}
+                          {this.renderMessages()}
+                          {this.renderTypingIndicator()}
+                          {this.renderSTTview(this.state?.onSTTValue)}
+
+                          {this.renderInputToolbar()}
+                          {this.state.activetheme && this.renderLoader()}
+                          {this.renderAttachedBottomSheet()}
+                          {this.renderMenuBottomSheet()}
+                          {this.renderSeeMoreBottomSheet()}
+                          {this.renderWelcomeScreenModel()}
+                          {this.renderBackButtonDialog()}
+                          <CustomAlertComponent ref={this.alertRef} />
+                        </View>
+                      )
+                    ) : (
+                      <View
+                        style={[
+                          styles.chat_body_container,
+                          {
+                            paddingBottom:
+                              this.state.androidKeyboardPadding > 0
+                                ? this.state.androidKeyboardPadding
+                                : defaultBottomPadding,
+                          },
+                        ]}>
+                        {this.openFullScreenDialog()}
+                        {this.renderMessages()}
+                        {this.renderTypingIndicator()}
+                        {this.renderSTTview(this.state?.onSTTValue)}
+
+                        {this.renderInputToolbar()}
+                        {this.state.activetheme && this.renderLoader()}
+                        {this.renderAttachedBottomSheet()}
+                        {this.renderMenuBottomSheet()}
+                        {this.renderSeeMoreBottomSheet()}
+                        {this.renderWelcomeScreenModel()}
+                        {this.renderBackButtonDialog()}
+                        <CustomAlertComponent ref={this.alertRef} />
+                      </View>
+                    )}
+                  </View>
+                </Wrapper>
+              </ThemeProvider>
+            );
+          }}
+        </SafeAreaInsetsContext.Consumer>
       );
     }
     return (

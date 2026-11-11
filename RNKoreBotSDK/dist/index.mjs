@@ -18205,6 +18205,10 @@ var uuid_default = UUID;
 // bot-sdk/chat/KoreChat.tsx
 import dayjs10 from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import {
+  SafeAreaInsetsContext,
+  initialWindowMetrics
+} from "react-native-safe-area-context";
 
 // bot-sdk/chat/components/InputToolbar.tsx
 init_esm_shims();
@@ -24780,6 +24784,10 @@ var KoreChat = class _KoreChat extends React113.Component {
   allowNavigation = false;
   keyboardListener;
   keyboardHideListener;
+  initialContainerHeight = 0;
+  currentContainerHeight = 0;
+  isKeyboardVisible = false;
+  currentKeyboardHeight = 0;
   static defaultProps;
   _isChatMounted = false;
   fileUploadQueue;
@@ -24819,7 +24827,8 @@ var KoreChat = class _KoreChat extends React113.Component {
       showBackButtonDialog: false,
       showTemplateBottomSheet: false,
       messageBottomSheet: null,
-      isTTSenable: false
+      isTTSenable: false,
+      androidKeyboardPadding: 0
     };
   }
   lazyLaunchCamera = async (options, callback) => {
@@ -25118,11 +25127,34 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.setTextFromProp(text);
     this.stopTTS();
     const showEvent = Platform22.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    this.keyboardListener = Keyboard5.addListener(showEvent, () => {
+    this.keyboardListener = Keyboard5.addListener(showEvent, (e) => {
+      if (Platform22.OS === "android") {
+        const keyboardHeight = e?.endCoordinates?.height || 0;
+        this.currentKeyboardHeight = keyboardHeight;
+        this.isKeyboardVisible = true;
+        this.adjustAndroidKeyboardPadding(
+          keyboardHeight,
+          this.currentContainerHeight
+        );
+      }
       setTimeout(() => this.scrollToBottom(true), 150);
     });
     const hideEvent = Platform22.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
     this.keyboardHideListener = Keyboard5.addListener(hideEvent, () => {
+      if (Platform22.OS === "android") {
+        this.currentKeyboardHeight = 0;
+        this.isKeyboardVisible = false;
+        if (this.state.androidKeyboardPadding !== 0) {
+          if (UIManager2.setLayoutAnimationEnabledExperimental) {
+            UIManager2.setLayoutAnimationEnabledExperimental(true);
+          }
+          LayoutAnimation2.configureNext({
+            duration: 150,
+            update: { type: LayoutAnimation2.Types.easeInEaseOut }
+          });
+          this.setState({ androidKeyboardPadding: 0 });
+        }
+      }
       setTimeout(() => this.scrollToBottom(false), 100);
     });
     setTimeout(() => {
@@ -26092,7 +26124,47 @@ var KoreChat = class _KoreChat extends React113.Component {
       text: this.getTextFromProp(initialText)
     });
   };
-  onMainViewLayout = (_e) => {
+  adjustAndroidKeyboardPadding = (keyboardHeight, currentHeight) => {
+    if (Platform22.OS !== "android") {
+      return;
+    }
+    if (!keyboardHeight) {
+      if (this.state.androidKeyboardPadding !== 0) {
+        this.setState({ androidKeyboardPadding: 0 });
+      }
+      return;
+    }
+    const initialH = this.initialContainerHeight || Dimensions36.get("window").height;
+    const currH = currentHeight || initialH;
+    const amountAlreadyShrunk = Math.max(0, initialH - currH);
+    const bottomOffset = this.props.bottomOffset || 0;
+    const neededPadding = Math.max(
+      0,
+      Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset)
+    );
+    if (this.state.androidKeyboardPadding !== neededPadding) {
+      if (UIManager2.setLayoutAnimationEnabledExperimental) {
+        UIManager2.setLayoutAnimationEnabledExperimental(true);
+      }
+      LayoutAnimation2.configureNext({
+        duration: 200,
+        update: { type: LayoutAnimation2.Types.easeInEaseOut }
+      });
+      this.setState({ androidKeyboardPadding: neededPadding }, () => {
+        setTimeout(() => this.scrollToBottom(true), 100);
+      });
+    }
+  };
+  onMainViewLayout = (e) => {
+    const height = e?.nativeEvent?.layout?.height;
+    if (height && height > 0) {
+      this.currentContainerHeight = height;
+      if (!this.isKeyboardVisible) {
+        this.initialContainerHeight = height;
+      } else if (Platform22.OS === "android") {
+        this.adjustAndroidKeyboardPadding(this.currentKeyboardHeight, height);
+      }
+    }
     if (this.getIsFirstLayout() === true) {
       this.setIsFirstLayout(false);
     }
@@ -26974,54 +27046,81 @@ var KoreChat = class _KoreChat extends React113.Component {
       const bgColor = this.state.themeData?.v3?.header?.bg_color || "#EAECF0";
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
-      const androidTopPadding = Platform22.OS === "android" && wrapInSafeArea !== false ? StatusBar3.currentHeight || 0 : 0;
-      return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: [styles88.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React113.createElement(
-        View95,
-        {
-          style: [
-            styles88.container,
-            {
-              flexDirection: "column",
-              paddingTop: androidTopPadding
-            }
-          ],
-          onLayout: this.onMainViewLayout
-        },
-        bgColor && !isWhiteStatus ? /* @__PURE__ */ React113.createElement(
-          StatusBar3,
+      return /* @__PURE__ */ React113.createElement(SafeAreaInsetsContext.Consumer, null, (insets) => {
+        const rawTopInset = insets?.top ?? initialWindowMetrics?.insets?.top ?? (Platform22.OS === "android" ? StatusBar3.currentHeight || 0 : 0);
+        const rawBottomInset = insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
+        const androidTopPadding = Platform22.OS === "android" && wrapInSafeArea !== false ? Math.max(rawTopInset, StatusBar3.currentHeight || 0, 38) : 0;
+        const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && Platform22.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
+        return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: [styles88.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React113.createElement(
+          View95,
           {
-            barStyle: isBlackStatus ? "default" : "dark-content",
-            backgroundColor: bgColor
-          }
-        ) : /* @__PURE__ */ React113.createElement(
-          StatusBar3,
-          {
-            barStyle: "dark-content",
-            backgroundColor: Color_default.white
-          }
-        ),
-        this.renderHeader(),
-        this.props.isKeyboardInternallyHandled !== false ? /* @__PURE__ */ React113.createElement(
-          KeyboardAvoidingView,
-          {
-            style: styles88.chat_body_container,
-            behavior: Platform22.OS === "ios" ? "padding" : "height",
-            keyboardVerticalOffset: this.props.bottomOffset || 0
+            style: [
+              styles88.container,
+              {
+                flexDirection: "column",
+                paddingTop: androidTopPadding
+              }
+            ],
+            onLayout: this.onMainViewLayout
           },
-          this.openFullScreenDialog(),
-          this.renderMessages(),
-          this.renderTypingIndicator(),
-          this.renderSTTview(this.state?.onSTTValue),
-          this.renderInputToolbar(),
-          this.state.activetheme && this.renderLoader(),
-          this.renderAttachedBottomSheet(),
-          this.renderMenuBottomSheet(),
-          this.renderSeeMoreBottomSheet(),
-          this.renderWelcomeScreenModel(),
-          this.renderBackButtonDialog(),
-          /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef })
-        ) : /* @__PURE__ */ React113.createElement(View95, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
-      )));
+          bgColor && !isWhiteStatus ? /* @__PURE__ */ React113.createElement(
+            StatusBar3,
+            {
+              barStyle: isBlackStatus ? "default" : "dark-content",
+              backgroundColor: bgColor
+            }
+          ) : /* @__PURE__ */ React113.createElement(
+            StatusBar3,
+            {
+              barStyle: "dark-content",
+              backgroundColor: Color_default.white
+            }
+          ),
+          this.renderHeader(),
+          Platform22.OS === "ios" ? this.props.isKeyboardInternallyHandled !== false ? /* @__PURE__ */ React113.createElement(
+            KeyboardAvoidingView,
+            {
+              style: styles88.chat_body_container,
+              behavior: "padding",
+              keyboardVerticalOffset: (this.props.bottomOffset || 0) + (rawTopInset || 0)
+            },
+            this.openFullScreenDialog(),
+            this.renderMessages(),
+            this.renderTypingIndicator(),
+            this.renderSTTview(this.state?.onSTTValue),
+            this.renderInputToolbar(),
+            this.state.activetheme && this.renderLoader(),
+            this.renderAttachedBottomSheet(),
+            this.renderMenuBottomSheet(),
+            this.renderSeeMoreBottomSheet(),
+            this.renderWelcomeScreenModel(),
+            this.renderBackButtonDialog(),
+            /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+          ) : /* @__PURE__ */ React113.createElement(View95, { style: styles88.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef })) : /* @__PURE__ */ React113.createElement(
+            View95,
+            {
+              style: [
+                styles88.chat_body_container,
+                {
+                  paddingBottom: this.state.androidKeyboardPadding > 0 ? this.state.androidKeyboardPadding : defaultBottomPadding
+                }
+              ]
+            },
+            this.openFullScreenDialog(),
+            this.renderMessages(),
+            this.renderTypingIndicator(),
+            this.renderSTTview(this.state?.onSTTValue),
+            this.renderInputToolbar(),
+            this.state.activetheme && this.renderLoader(),
+            this.renderAttachedBottomSheet(),
+            this.renderMenuBottomSheet(),
+            this.renderSeeMoreBottomSheet(),
+            this.renderWelcomeScreenModel(),
+            this.renderBackButtonDialog(),
+            /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+          )
+        )));
+      });
     }
     return /* @__PURE__ */ React113.createElement(View95, { style: styles88.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React113.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
   }

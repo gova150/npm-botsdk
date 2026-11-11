@@ -8,7 +8,7 @@ import {
 import {useHeaderHeight} from '@react-navigation/elements';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const DEFAULT_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : 'height';
+const DEFAULT_BEHAVIOR = Platform.OS === 'ios' ? 'padding' : undefined;
 
 export const WAKeyboardAvoidingView = ({
   behavior,
@@ -30,8 +30,9 @@ export const WAKeyboardAvoidingView = ({
   return (
     <KeyboardAvoidingView
       style={[styles.container, style]}
-      behavior={behavior || DEFAULT_BEHAVIOR}
+      behavior={behavior !== undefined ? behavior : DEFAULT_BEHAVIOR}
       keyboardVerticalOffset={offset}
+      enabled={rest.enabled !== undefined ? rest.enabled : Platform.OS === 'ios'}
       {...rest}>
       {children}
     </KeyboardAvoidingView>

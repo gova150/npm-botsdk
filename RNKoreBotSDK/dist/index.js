@@ -18446,6 +18446,7 @@ var uuid_default = UUID;
 // bot-sdk/chat/KoreChat.tsx
 var import_dayjs10 = __toESM(require("dayjs"));
 var import_localizedFormat = __toESM(require("dayjs/plugin/localizedFormat"));
+var import_react_native_safe_area_context = require("react-native-safe-area-context");
 
 // bot-sdk/chat/components/InputToolbar.tsx
 init_cjs_shims();
@@ -24955,6 +24956,10 @@ var KoreChat = class _KoreChat extends React115.Component {
   allowNavigation = false;
   keyboardListener;
   keyboardHideListener;
+  initialContainerHeight = 0;
+  currentContainerHeight = 0;
+  isKeyboardVisible = false;
+  currentKeyboardHeight = 0;
   static defaultProps;
   _isChatMounted = false;
   fileUploadQueue;
@@ -24994,7 +24999,8 @@ var KoreChat = class _KoreChat extends React115.Component {
       showBackButtonDialog: false,
       showTemplateBottomSheet: false,
       messageBottomSheet: null,
-      isTTSenable: false
+      isTTSenable: false,
+      androidKeyboardPadding: 0
     };
   }
   lazyLaunchCamera = async (options, callback) => {
@@ -25293,11 +25299,34 @@ var KoreChat = class _KoreChat extends React115.Component {
     this.setTextFromProp(text);
     this.stopTTS();
     const showEvent = import_react_native111.Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    this.keyboardListener = import_react_native111.Keyboard.addListener(showEvent, () => {
+    this.keyboardListener = import_react_native111.Keyboard.addListener(showEvent, (e) => {
+      if (import_react_native111.Platform.OS === "android") {
+        const keyboardHeight = e?.endCoordinates?.height || 0;
+        this.currentKeyboardHeight = keyboardHeight;
+        this.isKeyboardVisible = true;
+        this.adjustAndroidKeyboardPadding(
+          keyboardHeight,
+          this.currentContainerHeight
+        );
+      }
       setTimeout(() => this.scrollToBottom(true), 150);
     });
     const hideEvent = import_react_native111.Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
     this.keyboardHideListener = import_react_native111.Keyboard.addListener(hideEvent, () => {
+      if (import_react_native111.Platform.OS === "android") {
+        this.currentKeyboardHeight = 0;
+        this.isKeyboardVisible = false;
+        if (this.state.androidKeyboardPadding !== 0) {
+          if (import_react_native111.UIManager.setLayoutAnimationEnabledExperimental) {
+            import_react_native111.UIManager.setLayoutAnimationEnabledExperimental(true);
+          }
+          import_react_native111.LayoutAnimation.configureNext({
+            duration: 150,
+            update: { type: import_react_native111.LayoutAnimation.Types.easeInEaseOut }
+          });
+          this.setState({ androidKeyboardPadding: 0 });
+        }
+      }
       setTimeout(() => this.scrollToBottom(false), 100);
     });
     setTimeout(() => {
@@ -26267,7 +26296,47 @@ var KoreChat = class _KoreChat extends React115.Component {
       text: this.getTextFromProp(initialText)
     });
   };
-  onMainViewLayout = (_e) => {
+  adjustAndroidKeyboardPadding = (keyboardHeight, currentHeight) => {
+    if (import_react_native111.Platform.OS !== "android") {
+      return;
+    }
+    if (!keyboardHeight) {
+      if (this.state.androidKeyboardPadding !== 0) {
+        this.setState({ androidKeyboardPadding: 0 });
+      }
+      return;
+    }
+    const initialH = this.initialContainerHeight || import_react_native111.Dimensions.get("window").height;
+    const currH = currentHeight || initialH;
+    const amountAlreadyShrunk = Math.max(0, initialH - currH);
+    const bottomOffset = this.props.bottomOffset || 0;
+    const neededPadding = Math.max(
+      0,
+      Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset)
+    );
+    if (this.state.androidKeyboardPadding !== neededPadding) {
+      if (import_react_native111.UIManager.setLayoutAnimationEnabledExperimental) {
+        import_react_native111.UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+      import_react_native111.LayoutAnimation.configureNext({
+        duration: 200,
+        update: { type: import_react_native111.LayoutAnimation.Types.easeInEaseOut }
+      });
+      this.setState({ androidKeyboardPadding: neededPadding }, () => {
+        setTimeout(() => this.scrollToBottom(true), 100);
+      });
+    }
+  };
+  onMainViewLayout = (e) => {
+    const height = e?.nativeEvent?.layout?.height;
+    if (height && height > 0) {
+      this.currentContainerHeight = height;
+      if (!this.isKeyboardVisible) {
+        this.initialContainerHeight = height;
+      } else if (import_react_native111.Platform.OS === "android") {
+        this.adjustAndroidKeyboardPadding(this.currentKeyboardHeight, height);
+      }
+    }
     if (this.getIsFirstLayout() === true) {
       this.setIsFirstLayout(false);
     }
@@ -27149,54 +27218,81 @@ var KoreChat = class _KoreChat extends React115.Component {
       const bgColor = this.state.themeData?.v3?.header?.bg_color || "#EAECF0";
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
-      const androidTopPadding = import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false ? import_react_native111.StatusBar.currentHeight || 0 : 0;
-      return /* @__PURE__ */ React115.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React115.createElement(Wrapper, { style: [styles90.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React115.createElement(
-        import_react_native111.View,
-        {
-          style: [
-            styles90.container,
-            {
-              flexDirection: "column",
-              paddingTop: androidTopPadding
-            }
-          ],
-          onLayout: this.onMainViewLayout
-        },
-        bgColor && !isWhiteStatus ? /* @__PURE__ */ React115.createElement(
-          import_react_native111.StatusBar,
+      return /* @__PURE__ */ React115.createElement(import_react_native_safe_area_context.SafeAreaInsetsContext.Consumer, null, (insets) => {
+        const rawTopInset = insets?.top ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.top ?? (import_react_native111.Platform.OS === "android" ? import_react_native111.StatusBar.currentHeight || 0 : 0);
+        const rawBottomInset = insets?.bottom ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.bottom ?? 0;
+        const androidTopPadding = import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false ? Math.max(rawTopInset, import_react_native111.StatusBar.currentHeight || 0, 38) : 0;
+        const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
+        return /* @__PURE__ */ React115.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React115.createElement(Wrapper, { style: [styles90.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React115.createElement(
+          import_react_native111.View,
           {
-            barStyle: isBlackStatus ? "default" : "dark-content",
-            backgroundColor: bgColor
-          }
-        ) : /* @__PURE__ */ React115.createElement(
-          import_react_native111.StatusBar,
-          {
-            barStyle: "dark-content",
-            backgroundColor: Color_default.white
-          }
-        ),
-        this.renderHeader(),
-        this.props.isKeyboardInternallyHandled !== false ? /* @__PURE__ */ React115.createElement(
-          import_react_native111.KeyboardAvoidingView,
-          {
-            style: styles90.chat_body_container,
-            behavior: import_react_native111.Platform.OS === "ios" ? "padding" : "height",
-            keyboardVerticalOffset: this.props.bottomOffset || 0
+            style: [
+              styles90.container,
+              {
+                flexDirection: "column",
+                paddingTop: androidTopPadding
+              }
+            ],
+            onLayout: this.onMainViewLayout
           },
-          this.openFullScreenDialog(),
-          this.renderMessages(),
-          this.renderTypingIndicator(),
-          this.renderSTTview(this.state?.onSTTValue),
-          this.renderInputToolbar(),
-          this.state.activetheme && this.renderLoader(),
-          this.renderAttachedBottomSheet(),
-          this.renderMenuBottomSheet(),
-          this.renderSeeMoreBottomSheet(),
-          this.renderWelcomeScreenModel(),
-          this.renderBackButtonDialog(),
-          /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef })
-        ) : /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef }))
-      )));
+          bgColor && !isWhiteStatus ? /* @__PURE__ */ React115.createElement(
+            import_react_native111.StatusBar,
+            {
+              barStyle: isBlackStatus ? "default" : "dark-content",
+              backgroundColor: bgColor
+            }
+          ) : /* @__PURE__ */ React115.createElement(
+            import_react_native111.StatusBar,
+            {
+              barStyle: "dark-content",
+              backgroundColor: Color_default.white
+            }
+          ),
+          this.renderHeader(),
+          import_react_native111.Platform.OS === "ios" ? this.props.isKeyboardInternallyHandled !== false ? /* @__PURE__ */ React115.createElement(
+            import_react_native111.KeyboardAvoidingView,
+            {
+              style: styles90.chat_body_container,
+              behavior: "padding",
+              keyboardVerticalOffset: (this.props.bottomOffset || 0) + (rawTopInset || 0)
+            },
+            this.openFullScreenDialog(),
+            this.renderMessages(),
+            this.renderTypingIndicator(),
+            this.renderSTTview(this.state?.onSTTValue),
+            this.renderInputToolbar(),
+            this.state.activetheme && this.renderLoader(),
+            this.renderAttachedBottomSheet(),
+            this.renderMenuBottomSheet(),
+            this.renderSeeMoreBottomSheet(),
+            this.renderWelcomeScreenModel(),
+            this.renderBackButtonDialog(),
+            /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+          ) : /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.chat_body_container }, this.openFullScreenDialog(), this.renderMessages(), this.renderTypingIndicator(), this.renderSTTview(this.state?.onSTTValue), this.renderInputToolbar(), this.state.activetheme && this.renderLoader(), this.renderAttachedBottomSheet(), this.renderMenuBottomSheet(), this.renderSeeMoreBottomSheet(), this.renderWelcomeScreenModel(), this.renderBackButtonDialog(), /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef })) : /* @__PURE__ */ React115.createElement(
+            import_react_native111.View,
+            {
+              style: [
+                styles90.chat_body_container,
+                {
+                  paddingBottom: this.state.androidKeyboardPadding > 0 ? this.state.androidKeyboardPadding : defaultBottomPadding
+                }
+              ]
+            },
+            this.openFullScreenDialog(),
+            this.renderMessages(),
+            this.renderTypingIndicator(),
+            this.renderSTTview(this.state?.onSTTValue),
+            this.renderInputToolbar(),
+            this.state.activetheme && this.renderLoader(),
+            this.renderAttachedBottomSheet(),
+            this.renderMenuBottomSheet(),
+            this.renderSeeMoreBottomSheet(),
+            this.renderWelcomeScreenModel(),
+            this.renderBackButtonDialog(),
+            /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef })
+          )
+        )));
+      });
     }
     return /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.container, onLayout: this.onInitialLayoutViewLayout }, this.renderLoading(), /* @__PURE__ */ React115.createElement(CustomAlertComponent_default, { ref: this.alertRef }));
   }

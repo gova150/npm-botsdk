@@ -836,6 +836,7 @@ interface KoraChatState {
     showBackButtonDialog?: boolean;
     showTemplateBottomSheet: boolean;
     messageBottomSheet?: any;
+    androidKeyboardPadding?: number;
 }
 declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     _messageContainerRef: RefObject<any>;
@@ -852,6 +853,10 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     allowNavigation: boolean;
     keyboardListener: any;
     keyboardHideListener: any;
+    initialContainerHeight: number;
+    currentContainerHeight: number;
+    isKeyboardVisible: boolean;
+    currentKeyboardHeight: number;
     static defaultProps: {
         messagesContainerStyle: null;
         text: null;
@@ -993,6 +998,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     private onInputTextChanged;
     private notifyInputTextReset;
     private onInitialLayoutViewLayout;
+    private adjustAndroidKeyboardPadding;
     private onMainViewLayout;
     private isMediaAddedToSend;
     private onSpeakerClicked;
