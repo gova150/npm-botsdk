@@ -100,7 +100,10 @@ export default class PdfDownloadTemplate extends BaseView<
   componentDidMount() {
     this.unsubscribeLoader = PdfDownloadLoaderManager.getInstance().subscribe(
       (loading: boolean) => {
-        this.setState({isLoading: loading});
+        this.setState(prevState => ({
+          isLoading: loading,
+          clickedIndices: loading ? prevState.clickedIndices : new Set<number>(),
+        }));
       },
     );
   }

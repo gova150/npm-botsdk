@@ -17133,6 +17133,7 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
   static instance;
   listeners = /* @__PURE__ */ new Set();
   isLoading = false;
+  timeoutId = null;
   constructor() {
   }
   static getInstance() {
@@ -17141,8 +17142,14 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
     }
     return _PdfDownloadLoaderManager.instance;
   }
-  showLoader() {
+  showLoader(timeoutMs = 25e3) {
     this.isLoading = true;
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(() => {
+      this.hideLoader();
+    }, timeoutMs);
     this.listeners.forEach((listener) => {
       try {
         listener(true);
@@ -17152,6 +17159,10 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
     });
   }
   hideLoader() {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
     this.isLoading = false;
     this.listeners.forEach((listener) => {
       try {
@@ -17231,7 +17242,10 @@ var PdfDownloadTemplate = class extends BaseView_default {
   componentDidMount() {
     this.unsubscribeLoader = PdfDownloadLoader_default.getInstance().subscribe(
       (loading) => {
-        this.setState({ isLoading: loading });
+        this.setState((prevState) => ({
+          isLoading: loading,
+          clickedIndices: loading ? prevState.clickedIndices : /* @__PURE__ */ new Set()
+        }));
       }
     );
   }
@@ -21787,6 +21801,24 @@ function applyKoreBotClientPatches() {
       );
       return true;
     };
+    const originalSend = proto.send;
+    proto.send = function(message) {
+      if (message && message.type !== "ping") {
+        console.log("\u{1F4E4} [WebSocket Sent]:", JSON.stringify(message, null, 2));
+      }
+      return originalSend.call(this, message);
+    };
+    const originalOnMessage = proto.onMessage;
+    proto.onMessage = function(messageData, isJsonObj = false) {
+      try {
+        const parsed = isJsonObj ? messageData : JSON.parse(messageData);
+        if (parsed?.type !== "pong") {
+          console.log("\u{1F4E5} [WebSocket Received]:", JSON.stringify(parsed, null, 2));
+        }
+      } catch (e) {
+      }
+      return originalOnMessage.call(this, messageData, isJsonObj);
+    };
   } catch (e) {
   }
 }
@@ -24888,6 +24920,8 @@ var KoreChat = class _KoreChat extends React113.Component {
       });
     });
     botClient.on(RTM_EVENT2.ERROR, (data) => {
+      hidePdfDownloadLoader();
+      this.setIsBotResponseLoading(false);
       if (this.state.isReconnecting || !this.state.isThemeLoaded) {
         this.setState({
           isReconnecting: false,
@@ -25143,6 +25177,9 @@ var KoreChat = class _KoreChat extends React113.Component {
       }
     });
     botClient?.on(RTM_EVENT2.ON_MESSAGE, (data) => {
+      if (data) {
+        console.log("Bot Response Data ------->:", JSON.stringify(data, null, 2));
+      }
       if (data.type === "ack") {
         console.log("Received ACK message, setting loading state");
         this.setIsBotResponseLoading(true);
@@ -25890,10 +25927,10 @@ var KoreChat = class _KoreChat extends React113.Component {
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
         if (!isFromViewMore) {
           const title = item?.title?.trim() || "";
-          const msgToSend = `DD_Download, ${title}`;
+          const msgToSend = typeof item?.payload === "string" && item.payload.trim().length > 0 ? item.payload.trim() : `DD_Download, ${title}`;
           this.onSend({
             message: { text: msgToSend },
-            data: item,
+            data: msgToSend,
             data_type: "postback",
             isDisplayUserMessage: false
           });

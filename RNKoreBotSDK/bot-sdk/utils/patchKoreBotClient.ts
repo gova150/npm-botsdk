@@ -193,6 +193,26 @@ export function applyKoreBotClientPatches() {
       );
       return true;
     };
+
+    // 4. Log all outgoing and incoming WebSocket messages for complete debugging visibility
+    const originalSend = proto.send;
+    proto.send = function (message: any) {
+      if (message && message.type !== 'ping') {
+        console.log('📤 [WebSocket Sent]:', JSON.stringify(message, null, 2));
+      }
+      return originalSend.call(this, message);
+    };
+
+    const originalOnMessage = proto.onMessage;
+    proto.onMessage = function (messageData: any, isJsonObj: boolean = false) {
+      try {
+        const parsed = isJsonObj ? messageData : JSON.parse(messageData);
+        if (parsed?.type !== 'pong') {
+          console.log('📥 [WebSocket Received]:', JSON.stringify(parsed, null, 2));
+        }
+      } catch (e) {}
+      return originalOnMessage.call(this, messageData, isJsonObj);
+    };
   } catch (e) {
     // Fail-safe
   }

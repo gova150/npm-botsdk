@@ -4,6 +4,7 @@ class PdfDownloadLoaderManager {
   private static instance: PdfDownloadLoaderManager;
   private listeners: Set<LoaderListener> = new Set();
   private isLoading: boolean = false;
+  private timeoutId: any = null;
 
   private constructor() {}
 
@@ -14,8 +15,16 @@ class PdfDownloadLoaderManager {
     return PdfDownloadLoaderManager.instance;
   }
 
-  public showLoader(): void {
+  public showLoader(timeoutMs: number = 25000): void {
     this.isLoading = true;
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+    // Safety auto-dismiss: if bot or network never responds, clear spinner after 25s
+    this.timeoutId = setTimeout(() => {
+      this.hideLoader();
+    }, timeoutMs);
+
     this.listeners.forEach(listener => {
       try {
         listener(true);
@@ -26,6 +35,10 @@ class PdfDownloadLoaderManager {
   }
 
   public hideLoader(): void {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
     this.isLoading = false;
     this.listeners.forEach(listener => {
       try {

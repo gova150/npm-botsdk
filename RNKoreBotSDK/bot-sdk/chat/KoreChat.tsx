@@ -463,6 +463,8 @@ export default class KoreChat extends React.Component<
 
     botClient
       .on(RTM_EVENT.ERROR, (data?: any) => {
+        hidePdfDownloadLoader();
+        this.setIsBotResponseLoading(false);
         if (this.state.isReconnecting || !this.state.isThemeLoaded) {
           this.setState({
             isReconnecting: false,
@@ -764,9 +766,9 @@ export default class KoreChat extends React.Component<
       });
     botClient
       ?.on(RTM_EVENT.ON_MESSAGE, (data: any) => {
-        // if (data) {
-        //   console.log('Bot Response Data ------->:', JSON.stringify(data, null, 2));
-        // }
+        if (data) {
+          console.log('Bot Response Data ------->:', JSON.stringify(data, null, 2));
+        }
         if (data.type === 'ack') {
           console.log('Received ACK message, setting loading state');
           this.setIsBotResponseLoading(true);
@@ -1683,10 +1685,13 @@ export default class KoreChat extends React.Component<
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
         if (!isFromViewMore) {
           const title = item?.title?.trim() || '';
-          const msgToSend = `DD_Download, ${title}`;
+          const msgToSend =
+            typeof item?.payload === 'string' && item.payload.trim().length > 0
+              ? item.payload.trim()
+              : `DD_Download, ${title}`;
           this.onSend({
             message: {text: msgToSend},
-            data: item,
+            data: msgToSend,
             data_type: 'postback',
             isDisplayUserMessage: false,
           });
