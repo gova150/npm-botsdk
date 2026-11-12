@@ -24788,6 +24788,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   currentContainerHeight = 0;
   isKeyboardVisible = false;
   currentKeyboardHeight = 0;
+  lastAndroidKeyboardHeight = 290;
   static defaultProps;
   _isChatMounted = false;
   fileUploadQueue;
@@ -25130,10 +25131,13 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.keyboardListener = Keyboard5.addListener(showEvent, (e) => {
       if (Platform22.OS === "android") {
         const keyboardHeight = e?.endCoordinates?.height || 0;
-        this.currentKeyboardHeight = keyboardHeight;
+        if (keyboardHeight > 100) {
+          this.currentKeyboardHeight = keyboardHeight;
+          this.lastAndroidKeyboardHeight = keyboardHeight;
+        }
         this.isKeyboardVisible = true;
         this.adjustAndroidKeyboardPadding(
-          keyboardHeight,
+          this.currentKeyboardHeight || keyboardHeight,
           this.currentContainerHeight
         );
       }
@@ -26201,6 +26205,22 @@ var KoreChat = class _KoreChat extends React113.Component {
       }
     );
   };
+  onInputFocus = (e) => {
+    if (this.props.textInputProps?.onFocus) {
+      this.props.textInputProps.onFocus(e);
+    }
+    if (Platform22.OS === "android" && this.props.isKeyboardInternallyHandled !== false) {
+      this.isKeyboardVisible = true;
+      const kbHeight = this.currentKeyboardHeight > 0 ? this.currentKeyboardHeight : this.lastAndroidKeyboardHeight || Math.round(Dimensions36.get("window").height * 0.36);
+      this.adjustAndroidKeyboardPadding(kbHeight, this.currentContainerHeight);
+      setTimeout(() => this.scrollToBottom(true), 120);
+    }
+  };
+  onInputBlur = (e) => {
+    if (this.props.textInputProps?.onBlur) {
+      this.props.textInputProps.onBlur(e);
+    }
+  };
   renderInputToolbar = () => {
     const inputToolbarProps = {
       ...this.props,
@@ -26218,7 +26238,9 @@ var KoreChat = class _KoreChat extends React113.Component {
       textInputProps: {
         ...this.props.textInputProps,
         ref: (textInput) => this.textInput = textInput,
-        maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength
+        maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength,
+        onFocus: this.onInputFocus,
+        onBlur: this.onInputBlur
       },
       quick_replies: this.state.quickReplies,
       renderQuickRepliesView: this.renderQuickRepliesView,
@@ -27061,9 +27083,9 @@ var KoreChat = class _KoreChat extends React113.Component {
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
       return /* @__PURE__ */ React113.createElement(SafeAreaInsetsContext.Consumer, null, (insets) => {
-        const rawTopInset = insets?.top ?? initialWindowMetrics?.insets?.top ?? (Platform22.OS === "android" ? StatusBar3.currentHeight || 0 : 0);
+        const rawTopInset = insets?.top ?? initialWindowMetrics?.insets?.top ?? 0;
         const rawBottomInset = insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
-        const androidTopPadding = Platform22.OS === "android" ? Math.max(rawTopInset || 0, (StatusBar3.currentHeight || 0) + 12, 54) : 0;
+        const androidTopPadding = Platform22.OS === "android" ? rawTopInset > 0 ? Math.max(rawTopInset, StatusBar3.currentHeight || 0) : 0 : 0;
         const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && Platform22.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
         return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: [styles88.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React113.createElement(
           View95,

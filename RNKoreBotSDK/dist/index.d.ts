@@ -857,6 +857,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     currentContainerHeight: number;
     isKeyboardVisible: boolean;
     currentKeyboardHeight: number;
+    lastAndroidKeyboardHeight: number;
     static defaultProps: {
         messagesContainerStyle: null;
         text: null;
@@ -1002,6 +1003,8 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     private onMainViewLayout;
     private isMediaAddedToSend;
     private onSpeakerClicked;
+    private onInputFocus;
+    private onInputBlur;
     private renderInputToolbar;
     private renderChatFooter;
     private renderLoading;

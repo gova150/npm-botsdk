@@ -244,6 +244,7 @@ export default class KoreChat extends React.Component<
   currentContainerHeight: number = 0;
   isKeyboardVisible: boolean = false;
   currentKeyboardHeight: number = 0;
+  lastAndroidKeyboardHeight: number = 290;
   static defaultProps: {
     messagesContainerStyle: null;
     text: null;
@@ -701,10 +702,13 @@ export default class KoreChat extends React.Component<
     this.keyboardListener = Keyboard.addListener(showEvent, (e: any) => {
       if (Platform.OS === 'android') {
         const keyboardHeight = e?.endCoordinates?.height || 0;
-        this.currentKeyboardHeight = keyboardHeight;
+        if (keyboardHeight > 100) {
+          this.currentKeyboardHeight = keyboardHeight;
+          this.lastAndroidKeyboardHeight = keyboardHeight;
+        }
         this.isKeyboardVisible = true;
         this.adjustAndroidKeyboardPadding(
-          keyboardHeight,
+          this.currentKeyboardHeight || keyboardHeight,
           this.currentContainerHeight,
         );
       }
@@ -2015,6 +2019,31 @@ export default class KoreChat extends React.Component<
     );
   };
 
+  private onInputFocus = (e: any) => {
+    if (this.props.textInputProps?.onFocus) {
+      this.props.textInputProps.onFocus(e);
+    }
+    if (
+      Platform.OS === 'android' &&
+      this.props.isKeyboardInternallyHandled !== false
+    ) {
+      this.isKeyboardVisible = true;
+      const kbHeight =
+        this.currentKeyboardHeight > 0
+          ? this.currentKeyboardHeight
+          : this.lastAndroidKeyboardHeight ||
+            Math.round(Dimensions.get('window').height * 0.36);
+      this.adjustAndroidKeyboardPadding(kbHeight, this.currentContainerHeight);
+      setTimeout(() => this.scrollToBottom(true), 120);
+    }
+  };
+
+  private onInputBlur = (e: any) => {
+    if (this.props.textInputProps?.onBlur) {
+      this.props.textInputProps.onBlur(e);
+    }
+  };
+
   private renderInputToolbar = (): ReactNode => {
     const inputToolbarProps = {
       ...this.props,
@@ -2036,6 +2065,8 @@ export default class KoreChat extends React.Component<
         ...this.props.textInputProps,
         ref: (textInput: any) => (this.textInput = textInput),
         maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength,
+        onFocus: this.onInputFocus,
+        onBlur: this.onInputBlur,
       },
       quick_replies: this.state.quickReplies,
       renderQuickRepliesView: this.renderQuickRepliesView,
@@ -3002,20 +3033,20 @@ export default class KoreChat extends React.Component<
             const rawTopInset =
               insets?.top ??
               initialWindowMetrics?.insets?.top ??
-              (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0);
+              0;
 
             const rawBottomInset =
               insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
 
-            // On Android devices with a notch, camera cutout, or edge-to-edge:
-            // Camera cutouts and notches on Google Pixel, Samsung Galaxy S20-S26, etc. extend 40dp-50dp.
-            // We ensure the header is strictly below the notch by taking the max of:
-            // - The exact physical top inset from SafeAreaInsetsContext
-            // - StatusBar.currentHeight + 12
-            // - A minimum safe threshold of 54dp on Android devices
+            // If the view is already positioned below the status bar (e.g. standard window or parent SafeAreaView),
+            // rawTopInset is 0, so no top padding should be added to prevent dragging the header down.
+            // If the view is in edge-to-edge mode drawing behind the status bar, rawTopInset is > 0,
+            // so we pad by rawTopInset (matching the exact status bar / notch height).
             const androidTopPadding =
               Platform.OS === 'android'
-                ? Math.max(rawTopInset || 0, (StatusBar.currentHeight || 0) + 12, 54)
+                ? rawTopInset > 0
+                  ? Math.max(rawTopInset, StatusBar.currentHeight || 0)
+                  : 0
                 : 0;
 
             // When keyboard is not active, ensure bottom navigation pill / gesture bar is respected
