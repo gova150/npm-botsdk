@@ -1,4 +1,5 @@
 module.exports = {
+  assets: ['./assets/fonts'],
   dependencies: {
     'rn-kore-bot-sdk-v79': {
       platforms: {

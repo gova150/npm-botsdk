@@ -31,17 +31,76 @@ class Home extends React.Component<HomeProps, homeState> {
     };
   }
 
-  handleAppNavigation = (navigationUrl: string, item: any) => {
+  resolveRoute = (navUrl: string): string => {
+    if (!navUrl) {
+      return '';
+    }
+    let target = navUrl;
+    if (target.includes('://')) {
+      const parts = target.split('://');
+      target = (parts[1] || '').split('?')[0].replace(/^\/+|\/+$/g, '');
+    } else if (target.startsWith('/')) {
+      target = target.slice(1).split('?')[0];
+    }
+    const clean = target.toLowerCase();
+    if (clean === 'page1' || clean === 'page_one' || clean === 'pageone') {
+      return ROUTE_NAMES.PAGE_ONE;
+    }
+    if (clean === 'page2' || clean === 'page_two' || clean === 'pagetwo') {
+      return ROUTE_NAMES.PAGE_TWO;
+    }
+    if (clean === 'home' || clean === 'main_home' || clean === 'mainhome') {
+      return ROUTE_NAMES.MAIN_HOME;
+    }
+    if (clean === 'welcome' || clean === 'settings') {
+      return ROUTE_NAMES.WELCOME_SCREEN;
+    }
+    return target;
+  };
+
+  handleAppNavigation = async (navigationUrl: string, item: any) => {
     if (!navigationUrl) {
       return;
     }
-    // Take the dynamic URL directly from the template JSON
-    if (navigationUrl.includes('://')) {
+
+    const routeName = this.resolveRoute(navigationUrl);
+
+    // If it's an external web URL (http/https), open in browser
+    if (
+      navigationUrl.startsWith('http://') ||
+      navigationUrl.startsWith('https://')
+    ) {
       Linking.openURL(navigationUrl).catch(err => {
-        console.warn('Could not open navigation URL:', navigationUrl, err);
+        console.warn('Could not open web URL:', navigationUrl, err);
       });
-    } else {
-      this.props.navigation?.navigate(navigationUrl, { data: item });
+      return;
+    }
+
+    // Attempt internal screen navigation first
+    if (routeName && this.props.navigation?.navigate) {
+      try {
+        this.props.navigation.navigate(routeName, {
+          data: item,
+          navigationUrl,
+        });
+        return;
+      } catch (e) {
+        console.warn('Internal navigation failed for route:', routeName, e);
+      }
+    }
+
+    // Fallback: Check if device OS has an app registered for this custom URL scheme
+    if (navigationUrl.includes('://')) {
+      try {
+        const canOpen = await Linking.canOpenURL(navigationUrl);
+        if (canOpen) {
+          await Linking.openURL(navigationUrl);
+        } else {
+          console.warn('No Activity found to handle URL scheme:', navigationUrl);
+        }
+      } catch (err) {
+        console.warn('Could not open navigation URL:', navigationUrl, err);
+      }
     }
   };
 
@@ -55,6 +114,7 @@ class Home extends React.Component<HomeProps, homeState> {
         <WAKeyboardAvoidingView style={styles.mainStyle2}>
           <KoreChat
             botConfig={config}
+            fontFamily="DM Sans"
             alwaysShowSend={true}
             onAppNavigation={this.handleAppNavigation}
             onClose={() => {

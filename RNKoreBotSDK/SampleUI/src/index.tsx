@@ -41,6 +41,7 @@ class App extends React.Component<AppProps, AppState> {
         <SafeAreaView style={{flex: 1}}>
         <KoreChat
             botConfig={botConfig}
+            fontFamily="DM Sans"
             // renderInputToolbar={this.renderInputToolbar}
             //renderComposer={this.renderComposer}
             //renderSend={this.renderSend}

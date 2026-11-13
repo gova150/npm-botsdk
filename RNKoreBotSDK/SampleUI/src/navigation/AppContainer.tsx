@@ -15,7 +15,7 @@ const Stack = createStackNavigator();
 
 // Linking configuration for deep links
 const linking = {
-  prefixes: ['myapp://', 'example://'],
+  prefixes: ['myapp://', 'example://', 'sampleui://'],
   config: {
     screens: {
       [ROUTE_NAMES.MAIN_HOME]: 'home',
