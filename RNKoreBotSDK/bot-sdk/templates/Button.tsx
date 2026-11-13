@@ -20,7 +20,10 @@ interface ButtonProps extends BaseViewProps {
   buttonContainerStyle?: any;
   buttonTextStyle?: any;
 }
-interface ButtonState extends BaseViewState {}
+interface ButtonState extends BaseViewState {
+  disabledIndices: Set<number>;
+  clickedIndices: Set<number>;
+}
 
 export default class Button extends BaseView<ButtonProps, ButtonState> {
   static contextType = ThemeContext;
@@ -31,6 +34,17 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
 
   constructor(props: any) {
     super(props);
+    const initialDisabled = new Set<number>();
+    const buttons = props?.payload?.buttons || [];
+    buttons.forEach((btn: any, idx: number) => {
+      if (btn?.disabled || btn?.isDownloaded) {
+        initialDisabled.add(idx);
+      }
+    });
+    this.state = {
+      disabledIndices: initialDisabled,
+      clickedIndices: new Set<number>(),
+    };
   }
 
   // shouldComponentUpdate(nextProps: ButtonProps) {
@@ -58,6 +72,13 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
     bbtheme: BubbleTheme,
     payload: any
   ) => {
+    const isPermanentlyDisabled =
+      item?.disabled === true ||
+      item?.isDownloaded === true ||
+      this.state.disabledIndices?.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
+    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
+
     const bodyBtn =
       (this.props?.theme?.v3?.body as any)?.buttons ||
       (this.props?.theme?.v3?.body as any)?.button;
@@ -83,20 +104,44 @@ export default class Button extends BaseView<ButtonProps, ButtonState> {
       btnTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
     }
 
+    if (isButtonDisabled) {
+      btnBgColor = '#DDDDDD';
+      btnBorderColor = '#DDDDDD';
+      btnTextColor = '#7D7D7D';
+    }
+
     return (
       <View key={index + ''} style={styles.item_container}>
         <TouchableOpacity
           key={index}
+          disabled={isButtonDisabled}
+          activeOpacity={0.7}
           style={[
             styles.btn_view,
             {
               width: payload.fullWidth ? getWindowWidth() * 0.75 : undefined,
               backgroundColor: btnBgColor,
               borderColor: btnBorderColor,
-              borderWidth: isTextInverted ? 1 : 0,
+              borderWidth: isTextInverted || isButtonDisabled ? 1 : 0,
             },
           ]}
           onPress={() => {
+            if (isButtonDisabled) {
+              return;
+            }
+            this.setState(prevState => {
+              const nextClicked = new Set(prevState.clickedIndices);
+              nextClicked.add(index);
+              const nextDisabled = new Set(prevState.disabledIndices);
+              nextDisabled.add(index);
+              if (item) {
+                item.disabled = true;
+              }
+              return {
+                clickedIndices: nextClicked,
+                disabledIndices: nextDisabled,
+              };
+            });
             if (this.props.onListItemClick) {
               this.props.onListItemClick(
                 this.props.payload.template_type,

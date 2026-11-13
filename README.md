@@ -23,6 +23,7 @@ This sample app showcases how to integrate the Kore Bot SDK with **selective dep
 - [📦 Installation](#-installation)
 - [🎯 Basic Usage](#-basic-usage)
 - [🎨 Customization](#-customization)
+  - [Custom Font Family (Host App Font Override)](#custom-font-family-host-app-font-override)
 - [📚 API Reference](#-api-reference)
 - [🛠️ Advanced Configuration](#️-advanced-configuration)
 - [🔐 Permissions Setup](#-permissions-setup)
@@ -332,6 +333,25 @@ const MyCustomButton = new CustomTemplate({
 />
 ```
 
+### Custom Font Family (Host App Font Override)
+
+By default, the SDK uses the font family defined in your Kore.ai Bot Branding configuration (`theme.v3.body.font.family`, falling back to `Inter`).
+
+You can override the branding API font family globally and use your host application's typography by passing the `fontFamily` prop to `<KoreChat>`:
+
+```tsx
+<KoreChat
+  botConfig={botConfig}
+  fontFamily="DM Sans" // <-- Root application font override
+  navigation={navigation}
+/>
+```
+
+#### How it Works:
+1. **Immediate Fallback**: In the constructor and lifecycle, `TEMPLATE_STYLE_VALUES.FONT_FAMILY` is immediately set to the specified `fontFamily`.
+2. **Branding API Override**: When the bot platform returns the branding theme payload (`getThemeAPI`), the SDK injects `data.v3.body.font.family = fontFamily`.
+3. **Global Propagation**: All message bubbles, composer text, bot responses, buttons, cards, list templates, and confirmation dialogs automatically inherit the specified font.
+
 ---
 
 ## 📚 API Reference
@@ -345,6 +365,7 @@ const MyCustomButton = new CustomTemplate({
 | `onHeaderActionsClick` | `(action: any) => void` | ❌ | Callback for header action buttons |
 | `templateInjection` | `Map<string, CustomTemplate>` | ❌ | Custom template injection map |
 | `themeConfig` | `ThemeConfig` | ❌ | Custom theme configuration |
+| `fontFamily` | `string` | ❌ | Custom font family override from root host app (e.g., 'DM Sans') |
 
 ### BotConfigModel Interface
 

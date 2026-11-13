@@ -223,13 +223,12 @@ export default class PdfDownloadTemplate extends BaseView<
           style={[
             styles.button,
             {
-              backgroundColor: isPermanentlyDisabled
-                ? '#98A2B3'
+              backgroundColor: isButtonDisabled
+                ? '#DDDDDD'
                 : buttonBgColor,
-              borderColor: isPermanentlyDisabled
-                ? '#98A2B3'
+              borderColor: isButtonDisabled
+                ? '#DDDDDD'
                 : buttonBorderColor,
-              opacity: isButtonDisabled ? 0.6 : 1,
             },
           ]}
           onPress={() => {
@@ -256,12 +255,15 @@ export default class PdfDownloadTemplate extends BaseView<
             }
           }}>
           <View style={styles.buttonContent}>
-            <DownloadIcon size={18} color={buttonTextColor} />
+            <DownloadIcon
+              size={18}
+              color={isButtonDisabled ? '#7D7D7D' : buttonTextColor}
+            />
             <Text
               style={[
                 styles.buttonText,
                 {
-                  color: buttonTextColor,
+                  color: isButtonDisabled ? '#7D7D7D' : buttonTextColor,
                   fontFamily,
                 },
                 fontSizeStyle,

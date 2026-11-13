@@ -794,11 +794,19 @@ interface KoraChatProps {
     statusBarColor?: (colorCode: any) => void;
     onAppNavigation?: (navigationUrl: string, item: any) => void;
     leaveChatTitle?: string;
+    leaveChatTitleColor?: string;
     leaveChatDescription?: string;
+    leaveChatSubtitleColor?: string;
     leaveChatConfirmText?: string;
     leaveChatCancelText?: string;
     leaveChatPrimaryColor?: string;
+    leaveChatPrimaryBorderColor?: string;
+    leaveChatPrimaryTextColor?: string;
+    leaveChatSecondaryBgColor?: string;
+    leaveChatSecondaryBorderColor?: string;
+    leaveChatSecondaryTextColor?: string;
     leaveChatTextAlign?: 'left' | 'center';
+    fontFamily?: string;
     isKeyboardInternallyHandled?: boolean;
     bottomOffset?: number;
     templateInjection?: Map<string, CustomTemplate<CustomViewProps, CustomViewState>>;
@@ -1127,6 +1135,8 @@ interface InternalAppNavigationTemplateProps extends BaseViewProps {
     currentMessage?: any;
 }
 interface InternalAppNavigationTemplateState extends BaseViewState {
+    disabledIndices: Set<number>;
+    clickedIndices: Set<number>;
 }
 declare class InternalAppNavigationTemplate extends BaseView<InternalAppNavigationTemplateProps, InternalAppNavigationTemplateState> {
     constructor(props: InternalAppNavigationTemplateProps);

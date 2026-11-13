@@ -32,7 +32,7 @@ import InputToolbar from './components/InputToolbar';
 import MessageContainer from './components/MessageContainer';
 import NetInfo from '@react-native-community/netinfo';
 import {ThemeProvider} from '../theme/ThemeContext';
-import {getBubbleTheme} from '../theme/themeHelper';
+import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {
   MIN_COMPOSER_HEIGHT,
   MAX_COMPOSER_HEIGHT,
@@ -172,11 +172,19 @@ interface KoraChatProps {
   statusBarColor?: (colorCode: any) => void;
   onAppNavigation?: (navigationUrl: string, item: any) => void;
   leaveChatTitle?: string;
+  leaveChatTitleColor?: string;
   leaveChatDescription?: string;
+  leaveChatSubtitleColor?: string;
   leaveChatConfirmText?: string;
   leaveChatCancelText?: string;
   leaveChatPrimaryColor?: string;
+  leaveChatPrimaryBorderColor?: string;
+  leaveChatPrimaryTextColor?: string;
+  leaveChatSecondaryBgColor?: string;
+  leaveChatSecondaryBorderColor?: string;
+  leaveChatSecondaryTextColor?: string;
   leaveChatTextAlign?: 'left' | 'center';
+  fontFamily?: string;
   isKeyboardInternallyHandled?: boolean;
   bottomOffset?: number;
   templateInjection?: Map<
@@ -327,6 +335,9 @@ export default class KoreChat extends React.Component<
 
   constructor(props: KoraChatProps) {
     super(props);
+    if (props.fontFamily) {
+      TEMPLATE_STYLE_VALUES.FONT_FAMILY = props.fontFamily;
+    }
     this.themApi = new ActiveThemeAPI();
     this.fileUploadQueue = undefined;
     isAgentConnect = false;
@@ -578,6 +589,12 @@ export default class KoreChat extends React.Component<
         if (data.v3.header?.buttons?.reconnect) {
           data.v3.header.buttons.reconnect.show = false;
         }
+        if (this.props.fontFamily) {
+          data.v3.body = data.v3.body || {};
+          data.v3.body.font = data.v3.body.font || {};
+          data.v3.body.font.family = this.props.fontFamily;
+          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+        }
         this.saveThemeData(data);
         this.setState({
           showLoader: false,
@@ -585,10 +602,23 @@ export default class KoreChat extends React.Component<
           isThemeLoaded: true,
         });
       } else {
-        this.saveThemeData(null);
+        let fallbackTheme: any = null;
+        if (this.props.fontFamily) {
+          fallbackTheme = {
+            v3: {
+              body: {
+                font: {
+                  family: this.props.fontFamily,
+                },
+              },
+            },
+          };
+          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+        }
+        this.saveThemeData(fallbackTheme);
         this.setState({
           showLoader: false,
-          themeData: undefined,
+          themeData: fallbackTheme || undefined,
           isThemeLoaded: true,
         });
       }
@@ -676,6 +706,9 @@ export default class KoreChat extends React.Component<
   };
 
   componentDidMount() {
+    if (this.props.fontFamily) {
+      TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+    }
     const botClient = KoreBotClient.getInstance();
     this._unsubscribeConn = NetInfo.addEventListener(state => {
       const {isConnected} = state;
@@ -2999,24 +3032,74 @@ export default class KoreChat extends React.Component<
       this.getLocalizedString('no_stay_in_chat') ||
       'No, stay in chat';
 
+    const buttonTheme = getButtonTheme(this.state.themeData);
+    const bodyBtn =
+      (this.state.themeData?.v3?.body as any)?.buttons ||
+      (this.state.themeData?.v3?.body as any)?.button;
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || '#002259';
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || '#FFFFFF';
+    const brandingBtnBorder =
+      bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+
     const primaryColor =
-      this.props.leaveChatPrimaryColor || '#1B365D';
+      this.props.leaveChatPrimaryColor || brandingBtnBg;
+    const primaryBorderColor =
+      this.props.leaveChatPrimaryBorderColor || brandingBtnBorder || primaryColor;
+    const primaryTextColor =
+      this.props.leaveChatPrimaryTextColor || brandingBtnText;
+
+    const secondaryBgColor =
+      this.props.leaveChatSecondaryBgColor || '#FFFFFF';
+    const secondaryBorderColor =
+      this.props.leaveChatSecondaryBorderColor || brandingBtnBorder || primaryColor;
+    const secondaryTextColor =
+      this.props.leaveChatSecondaryTextColor || secondaryBorderColor;
+
+    const titleColor = this.props.leaveChatTitleColor || '#002259';
+    const subtitleColor = this.props.leaveChatSubtitleColor || '#282828';
     const textAlign = this.props.leaveChatTextAlign || 'left';
+    const fontFamily =
+      this.props.fontFamily ||
+      this.state.themeData?.v3?.body?.font?.family ||
+      TEMPLATE_STYLE_VALUES.FONT_FAMILY;
 
     return (
       <View style={styles.leave_modal_container}>
         <View style={styles.leave_modal_card}>
-          <Text style={[styles.leave_modal_title, {textAlign}]}>{title}</Text>
-          <Text style={[styles.leave_modal_desc, {textAlign}]}>{description}</Text>
+          <Text
+            style={[
+              styles.leave_modal_title,
+              {textAlign, color: titleColor},
+              fontFamily ? {fontFamily} : null,
+            ]}>
+            {title}
+          </Text>
+          <Text
+            style={[
+              styles.leave_modal_desc,
+              {textAlign, color: subtitleColor},
+              fontFamily ? {fontFamily} : null,
+            ]}>
+            {description}
+          </Text>
 
           <TouchableOpacity
             style={[
               styles.leave_modal_btn_primary,
-              {backgroundColor: primaryColor},
+              {
+                backgroundColor: primaryColor,
+                borderColor: primaryBorderColor,
+                borderWidth: 1.5,
+              },
             ]}
             activeOpacity={0.8}
             onPress={this.handleDialogClose}>
-            <Text style={styles.leave_modal_btn_primary_text}>
+            <Text
+              style={[
+                styles.leave_modal_btn_primary_text,
+                {color: primaryTextColor},
+                fontFamily ? {fontFamily} : null,
+              ]}>
               {confirmText}
             </Text>
           </TouchableOpacity>
@@ -3024,14 +3107,19 @@ export default class KoreChat extends React.Component<
           <TouchableOpacity
             style={[
               styles.leave_modal_btn_secondary,
-              {borderColor: primaryColor},
+              {
+                backgroundColor: secondaryBgColor,
+                borderColor: secondaryBorderColor,
+                borderWidth: 1.5,
+              },
             ]}
             activeOpacity={0.8}
             onPress={this.handleDialogCancel}>
             <Text
               style={[
                 styles.leave_modal_btn_secondary_text,
-                {color: primaryColor},
+                {color: secondaryTextColor},
+                fontFamily ? {fontFamily} : null,
               ]}>
               {cancelText}
             </Text>
@@ -3521,24 +3609,25 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   leave_modal_title: {
-    fontSize: normalize(22),
+    fontSize: 24,
     fontWeight: '700',
-    color: '#101828',
-    lineHeight: normalize(28),
+    color: '#002259',
+    lineHeight: 30,
     marginBottom: normalize(14),
     textAlign: 'left',
   },
   leave_modal_desc: {
-    fontSize: normalize(15),
+    fontSize: 14,
     fontWeight: '400',
-    color: '#475467',
-    lineHeight: normalize(22),
+    color: '#282828',
+    lineHeight: 20,
     marginBottom: normalize(28),
     textAlign: 'left',
   },
   leave_modal_btn_primary: {
     height: normalize(50),
     borderRadius: normalize(25),
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: normalize(12),

@@ -11773,6 +11773,17 @@ var Button2 = class extends BaseView_default {
   static propTypes;
   constructor(props) {
     super(props);
+    const initialDisabled = /* @__PURE__ */ new Set();
+    const buttons = props?.payload?.buttons || [];
+    buttons.forEach((btn, idx) => {
+      if (btn?.disabled || btn?.isDownloaded) {
+        initialDisabled.add(idx);
+      }
+    });
+    this.state = {
+      disabledIndices: initialDisabled,
+      clickedIndices: /* @__PURE__ */ new Set()
+    };
   }
   // shouldComponentUpdate(nextProps: ButtonProps) {
   //   return (
@@ -11791,6 +11802,9 @@ var Button2 = class extends BaseView_default {
     );
   };
   getSingleButtonView = (item, index = 0, btheme, bbtheme, payload) => {
+    const isPermanentlyDisabled = item?.disabled === true || item?.isDownloaded === true || this.state.disabledIndices?.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
+    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
     const bodyBtn = this.props?.theme?.v3?.body?.buttons || this.props?.theme?.v3?.body?.button;
     const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
     const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
@@ -11808,20 +11822,43 @@ var Button2 = class extends BaseView_default {
       btnBorderColor = bodyBtnBg || bbtheme.BUBBLE_RIGHT_BG_COLOR;
       btnTextColor = bodyBtnColor || bbtheme.BUBBLE_RIGHT_TEXT_COLOR;
     }
+    if (isButtonDisabled) {
+      btnBgColor = "#DDDDDD";
+      btnBorderColor = "#DDDDDD";
+      btnTextColor = "#7D7D7D";
+    }
     return /* @__PURE__ */ React52.createElement(import_react_native46.View, { key: index + "", style: styles36.item_container }, /* @__PURE__ */ React52.createElement(
       import_react_native46.TouchableOpacity,
       {
         key: index,
+        disabled: isButtonDisabled,
+        activeOpacity: 0.7,
         style: [
           styles36.btn_view,
           {
             width: payload.fullWidth ? getWindowWidth() * 0.75 : void 0,
             backgroundColor: btnBgColor,
             borderColor: btnBorderColor,
-            borderWidth: isTextInverted ? 1 : 0
+            borderWidth: isTextInverted || isButtonDisabled ? 1 : 0
           }
         ],
         onPress: () => {
+          if (isButtonDisabled) {
+            return;
+          }
+          this.setState((prevState) => {
+            const nextClicked = new Set(prevState.clickedIndices);
+            nextClicked.add(index);
+            const nextDisabled = new Set(prevState.disabledIndices);
+            nextDisabled.add(index);
+            if (item) {
+              item.disabled = true;
+            }
+            return {
+              clickedIndices: nextClicked,
+              disabledIndices: nextDisabled
+            };
+          });
           if (this.props.onListItemClick) {
             this.props.onListItemClick(
               this.props.payload.template_type,
@@ -17453,14 +17490,6 @@ var showPdfDownloadLoader = () => {
 var hidePdfDownloadLoader = (success = false) => {
   PdfDownloadLoaderManager.getInstance().hideLoader(success);
 };
-if (typeof globalThis !== "undefined") {
-  globalThis.showPdfDownloadLoader = showPdfDownloadLoader;
-  globalThis.hidePdfDownloadLoader = hidePdfDownloadLoader;
-}
-if (typeof global !== "undefined") {
-  global.showPdfDownloadLoader = showPdfDownloadLoader;
-  global.hidePdfDownloadLoader = hidePdfDownloadLoader;
-}
 var PdfDownloadLoader_default = PdfDownloadLoaderManager;
 
 // bot-sdk/templates/PdfDownloadTemplate.tsx
@@ -17601,9 +17630,8 @@ var PdfDownloadTemplate = class extends BaseView_default {
           style: [
             styles63.button,
             {
-              backgroundColor: isPermanentlyDisabled ? "#98A2B3" : buttonBgColor,
-              borderColor: isPermanentlyDisabled ? "#98A2B3" : buttonBorderColor,
-              opacity: isButtonDisabled ? 0.6 : 1
+              backgroundColor: isButtonDisabled ? "#DDDDDD" : buttonBgColor,
+              borderColor: isButtonDisabled ? "#DDDDDD" : buttonBorderColor
             }
           ],
           onPress: () => {
@@ -17628,13 +17656,19 @@ var PdfDownloadTemplate = class extends BaseView_default {
             }
           }
         },
-        /* @__PURE__ */ React81.createElement(import_react_native75.View, { style: styles63.buttonContent }, /* @__PURE__ */ React81.createElement(DownloadIcon, { size: 18, color: buttonTextColor }), /* @__PURE__ */ React81.createElement(
+        /* @__PURE__ */ React81.createElement(import_react_native75.View, { style: styles63.buttonContent }, /* @__PURE__ */ React81.createElement(
+          DownloadIcon,
+          {
+            size: 18,
+            color: isButtonDisabled ? "#7D7D7D" : buttonTextColor
+          }
+        ), /* @__PURE__ */ React81.createElement(
           import_react_native75.Text,
           {
             style: [
               styles63.buttonText,
               {
-                color: buttonTextColor,
+                color: isButtonDisabled ? "#7D7D7D" : buttonTextColor,
                 fontFamily
               },
               fontSizeStyle
@@ -18096,10 +18130,27 @@ var import_react_native77 = require("react-native");
 var InternalAppNavigationTemplate = class extends BaseView_default {
   constructor(props) {
     super(props);
+    const initialDisabled = /* @__PURE__ */ new Set();
+    const buttons = props?.payload?.buttons || [];
+    buttons.forEach((btn, idx) => {
+      if (btn?.disabled || btn?.isDownloaded) {
+        initialDisabled.add(idx);
+      }
+    });
+    this.state = {
+      disabledIndices: initialDisabled,
+      clickedIndices: /* @__PURE__ */ new Set()
+    };
   }
   renderButton = (btn, index, totalButtons, buttonBgColor, buttonBorderColor, buttonTextColor, isTextInverted, fontFamily, fontSizeStyle, templateType) => {
     const isLastButton = index === totalButtons - 1;
     const buttonTitle = btn?.title || "";
+    const isPermanentlyDisabled = btn?.disabled === true || btn?.isDownloaded === true || this.state.disabledIndices?.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
+    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
+    const currentBgColor = isButtonDisabled ? "#DDDDDD" : buttonBgColor;
+    const currentBorderColor = isButtonDisabled ? "#DDDDDD" : buttonBorderColor;
+    const currentTextColor = isButtonDisabled ? "#7D7D7D" : buttonTextColor;
     return /* @__PURE__ */ React83.createElement(
       import_react_native77.View,
       {
@@ -18112,16 +18163,33 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
       /* @__PURE__ */ React83.createElement(
         import_react_native77.TouchableOpacity,
         {
+          disabled: isButtonDisabled,
           activeOpacity: 0.7,
           style: [
             styles64.button,
             {
-              backgroundColor: buttonBgColor,
-              borderColor: buttonBorderColor,
-              borderWidth: isTextInverted ? 1 : 0
+              backgroundColor: currentBgColor,
+              borderColor: currentBorderColor,
+              borderWidth: isTextInverted || isButtonDisabled ? 1 : 0
             }
           ],
           onPress: () => {
+            if (isButtonDisabled) {
+              return;
+            }
+            this.setState((prevState) => {
+              const nextClicked = new Set(prevState.clickedIndices);
+              nextClicked.add(index);
+              const nextDisabled = new Set(prevState.disabledIndices);
+              nextDisabled.add(index);
+              if (btn) {
+                btn.disabled = true;
+              }
+              return {
+                clickedIndices: nextClicked,
+                disabledIndices: nextDisabled
+              };
+            });
             if (this.props.onListItemClick) {
               this.props.onListItemClick(
                 templateType || TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
@@ -18136,7 +18204,7 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
             style: [
               styles64.buttonText,
               {
-                color: buttonTextColor,
+                color: currentTextColor,
                 fontFamily
               },
               fontSizeStyle
@@ -25002,6 +25070,9 @@ var KoreChat = class _KoreChat extends React115.Component {
   themApi;
   constructor(props) {
     super(props);
+    if (props.fontFamily) {
+      TEMPLATE_STYLE_VALUES.FONT_FAMILY = props.fontFamily;
+    }
     this.themApi = new import_rn_kore_bot_socket_lib_v798.ActiveThemeAPI();
     this.fileUploadQueue = void 0;
     isAgentConnect = false;
@@ -25227,6 +25298,12 @@ var KoreChat = class _KoreChat extends React115.Component {
         if (data.v3.header?.buttons?.reconnect) {
           data.v3.header.buttons.reconnect.show = false;
         }
+        if (this.props.fontFamily) {
+          data.v3.body = data.v3.body || {};
+          data.v3.body.font = data.v3.body.font || {};
+          data.v3.body.font.family = this.props.fontFamily;
+          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+        }
         this.saveThemeData(data);
         this.setState({
           showLoader: false,
@@ -25234,10 +25311,23 @@ var KoreChat = class _KoreChat extends React115.Component {
           isThemeLoaded: true
         });
       } else {
-        this.saveThemeData(null);
+        let fallbackTheme = null;
+        if (this.props.fontFamily) {
+          fallbackTheme = {
+            v3: {
+              body: {
+                font: {
+                  family: this.props.fontFamily
+                }
+              }
+            }
+          };
+          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+        }
+        this.saveThemeData(fallbackTheme);
         this.setState({
           showLoader: false,
-          themeData: void 0,
+          themeData: fallbackTheme || void 0,
           isThemeLoaded: true
         });
       }
@@ -25317,6 +25407,9 @@ var KoreChat = class _KoreChat extends React115.Component {
     }, 100);
   };
   componentDidMount() {
+    if (this.props.fontFamily) {
+      TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
+    }
     const botClient = import_rn_kore_bot_socket_lib_v798.default.getInstance();
     this._unsubscribeConn = import_netinfo.default.addEventListener((state) => {
       const { isConnected } = state;
@@ -27262,25 +27355,76 @@ var KoreChat = class _KoreChat extends React115.Component {
     const description = this.props.leaveChatDescription || this.getLocalizedString("leave_chat_description") || "Chat history isn't saved, but if you would like to download a transcript, select the chat icon in the header before closing.";
     const confirmText = this.props.leaveChatConfirmText || this.getLocalizedString("yes_leave_chat") || "Yes, leave chat";
     const cancelText = this.props.leaveChatCancelText || this.getLocalizedString("no_stay_in_chat") || "No, stay in chat";
-    const primaryColor = this.props.leaveChatPrimaryColor || "#1B365D";
+    const buttonTheme = getButtonTheme(this.state.themeData);
+    const bodyBtn = this.state.themeData?.v3?.body?.buttons || this.state.themeData?.v3?.body?.button;
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || "#002259";
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || "#FFFFFF";
+    const brandingBtnBorder = bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+    const primaryColor = this.props.leaveChatPrimaryColor || brandingBtnBg;
+    const primaryBorderColor = this.props.leaveChatPrimaryBorderColor || brandingBtnBorder || primaryColor;
+    const primaryTextColor = this.props.leaveChatPrimaryTextColor || brandingBtnText;
+    const secondaryBgColor = this.props.leaveChatSecondaryBgColor || "#FFFFFF";
+    const secondaryBorderColor = this.props.leaveChatSecondaryBorderColor || brandingBtnBorder || primaryColor;
+    const secondaryTextColor = this.props.leaveChatSecondaryTextColor || secondaryBorderColor;
+    const titleColor = this.props.leaveChatTitleColor || "#002259";
+    const subtitleColor = this.props.leaveChatSubtitleColor || "#282828";
     const textAlign = this.props.leaveChatTextAlign || "left";
-    return /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.leave_modal_container }, /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.leave_modal_card }, /* @__PURE__ */ React115.createElement(import_react_native111.Text, { style: [styles90.leave_modal_title, { textAlign }] }, title), /* @__PURE__ */ React115.createElement(import_react_native111.Text, { style: [styles90.leave_modal_desc, { textAlign }] }, description), /* @__PURE__ */ React115.createElement(
+    const fontFamily = this.props.fontFamily || this.state.themeData?.v3?.body?.font?.family || TEMPLATE_STYLE_VALUES.FONT_FAMILY;
+    return /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.leave_modal_container }, /* @__PURE__ */ React115.createElement(import_react_native111.View, { style: styles90.leave_modal_card }, /* @__PURE__ */ React115.createElement(
+      import_react_native111.Text,
+      {
+        style: [
+          styles90.leave_modal_title,
+          { textAlign, color: titleColor },
+          fontFamily ? { fontFamily } : null
+        ]
+      },
+      title
+    ), /* @__PURE__ */ React115.createElement(
+      import_react_native111.Text,
+      {
+        style: [
+          styles90.leave_modal_desc,
+          { textAlign, color: subtitleColor },
+          fontFamily ? { fontFamily } : null
+        ]
+      },
+      description
+    ), /* @__PURE__ */ React115.createElement(
       import_react_native111.TouchableOpacity,
       {
         style: [
           styles90.leave_modal_btn_primary,
-          { backgroundColor: primaryColor }
+          {
+            backgroundColor: primaryColor,
+            borderColor: primaryBorderColor,
+            borderWidth: 1.5
+          }
         ],
         activeOpacity: 0.8,
         onPress: this.handleDialogClose
       },
-      /* @__PURE__ */ React115.createElement(import_react_native111.Text, { style: styles90.leave_modal_btn_primary_text }, confirmText)
+      /* @__PURE__ */ React115.createElement(
+        import_react_native111.Text,
+        {
+          style: [
+            styles90.leave_modal_btn_primary_text,
+            { color: primaryTextColor },
+            fontFamily ? { fontFamily } : null
+          ]
+        },
+        confirmText
+      )
     ), /* @__PURE__ */ React115.createElement(
       import_react_native111.TouchableOpacity,
       {
         style: [
           styles90.leave_modal_btn_secondary,
-          { borderColor: primaryColor }
+          {
+            backgroundColor: secondaryBgColor,
+            borderColor: secondaryBorderColor,
+            borderWidth: 1.5
+          }
         ],
         activeOpacity: 0.8,
         onPress: this.handleDialogCancel
@@ -27290,7 +27434,8 @@ var KoreChat = class _KoreChat extends React115.Component {
         {
           style: [
             styles90.leave_modal_btn_secondary_text,
-            { color: primaryColor }
+            { color: secondaryTextColor },
+            fontFamily ? { fontFamily } : null
           ]
         },
         cancelText
@@ -27713,24 +27858,25 @@ var styles90 = import_react_native111.StyleSheet.create({
     width: "100%"
   },
   leave_modal_title: {
-    fontSize: normalize(22),
+    fontSize: 24,
     fontWeight: "700",
-    color: "#101828",
-    lineHeight: normalize(28),
+    color: "#002259",
+    lineHeight: 30,
     marginBottom: normalize(14),
     textAlign: "left"
   },
   leave_modal_desc: {
-    fontSize: normalize(15),
+    fontSize: 14,
     fontWeight: "400",
-    color: "#475467",
-    lineHeight: normalize(22),
+    color: "#282828",
+    lineHeight: 20,
     marginBottom: normalize(28),
     textAlign: "left"
   },
   leave_modal_btn_primary: {
     height: normalize(50),
     borderRadius: normalize(25),
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: normalize(12),

@@ -37,7 +37,10 @@ export interface InternalAppNavigationTemplateProps extends BaseViewProps {
   currentMessage?: any;
 }
 
-export interface InternalAppNavigationTemplateState extends BaseViewState {}
+export interface InternalAppNavigationTemplateState extends BaseViewState {
+  disabledIndices: Set<number>;
+  clickedIndices: Set<number>;
+}
 
 export default class InternalAppNavigationTemplate extends BaseView<
   InternalAppNavigationTemplateProps,
@@ -45,6 +48,17 @@ export default class InternalAppNavigationTemplate extends BaseView<
 > {
   constructor(props: InternalAppNavigationTemplateProps) {
     super(props);
+    const initialDisabled = new Set<number>();
+    const buttons = props?.payload?.buttons || [];
+    buttons.forEach((btn: any, idx: number) => {
+      if (btn?.disabled || btn?.isDownloaded) {
+        initialDisabled.add(idx);
+      }
+    });
+    this.state = {
+      disabledIndices: initialDisabled,
+      clickedIndices: new Set<number>(),
+    };
   }
 
   private renderButton = (
@@ -61,6 +75,16 @@ export default class InternalAppNavigationTemplate extends BaseView<
   ) => {
     const isLastButton = index === totalButtons - 1;
     const buttonTitle = btn?.title || '';
+    const isPermanentlyDisabled =
+      btn?.disabled === true ||
+      btn?.isDownloaded === true ||
+      this.state.disabledIndices?.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
+    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
+
+    const currentBgColor = isButtonDisabled ? '#DDDDDD' : buttonBgColor;
+    const currentBorderColor = isButtonDisabled ? '#DDDDDD' : buttonBorderColor;
+    const currentTextColor = isButtonDisabled ? '#7D7D7D' : buttonTextColor;
 
     return (
       <View
@@ -70,16 +94,33 @@ export default class InternalAppNavigationTemplate extends BaseView<
           !isLastButton && styles.buttonSpacing,
         ]}>
         <TouchableOpacity
+          disabled={isButtonDisabled}
           activeOpacity={0.7}
           style={[
             styles.button,
             {
-              backgroundColor: buttonBgColor,
-              borderColor: buttonBorderColor,
-              borderWidth: isTextInverted ? 1 : 0,
+              backgroundColor: currentBgColor,
+              borderColor: currentBorderColor,
+              borderWidth: isTextInverted || isButtonDisabled ? 1 : 0,
             },
           ]}
           onPress={() => {
+            if (isButtonDisabled) {
+              return;
+            }
+            this.setState(prevState => {
+              const nextClicked = new Set(prevState.clickedIndices);
+              nextClicked.add(index);
+              const nextDisabled = new Set(prevState.disabledIndices);
+              nextDisabled.add(index);
+              if (btn) {
+                btn.disabled = true;
+              }
+              return {
+                clickedIndices: nextClicked,
+                disabledIndices: nextDisabled,
+              };
+            });
             if (this.props.onListItemClick) {
               this.props.onListItemClick(
                 templateType || TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
@@ -91,7 +132,7 @@ export default class InternalAppNavigationTemplate extends BaseView<
             style={[
               styles.buttonText,
               {
-                color: buttonTextColor,
+                color: currentTextColor,
                 fontFamily,
               },
               fontSizeStyle,

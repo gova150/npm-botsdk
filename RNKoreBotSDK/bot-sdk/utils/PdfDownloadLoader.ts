@@ -70,15 +70,5 @@ export const hidePdfDownloadLoader = (success: boolean = false): void => {
   PdfDownloadLoaderManager.getInstance().hideLoader(success);
 };
 
-// Expose globally so external scripts or components can call it without imports
-if (typeof globalThis !== 'undefined') {
-  (globalThis as any).showPdfDownloadLoader = showPdfDownloadLoader;
-  (globalThis as any).hidePdfDownloadLoader = hidePdfDownloadLoader;
-}
-if (typeof global !== 'undefined') {
-  (global as any).showPdfDownloadLoader = showPdfDownloadLoader;
-  (global as any).hidePdfDownloadLoader = hidePdfDownloadLoader;
-}
-
 export default PdfDownloadLoaderManager;
 
