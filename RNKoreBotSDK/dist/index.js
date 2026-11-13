@@ -2988,25 +2988,27 @@ var HeaderReconnect = (props) => {
   ));
 };
 var HeaderClose = (props) => {
-  let width8 = props.width || normalize(WIDTH4);
-  let height = props.height || normalize(HEIGHT4);
+  let width8 = props.width || normalize(11);
+  let height = props.height || normalize(14);
   let strokeColor = props.color || Color_default.black;
-  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 20 20", fill: "none" }, /* @__PURE__ */ React13.createElement(
+  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 384 512", fill: strokeColor }, /* @__PURE__ */ React13.createElement(
     import_react_native_svg4.Path,
     {
-      d: "M10.8838 10.0001L16.0669 4.81694C16.311 4.57286 16.311 4.17714 16.0669 3.93306C15.8229 3.68898 15.4271 3.68898 15.1831 3.93306L9.99988 9.11624L4.81694 3.93352C4.57286 3.68944 4.17713 3.68945 3.93306 3.93354C3.68899 4.17762 3.689 4.57335 3.93308 4.81742L9.116 10.0001L3.93306 15.1831C3.68898 15.4272 3.68898 15.8229 3.93306 16.067C4.17714 16.311 4.57286 16.311 4.81694 16.067L9.9999 10.884L15.1831 16.067C15.4272 16.311 15.8229 16.311 16.067 16.0669C16.311 15.8229 16.311 15.4271 16.0669 15.1831L10.8838 10.0001Z",
+      d: "M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z",
       fill: strokeColor
     }
   ));
 };
 var HeaderLiveAgent = (props) => {
-  let width8 = props.width || normalize(WIDTH4);
-  let height = props.height || normalize(HEIGHT4);
+  let width8 = props.width || normalize(14);
+  let height = props.height || normalize(14);
   let strokeColor = props.color || Color_default.black;
-  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 20 20", fill: strokeColor }, /* @__PURE__ */ React13.createElement(
+  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 512 512", fill: strokeColor }, /* @__PURE__ */ React13.createElement(
     import_react_native_svg4.Path,
     {
-      d: "M9.32692 1.25C2.94321 1.25 2.61719 5.45147 2.59615 8.79057C1.81791 9.09555 1.25 9.84225 1.25 10.6731C1.25 11.7458 2.05454 13.3654 3.26923 13.3654C3.3744 13.3654 3.48483 13.3549 3.59525 13.3444C4.58383 16.41 7.02374 18.75 9.32692 18.75C10.4259 18.75 11.5565 18.2031 12.5503 17.2987C12.1454 17.3618 11.7458 17.4038 11.3462 17.4038H9.32692C7.74414 17.4038 5.53561 15.4425 4.76262 12.524L4.54177 11.7563L3.91076 11.9141C3.52163 12.014 3.32182 12.0192 3.26923 12.0192C3.05364 11.9929 2.59615 11.2252 2.59615 10.6731C2.59615 10.3471 2.93795 10.021 3.3113 10L3.94231 9.95793V9.32692C3.94231 5.14123 4.30514 2.59615 9.32692 2.59615C9.48468 2.59615 11.3724 2.60141 12.6187 2.60667L12.1612 3.53741C12.0928 3.70042 11.8457 4.2473 10.9886 4.95192C10 5.77224 8.28576 6.63462 5.28846 6.63462V7.98077C8.54868 7.98077 10.6152 7.00796 11.851 5.99309C12.5083 5.44621 12.9079 4.90986 13.1603 4.49444C14.5433 5.19907 14.7115 6.59781 14.7115 9.32692V12.645C14.559 14.3382 12.2348 14.7115 11.3462 14.7115H10.6731C10.6731 13.9701 10.0684 13.3654 9.32692 13.3654C8.58549 13.3654 7.98077 13.9701 7.98077 14.7115C7.98077 15.453 8.58549 16.0577 9.32692 16.0577H11.3462C13.2024 16.0577 15.2479 15.2689 15.8736 13.5337H16.7308C17.8403 13.5337 18.75 12.6239 18.75 11.5144V10C18.75 8.89047 17.8403 7.98077 16.7308 7.98077H16.0314C15.963 6.05093 15.6318 4.23678 13.7861 3.29026L14.7852 1.27103L13.7019 1.26578C13.7019 1.26578 9.56355 1.25 9.32692 1.25ZM7.30769 9.32692C6.93434 9.32692 6.63462 9.62665 6.63462 10C6.63462 10.3733 6.93434 10.6731 7.30769 10.6731C7.68104 10.6731 7.98077 10.3733 7.98077 10C7.98077 9.62665 7.68104 9.32692 7.30769 9.32692ZM11.3462 9.32692C10.9728 9.32692 10.6731 9.62665 10.6731 10C10.6731 10.3733 10.9728 10.6731 11.3462 10.6731C11.7195 10.6731 12.0192 10.3733 12.0192 10C12.0192 9.62665 11.7195 9.32692 11.3462 9.32692ZM16.0577 9.32692H16.7308C17.1094 9.32692 17.4038 9.62139 17.4038 10V11.5144C17.4038 11.893 17.1094 12.1875 16.7308 12.1875H16.0577V9.32692Z",
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M 124.0 391.0 Q 144.0 377.0 168.0 385.0 Q 208.0 400.0 256.0 400.0 Q 351.0 397.0 407.0 350.0 Q 463.0 302.0 464.0 240.0 Q 463.0 178.0 407.0 130.0 Q 351.0 83.0 256.0 80.0 Q 161.0 83.0 105.0 130.0 Q 49.0 178.0 48.0 240.0 Q 48.0 289.0 84.0 329.0 Q 97.0 344.0 96.0 365.0 Q 93.0 392.0 84.0 414.0 Q 110.0 401.0 124.0 391.0 Z M 21.0 432.0 Q 24.0 428.0 26.0 424.0 Q 43.0 398.0 48.0 361.0 Q 1.0 309.0 0.0 240.0 Q 1.0 182.0 35.0 135.0 Q 69.0 88.0 127.0 60.0 Q 184.0 33.0 256.0 32.0 Q 328.0 33.0 385.0 60.0 Q 443.0 88.0 477.0 135.0 Q 511.0 182.0 512.0 240.0 Q 511.0 298.0 477.0 345.0 Q 443.0 392.0 385.0 420.0 Q 328.0 447.0 256.0 448.0 Q 200.0 448.0 152.0 430.0 Q 133.0 444.0 98.0 461.0 Q 75.0 471.0 47.0 477.0 Q 47.0 477.0 46.0 477.0 Q 46.0 477.0 45.0 477.0 Q 39.0 479.0 32.0 479.0 Q 32.0 479.0 32.0 479.0 Q 31.0 479.0 31.0 479.0 Q 24.0 480.0 16.0 480.0 Q 5.0 480.0 1.0 470.0 Q -2.0 460.0 4.0 453.0 Q 11.0 447.0 16.0 439.0 Q 18.0 436.0 21.0 432.0 L 21.0 432.0 Z M 256 140 c 13.3 0 24 10.7 24 24 v 84 h 56 c 7.1 0 10.7 8.6 5.7 13.6 l -80 80 c -3.1 3.1 -8.2 3.1 -11.3 0 l -80 -80 c -5 -5 -1.4 -13.6 5.7 -13.6 h 56 v -84 c 0 -13.3 10.7 -24 24 -24 z",
       fill: strokeColor
     }
   ));
@@ -3027,15 +3029,13 @@ var HeaderLeft = (props) => {
   ));
 };
 var HeaderMinimize = (props) => {
-  let width8 = props.width || normalize(WIDTH4);
-  let height = props.height || normalize(HEIGHT4);
+  let width8 = props.width || normalize(14);
+  let height = props.height || normalize(14);
   let strokeColor = props.color || Color_default.black;
-  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 20 20", fill: strokeColor }, /* @__PURE__ */ React13.createElement(
+  return /* @__PURE__ */ React13.createElement(import_react_native_svg4.default, { width: width8, height, viewBox: "0 0 448 512", fill: strokeColor }, /* @__PURE__ */ React13.createElement(
     import_react_native_svg4.Path,
     {
-      "fill-rule": "evenodd",
-      "clip-rule": "evenodd",
-      d: "M16.8548 10C17.2112 10 17.5 10.2798 17.5 10.625C17.5 10.951 17.2424 11.2187 16.9136 11.2474L16.8548 11.25H3.14516C2.78885 11.25 2.5 10.9702 2.5 10.625C2.5 10.299 2.75765 10.0313 3.08644 10.0026L3.14516 10H16.8548Z",
+      d: "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z",
       fill: strokeColor
     }
   ));
@@ -3169,13 +3169,13 @@ var HappyIcon = (props) => {
   ));
 };
 var UserSilhouetteIcon = (props) => {
-  const width8 = props.width || 14;
-  const height = props.height || 14;
+  const width8 = props.width || 12;
+  const height = props.height || 12;
   const color = props.color || "#111827";
-  return /* @__PURE__ */ React14.createElement(import_react_native_svg5.default, { width: width8, height, viewBox: "0 0 16 16", fill: "none" }, /* @__PURE__ */ React14.createElement(
+  return /* @__PURE__ */ React14.createElement(import_react_native_svg5.default, { width: width8, height, viewBox: "0 0 448 512", fill: color }, /* @__PURE__ */ React14.createElement(
     import_react_native_svg5.Path,
     {
-      d: "M8 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-5 6.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5v.5H3v-.5Z",
+      d: "M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z",
       fill: color
     }
   ));
@@ -8693,7 +8693,17 @@ var htmlEntities = {
   "&laquo;": "\xAB",
   "&raquo;": "\xBB"
 };
-function getParseList() {
+function getParseList(theme, customLinkColor) {
+  let linkColor = customLinkColor;
+  if (!linkColor && theme) {
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || "#002259";
+    linkColor = bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+  }
+  if (!linkColor) {
+    linkColor = "#002259";
+  }
   const renderHeaderNew = (level, matchingString, matches) => {
     const Header = `h${level}`;
     return /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1[Header] }, matches[1]);
@@ -8704,7 +8714,7 @@ function getParseList() {
   const renderLink = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
     import_react_native30.Text,
     {
-      style: styles1.link,
+      style: [styles1.link, { color: linkColor, textDecorationLine: "underline" }],
       onPress: () => onUrlPress(matches[2] || matchingString)
     },
     matches[1]
@@ -8745,21 +8755,49 @@ function getParseList() {
   };
   const renderTaskList = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.taskListItem }, matches[1] === "x" ? "\u2611\uFE0F" : "\u2B1C\uFE0F", " ", matches[2]);
   const renderFootnote = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.footnote }, matches[1], ": ", matches[2]);
-  const renderFootnoteReference = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { key: matchingString, style: styles1.footnoteReference }, `[${matches[1]}]`);
+  const renderFootnoteReference = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
+    import_react_native30.Text,
+    {
+      key: matchingString,
+      style: [styles1.footnoteReference, { color: linkColor, textDecorationLine: "underline" }]
+    },
+    `[${matches[1]}]`
+  );
   const renderHTML = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.html }, matches[1]);
   const renderParagraph = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.View, { style: styles1.paragraph }, /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.paragraph }, matches[1]));
-  const renderPhone = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.phone, onPress: () => onPhonePress(matches[0]) }, matches[0]);
-  const renderUrl = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.url, onPress: () => onUrlPress(matches[0]) }, matches[0]);
+  const renderPhone = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
+    import_react_native30.Text,
+    {
+      style: [styles1.phone, { color: linkColor, textDecorationLine: "underline" }],
+      onPress: () => onPhonePress(matches[0])
+    },
+    matches[0]
+  );
+  const renderUrl = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
+    import_react_native30.Text,
+    {
+      style: [styles1.url, { color: linkColor, textDecorationLine: "underline" }],
+      onPress: () => onUrlPress(matches[0])
+    },
+    matches[0]
+  );
   const renderUrl_2 = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
     import_react_native30.Text,
     {
       key: matchingString,
-      style: styles1.link,
+      style: [styles1.link, { color: linkColor, textDecorationLine: "underline" }],
       onPress: () => onUrlPress(matches[2] || matchingString)
     },
     matches[1]
   );
-  const renderEmail = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(import_react_native30.Text, { style: styles1.email, onPress: () => onEmailPress(matches[0]) }, matches[0]);
+  const renderEmail = (matchingString, matches) => /* @__PURE__ */ import_react22.default.createElement(
+    import_react_native30.Text,
+    {
+      style: [styles1.email, { color: linkColor, textDecorationLine: "underline" }],
+      onPress: () => onEmailPress(matches[0])
+    },
+    matches[0]
+  );
   const renderEmoticon = (match) => {
     return emojiMap[match] || match;
   };
@@ -8953,22 +8991,24 @@ function getParseList() {
     },
     {
       pattern: /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/,
+      style: [styles1.phone, { color: linkColor, textDecorationLine: "underline" }],
       renderText: renderPhone,
       onPress: onPhonePress
     },
     {
       pattern: /\[([^\]]+)\]\(([^)]+)\)/,
-      style: styles1.link,
+      style: [styles1.link, { color: linkColor, textDecorationLine: "underline" }],
       renderText: (_matchingString, matches) => matches[1],
       onPress: onUrlPress
     },
     {
       type: "url",
-      style: styles1.url,
+      style: [styles1.url, { color: linkColor, textDecorationLine: "underline" }],
       onPress: onUrlPress
     },
     {
       pattern: /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/,
+      style: [styles1.email, { color: linkColor, textDecorationLine: "underline" }],
       renderText: renderEmail,
       onPress: onEmailPress
     },
@@ -9043,7 +9083,7 @@ var styles1 = import_react_native30.StyleSheet.create({
     //color: '#333', // Change the color as needed
   },
   footnoteReference: {
-    color: "blue",
+    color: "#002259",
     textDecorationLine: "underline"
   },
   container: {
@@ -9065,7 +9105,7 @@ var styles1 = import_react_native30.StyleSheet.create({
     fontStyle: "italic"
   },
   link: {
-    color: "blue",
+    color: "#002259",
     textDecorationLine: "underline"
   },
   h1: {
@@ -9176,15 +9216,15 @@ var styles1 = import_react_native30.StyleSheet.create({
     paddingTop: 5
   },
   phone: {
-    //color: 'blue',
+    color: "#002259",
     textDecorationLine: "underline"
   },
   url: {
-    color: "blue",
+    color: "#002259",
     textDecorationLine: "underline"
   },
   email: {
-    color: "blue",
+    color: "#002259",
     textDecorationLine: "underline"
   }
 });
@@ -9301,7 +9341,13 @@ var BotText = class extends BaseView_default {
   }
   render() {
     let text = this.props?.text;
-    const bubbleTheme = getBubbleTheme(this.props?.theme);
+    const theme = this.props?.theme || this.context;
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || "#002259";
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || "#FFFFFF";
+    const brandingBtnBorder = bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+    const bubbleTheme = getBubbleTheme(theme);
     return text ? /* @__PURE__ */ React38.createElement(import_react_native31.View, { style: { flexWrap: "wrap", marginBottom: 5, marginEnd: 30 } }, /* @__PURE__ */ React38.createElement(
       import_react_native31.View,
       {
@@ -9311,7 +9357,7 @@ var BotText = class extends BaseView_default {
           {
             backgroundColor: bubbleTheme.BUBBLE_LEFT_BG_COLOR
           },
-          leftBubbleStyles[this.props?.theme?.v3?.body?.bubble_style || "balloon"].bubble_style
+          leftBubbleStyles[theme?.v3?.body?.bubble_style || "balloon"].bubble_style
         ]
       },
       /* @__PURE__ */ React38.createElement(
@@ -9321,14 +9367,14 @@ var BotText = class extends BaseView_default {
             styles23.text,
             {
               color: bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,
-              fontFamily: this.props.theme?.v3?.body?.font?.family || "Inter"
+              fontFamily: theme?.v3?.body?.font?.family || "Inter"
             },
-            botStyles[this.props?.theme?.v3?.body?.font?.size || "medium"]?.size,
+            botStyles[theme?.v3?.body?.font?.size || "medium"]?.size,
             this.props.text_color && {
               color: this.props.text_color
             }
           ],
-          parse: getParseList()
+          parse: getParseList(theme, brandingBtnBorder)
         },
         this.props.isFilterApply ? text.toString().replace(/\s\s+/g, "\n").trim() : text.trim()
       )
@@ -12029,7 +12075,7 @@ var styles37 = {
       ...textStyle
     },
     link: {
-      color: Color_default.black,
+      color: "#002259",
       textDecorationLine: "underline"
     }
   }),
@@ -12043,7 +12089,7 @@ var styles37 = {
       ...textStyle
     },
     link: {
-      color: Color_default.white,
+      color: "#002259",
       textDecorationLine: "underline"
     }
   }),
@@ -12062,7 +12108,7 @@ var styles37 = {
       ...textStyle
     },
     link: {
-      color: Color_default.white,
+      color: "#002259",
       textDecorationLine: "underline"
     }
   })
@@ -12139,8 +12185,18 @@ var MessageText = class extends BaseView_default {
     return parsedText;
   };
   render() {
+    const theme = this.props?.theme || this.context;
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || "#002259";
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || "#FFFFFF";
+    const brandingBtnBorder = bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
     const linkStyle = [
       styles37[this.props.position]?.link,
+      {
+        color: brandingBtnBorder,
+        textDecorationLine: "underline"
+      },
       this.props.linkStyle && this.props.linkStyle[this.props.position]
     ];
     const payload = this.props?.payload?.payload || this.props?.payload;
@@ -12210,7 +12266,7 @@ var MessageText = class extends BaseView_default {
               color: bubbleTheme.BUBBLE_RIGHT_TEXT_COLOR
             }
           ],
-          parse: isPassword ? [] : [...parseList, ...getParseList()],
+          parse: isPassword ? [] : [...parseList, ...getParseList(theme, brandingBtnBorder)],
           childrenProps: { ...this.props.textProps }
         },
         this.parseTextWithIcons(text?.trim?.())?.trim()
@@ -17494,34 +17550,13 @@ var PdfDownloadLoader_default = PdfDownloadLoaderManager;
 
 // bot-sdk/templates/PdfDownloadTemplate.tsx
 var DownloadIcon = ({
-  size = 18,
+  size = 14,
   color = "#FFFFFF"
-}) => /* @__PURE__ */ React81.createElement(import_react_native_svg14.default, { width: size, height: size, viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ React81.createElement(
+}) => /* @__PURE__ */ React81.createElement(import_react_native_svg14.default, { width: size, height: size, viewBox: "0 0 512 512", fill: color }, /* @__PURE__ */ React81.createElement(
   import_react_native_svg14.Path,
   {
-    d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
-    stroke: color,
-    strokeWidth: "2.2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }
-), /* @__PURE__ */ React81.createElement(
-  import_react_native_svg14.Path,
-  {
-    d: "M7 10l5 5 5-5",
-    stroke: color,
-    strokeWidth: "2.2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }
-), /* @__PURE__ */ React81.createElement(
-  import_react_native_svg14.Path,
-  {
-    d: "M12 15V3",
-    stroke: color,
-    strokeWidth: "2.2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
+    d: "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z",
+    fill: color
   }
 ));
 var PdfDownloadTemplate = class extends BaseView_default {
@@ -17659,7 +17694,7 @@ var PdfDownloadTemplate = class extends BaseView_default {
         /* @__PURE__ */ React81.createElement(import_react_native75.View, { style: styles63.buttonContent }, /* @__PURE__ */ React81.createElement(
           DownloadIcon,
           {
-            size: 18,
+            size: 14,
             color: isButtonDisabled ? "#7D7D7D" : buttonTextColor
           }
         ), /* @__PURE__ */ React81.createElement(
@@ -17835,13 +17870,16 @@ var styles63 = import_react_native75.StyleSheet.create({
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 0,
+    paddingHorizontal: 8
   },
   buttonText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
-    fontWeight: "600",
-    marginLeft: 8,
+    fontSize: 14,
+    fontStyle: "normal",
+    fontWeight: "700",
+    lineHeight: 20,
     textAlign: "center"
   },
   footerContainer: {
@@ -18734,9 +18772,8 @@ function Composer({
   };
   const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
   const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#1B365D";
-  const focusBorderColor = theme?.v3?.footer?.compose_bar?.["outline-color"] || sendButtonColor;
-  const outLineColor = isFocused ? focusBorderColor : bgColor;
-  const currentBorderWidth = 1;
+  const outLineColor = isFocused ? sendButtonColor : bgColor;
+  const currentBorderWidth = isFocused ? 2 : 1;
   const textColor = invertColor(bgColor, true);
   return /* @__PURE__ */ import_react34.default.createElement(
     import_react_native79.View,
@@ -18765,8 +18802,9 @@ function Composer({
           style: {
             height: animatedHeight,
             justifyContent: "center",
-            flexDirection: "row",
+            flexDirection: "column",
             alignItems: "flex-start",
+            flex: 1,
             borderWidth: currentBorderWidth,
             borderColor: outLineColor,
             borderStyle: "solid",
@@ -18796,18 +18834,21 @@ function Composer({
             style: [
               styles65.textInput,
               {
+                width: "100%",
                 flex: 1,
                 flexShrink: 1,
                 minHeight: MIN_HEIGHT,
-                paddingTop: 9,
-                paddingBottom: 9,
+                paddingTop: lineCount > 1 ? 9 : import_react_native79.Platform.OS === "ios" ? 9.5 : 8,
+                paddingBottom: lineCount > 1 ? 9 : import_react_native79.Platform.OS === "ios" ? 6 : 8,
                 paddingHorizontal: 12,
                 fontSize: 14,
-                lineHeight: 20,
+                lineHeight: lineCount > 1 ? 21 : import_react_native79.Platform.OS === "android" ? 21 : void 0,
+                fontStyle: "normal",
                 fontWeight: "400",
                 color: textColor,
                 alignSelf: "stretch",
-                textAlignVertical: "top"
+                textAlignVertical: lineCount > 1 ? "top" : "center",
+                includeFontPadding: false
               }
             ],
             autoFocus: textInputAutoFocus,
@@ -18874,13 +18915,15 @@ var styles65 = import_react_native79.StyleSheet.create({
     flexShrink: 1,
     minHeight: 38,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
+    fontStyle: "normal",
     fontWeight: "400",
     paddingHorizontal: 12,
     paddingTop: 9,
     paddingBottom: 9,
     alignSelf: "stretch",
-    textAlignVertical: "top",
+    textAlignVertical: "center",
+    includeFontPadding: false,
     color: Color_default.text_color
   }
 });
@@ -19885,20 +19928,19 @@ var styles70 = import_react_native86.StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
     paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: import_react_native86.Platform.OS === "ios" ? 16 : 8
+    paddingTop: 10,
+    paddingBottom: 10
   },
   primary: {
     flexDirection: "row",
-    alignItems: "flex-end"
+    alignItems: "center"
   },
   disclaimerText: {
     fontSize: 11,
     fontWeight: "400",
     textAlign: "center",
     color: "#666666",
-    paddingTop: 8,
-    paddingBottom: 4
+    marginTop: 8
   },
   accessory: {
     height: 44
@@ -21057,7 +21099,7 @@ var Bubble = class extends React94.Component {
           },
           "You"
         ),
-        /* @__PURE__ */ React94.createElement(UserSilhouetteIcon, { width: 14, height: 14, color: primaryTextColor })
+        /* @__PURE__ */ React94.createElement(UserSilhouetteIcon, { width: 12, height: 12, color: primaryTextColor })
       );
     } else {
       return /* @__PURE__ */ React94.createElement(
@@ -22831,7 +22873,7 @@ var BaseHeader = class extends import_react43.default.Component {
       buttons?.close?.show !== false && this.renderIcon(
         HeaderIconsId.CLOSE,
         "HeaderClose",
-        14,
+        11,
         14,
         styleProps,
         iconColor
@@ -22959,14 +23001,24 @@ var CompactHeader = class extends BaseHeader {
       bottomText = "Digital Advocate";
     }
     topText = topText.toUpperCase();
+    const paddingLeft = this.props.headerPaddingLeft !== void 0 ? this.props.headerPaddingLeft : this.props.headerPaddingHorizontal !== void 0 ? this.props.headerPaddingHorizontal : 16;
+    const paddingRight = this.props.headerPaddingRight !== void 0 ? this.props.headerPaddingRight : this.props.headerPaddingHorizontal !== void 0 ? this.props.headerPaddingHorizontal : 16;
+    const paddingTop = 12;
+    const paddingBottom = 10;
     return /* @__PURE__ */ React102.createElement(
       import_react_native98.View,
       {
         style: [
           styles81.main,
           {
-            backgroundColor: headerColor
-          }
+            backgroundColor: headerColor,
+            borderBottomColor: headerColor,
+            paddingTop,
+            paddingRight,
+            paddingBottom,
+            paddingLeft
+          },
+          this.props.headerStyle
         ]
       },
       /* @__PURE__ */ React102.createElement(import_react_native98.View, { style: styles81.sub_con }, this.renderBackIcon(
@@ -23038,14 +23090,20 @@ var styles81 = import_react_native98.StyleSheet.create({
   sub_con: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    width: "100%"
   },
   main: {
     width: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    alignSelf: "stretch",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    paddingTop: 12,
+    paddingRight: 16,
+    paddingBottom: 10,
+    paddingLeft: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#D8E8F0",
     borderStyle: "solid",
     backgroundColor: "#FFFFFF"
   },
@@ -23100,14 +23158,24 @@ var MediumHeader = class extends BaseHeader {
       bottomText = "Digital Advocate";
     }
     topText = topText.toUpperCase();
+    const paddingLeft = this.props.headerPaddingLeft !== void 0 ? this.props.headerPaddingLeft : this.props.headerPaddingHorizontal !== void 0 ? this.props.headerPaddingHorizontal : 16;
+    const paddingRight = this.props.headerPaddingRight !== void 0 ? this.props.headerPaddingRight : this.props.headerPaddingHorizontal !== void 0 ? this.props.headerPaddingHorizontal : 16;
+    const paddingTop = 12;
+    const paddingBottom = 10;
     return /* @__PURE__ */ React103.createElement(
       import_react_native99.View,
       {
         style: [
           styles82.main,
           {
-            backgroundColor: headerColor
-          }
+            backgroundColor: headerColor,
+            borderBottomColor: headerColor,
+            paddingTop,
+            paddingRight,
+            paddingBottom,
+            paddingLeft
+          },
+          this.props.headerStyle
         ]
       },
       /* @__PURE__ */ React103.createElement(import_react_native99.View, { style: styles82.sub_con }, this.renderBackIcon(
@@ -23193,14 +23261,20 @@ var styles82 = import_react_native99.StyleSheet.create({
   sub_con: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    width: "100%"
   },
   main: {
     width: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    alignSelf: "stretch",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    paddingTop: 12,
+    paddingRight: 16,
+    paddingBottom: 10,
+    paddingLeft: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#D8E8F0",
     borderStyle: "solid",
     backgroundColor: "#FFFFFF"
   },
@@ -27450,7 +27524,8 @@ var KoreChat = class _KoreChat extends React115.Component {
       const isWhiteStatus = isWhiteStatusBar(bgColor);
       const isBlackStatus = isBlackStatusBar(bgColor);
       return /* @__PURE__ */ React115.createElement(import_react_native_safe_area_context.SafeAreaInsetsContext.Consumer, null, (insets) => {
-        const rawTopInset = insets?.top ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.top ?? 0;
+        const insetsTop = insets?.top ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.top ?? 0;
+        const rawTopInset = insetsTop;
         const statusBarHeight = import_react_native111.Platform.OS === "android" ? import_react_native111.StatusBar.currentHeight || 0 : 0;
         const screenH = import_react_native111.Dimensions.get("screen").height;
         const windowH = import_react_native111.Dimensions.get("window").height;
@@ -27461,12 +27536,11 @@ var KoreChat = class _KoreChat extends React115.Component {
         const rawBottomInset = insets?.bottom ?? import_react_native_safe_area_context.initialWindowMetrics?.insets?.bottom ?? (potentialNavBar > 16 ? potentialNavBar : 0);
         this.currentBottomInset = rawBottomInset;
         let androidTopPadding = 0;
-        if (import_react_native111.Platform.OS === "android") {
-          if (insets != null) {
-            androidTopPadding = insets.top > 0 ? Math.max(insets.top, statusBarHeight, 44) : 0;
-          } else {
-            const fallbackTop = rawTopInset > 0 ? rawTopInset : statusBarHeight;
-            androidTopPadding = wrapInSafeArea !== false ? Math.max(fallbackTop, statusBarHeight, 44) : 0;
+        if (this.props.headerPaddingTop !== void 0) {
+          androidTopPadding = this.props.headerPaddingTop;
+        } else if (import_react_native111.Platform.OS === "android") {
+          if (wrapInSafeArea !== false) {
+            androidTopPadding = insetsTop > 0 ? Math.max(insetsTop, statusBarHeight) : statusBarHeight > 0 ? statusBarHeight : 36;
           }
         }
         const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && import_react_native111.Platform.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
@@ -27861,8 +27935,9 @@ var styles90 = import_react_native111.StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     color: "#002259",
-    lineHeight: 30,
-    marginBottom: normalize(14),
+    lineHeight: 28,
+    fontStyle: "normal",
+    marginBottom: 16,
     textAlign: "left"
   },
   leave_modal_desc: {
@@ -27870,35 +27945,45 @@ var styles90 = import_react_native111.StyleSheet.create({
     fontWeight: "400",
     color: "#282828",
     lineHeight: 20,
-    marginBottom: normalize(28),
+    fontStyle: "normal",
+    marginBottom: 16,
     textAlign: "left"
   },
   leave_modal_btn_primary: {
-    height: normalize(50),
-    borderRadius: normalize(25),
+    borderRadius: 24,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: normalize(12),
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     width: "100%"
   },
   leave_modal_btn_primary_text: {
     color: "#FFFFFF",
-    fontSize: normalize(16),
-    fontWeight: "600"
+    fontSize: 14,
+    fontWeight: "700",
+    fontStyle: "normal",
+    lineHeight: 20,
+    textAlign: "center"
   },
   leave_modal_btn_secondary: {
-    height: normalize(50),
-    borderRadius: normalize(25),
+    borderRadius: 24,
     borderWidth: 1.5,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     width: "100%"
   },
   leave_modal_btn_secondary_text: {
-    fontSize: normalize(16),
-    fontWeight: "600"
+    fontSize: 14,
+    fontWeight: "700",
+    fontStyle: "normal",
+    lineHeight: 20,
+    textAlign: "center"
   }
 });
 KoreChat.defaultProps = {

@@ -558,7 +558,7 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
             }}>
             You
           </Text>
-          <UserSilhouetteIcon width={14} height={14} color={primaryTextColor} />
+          <UserSilhouetteIcon width={12} height={12} color={primaryTextColor} />
         </View>
       );
     } else {

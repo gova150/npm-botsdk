@@ -53,33 +53,16 @@ export interface PdfDownloadTemplateState extends BaseViewState {
 }
 
 const DownloadIcon = ({
-  size = 18,
+  size = 14,
   color = '#FFFFFF',
 }: {
   size?: number;
   color?: string;
 }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+  <Svg width={size} height={size} viewBox="0 0 512 512" fill={color}>
     <Path
-      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-      stroke={color}
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M7 10l5 5 5-5"
-      stroke={color}
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M12 15V3"
-      stroke={color}
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"
+      fill={color}
     />
   </Svg>
 );
@@ -256,7 +239,7 @@ export default class PdfDownloadTemplate extends BaseView<
           }}>
           <View style={styles.buttonContent}>
             <DownloadIcon
-              size={18}
+              size={14}
               color={isButtonDisabled ? '#7D7D7D' : buttonTextColor}
             />
             <Text
@@ -503,12 +486,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 0,
+    paddingHorizontal: 8,
   },
   buttonText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
-    fontWeight: '600',
-    marginLeft: 8,
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 20,
     textAlign: 'center',
   },
   footerContainer: {

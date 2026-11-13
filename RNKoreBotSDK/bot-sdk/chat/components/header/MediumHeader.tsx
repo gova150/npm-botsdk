@@ -50,13 +50,34 @@ export default class MediumHeader extends BaseHeader<
     }
     topText = topText.toUpperCase();
 
+    const paddingLeft =
+      this.props.headerPaddingLeft !== undefined
+        ? this.props.headerPaddingLeft
+        : this.props.headerPaddingHorizontal !== undefined
+        ? this.props.headerPaddingHorizontal
+        : 16;
+    const paddingRight =
+      this.props.headerPaddingRight !== undefined
+        ? this.props.headerPaddingRight
+        : this.props.headerPaddingHorizontal !== undefined
+        ? this.props.headerPaddingHorizontal
+        : 16;
+    const paddingTop = 12;
+    const paddingBottom = 10;
+
     return (
       <View
         style={[
           styles.main,
           {
             backgroundColor: headerColor,
+            borderBottomColor: headerColor,
+            paddingTop,
+            paddingRight,
+            paddingBottom,
+            paddingLeft,
           },
+          this.props.headerStyle,
         ]}>
         <View style={styles.sub_con}>
           {this.renderBackIcon(
@@ -158,13 +179,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    width: '100%',
   },
   main: {
     width: '100%',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    alignSelf: 'stretch',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingTop: 12,
+    paddingRight: 16,
+    paddingBottom: 10,
+    paddingLeft: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#D8E8F0',
     borderStyle: 'solid',
     backgroundColor: '#FFFFFF',
   },

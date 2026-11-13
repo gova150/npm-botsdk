@@ -19,6 +19,11 @@ export interface BaseHeaderProps {
   theme?: IThemeType;
   onHeaderActionsClick?: any;
   isReconnecting?: boolean;
+  headerPaddingTop?: number;
+  headerPaddingHorizontal?: number;
+  headerPaddingLeft?: number;
+  headerPaddingRight?: number;
+  headerStyle?: any;
 }
 export interface BaseHeaderState {
   showPopover: boolean;
@@ -307,7 +312,7 @@ export default abstract class BaseHeader<
           this.renderIcon(
             HeaderIconsId.CLOSE,
             'HeaderClose',
-            14,
+            11,
             14,
             styleProps,
             iconColor,

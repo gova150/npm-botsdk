@@ -156,14 +156,14 @@ export const UserSilhouetteIcon = (props: {
   height?: number;
   color?: string;
 }) => {
-  const width = props.width || 14;
-  const height = props.height || 14;
+  const width = props.width || 12;
+  const height = props.height || 12;
   const color = props.color || '#111827';
 
   return (
-    <Svg width={width} height={height} viewBox="0 0 16 16" fill="none">
+    <Svg width={width} height={height} viewBox="0 0 448 512" fill={color}>
       <Path
-        d="M8 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-5 6.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5v.5H3v-.5Z"
+        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
         fill={color}
       />
     </Svg>

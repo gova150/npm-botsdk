@@ -185,6 +185,11 @@ interface KoraChatProps {
   leaveChatSecondaryTextColor?: string;
   leaveChatTextAlign?: 'left' | 'center';
   fontFamily?: string;
+  headerPaddingTop?: number;
+  headerPaddingHorizontal?: number;
+  headerPaddingLeft?: number;
+  headerPaddingRight?: number;
+  headerStyle?: any;
   isKeyboardInternallyHandled?: boolean;
   bottomOffset?: number;
   templateInjection?: Map<
@@ -3140,8 +3145,9 @@ export default class KoreChat extends React.Component<
       return (
         <SafeAreaInsetsContext.Consumer>
           {insets => {
-            const rawTopInset =
+            const insetsTop =
               insets?.top ?? initialWindowMetrics?.insets?.top ?? 0;
+            const rawTopInset = insetsTop;
             const statusBarHeight =
               Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
             const screenH = Dimensions.get('screen').height;
@@ -3157,24 +3163,18 @@ export default class KoreChat extends React.Component<
             this.currentBottomInset = rawBottomInset;
 
             let androidTopPadding = 0;
-            if (Platform.OS === 'android') {
-              if (insets != null) {
-                // When SafeAreaProvider is present:
-                // If insets.top > 0, view draws under status bar / notch (edge-to-edge).
-                // If insets.top === 0, parent view already padded it (e.g. SafeAreaView).
+            if (this.props.headerPaddingTop !== undefined) {
+              androidTopPadding = this.props.headerPaddingTop;
+            } else if (Platform.OS === 'android') {
+              if (wrapInSafeArea !== false) {
+                // Ensure header is never obscured by the status bar, notch, or camera cutout.
+                // 1) If insetsTop is reported (> 0), use the max of insetsTop and statusBarHeight.
+                // 2) If insetsTop is 0 (as in client host apps where insets aren't propagated but status bar is translucent),
+                //    use statusBarHeight (or standard 36dp notch safe fallback).
                 androidTopPadding =
-                  insets.top > 0
-                    ? Math.max(insets.top, statusBarHeight, 44)
-                    : 0;
-              } else {
-                // When SafeAreaProvider is NOT present in host app (standard client integration):
-                // Ensure header is never under status bar or notch.
-                const fallbackTop =
-                  rawTopInset > 0 ? rawTopInset : statusBarHeight;
-                androidTopPadding =
-                  wrapInSafeArea !== false
-                    ? Math.max(fallbackTop, statusBarHeight, 44)
-                    : 0;
+                  insetsTop > 0
+                    ? Math.max(insetsTop, statusBarHeight)
+                    : (statusBarHeight > 0 ? statusBarHeight : 36);
               }
             }
 
@@ -3612,8 +3612,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#002259',
-    lineHeight: 30,
-    marginBottom: normalize(14),
+    lineHeight: 28,
+    fontStyle: 'normal',
+    marginBottom: 16,
     textAlign: 'left',
   },
   leave_modal_desc: {
@@ -3621,35 +3622,45 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#282828',
     lineHeight: 20,
-    marginBottom: normalize(28),
+    fontStyle: 'normal',
+    marginBottom: 16,
     textAlign: 'left',
   },
   leave_modal_btn_primary: {
-    height: normalize(50),
-    borderRadius: normalize(25),
+    borderRadius: 24,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: normalize(12),
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     width: '100%',
   },
   leave_modal_btn_primary_text: {
     color: '#FFFFFF',
-    fontSize: normalize(16),
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+    fontStyle: 'normal',
+    lineHeight: 20,
+    textAlign: 'center',
   },
   leave_modal_btn_secondary: {
-    height: normalize(50),
-    borderRadius: normalize(25),
+    borderRadius: 24,
     borderWidth: 1.5,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     width: '100%',
   },
   leave_modal_btn_secondary_text: {
-    fontSize: normalize(16),
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+    fontStyle: 'normal',
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });
 

@@ -19,7 +19,7 @@ import {
 } from '../theme/styles';
 import Color from '../theme/Color';
 import {ThemeContext} from '../theme/ThemeContext';
-import {getBubbleTheme} from '../theme/themeHelper';
+import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {getParseList} from '../utils/ParseList';
 
 interface MessageTextProps extends BaseViewProps {
@@ -68,7 +68,7 @@ const styles = {
       ...textStyle,
     } as TextStyle,
     link: {
-      color: Color.black,
+      color: '#002259',
       textDecorationLine: 'underline',
     } as TextStyle,
   }),
@@ -82,7 +82,7 @@ const styles = {
       ...textStyle,
     } as TextStyle,
     link: {
-      color: Color.white,
+      color: '#002259',
       textDecorationLine: 'underline',
     } as TextStyle,
   }),
@@ -101,7 +101,7 @@ const styles = {
       ...textStyle,
     } as TextStyle,
     link: {
-      color: Color.white,
+      color: '#002259',
       textDecorationLine: 'underline',
     } as TextStyle,
   }),
@@ -249,8 +249,22 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
 
   render() {
     //console.log('this.props.position --->:', this.props.position);
+    const theme = (this.props?.theme || this.context) as any;
+    const bodyBtn =
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || '#002259';
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || '#FFFFFF';
+    const brandingBtnBorder =
+      bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+
     const linkStyle = [
       styles[this.props.position!]?.link,
+      {
+        color: brandingBtnBorder,
+        textDecorationLine: 'underline',
+      },
       this.props.linkStyle && this.props.linkStyle[this.props.position!],
     ];
 
@@ -356,7 +370,7 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
               color: bubbleTheme.BUBBLE_RIGHT_TEXT_COLOR,
             },
           ]}
-          parse={isPassword ? [] : [...parseList, ...getParseList()]}
+          parse={isPassword ? [] : [...parseList, ...getParseList(theme, brandingBtnBorder)]}
           childrenProps={{...this.props.textProps}}>
           {this.parseTextWithIcons(text?.trim?.())?.trim()}
         </ParsedText>

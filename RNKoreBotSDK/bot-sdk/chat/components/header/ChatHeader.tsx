@@ -12,6 +12,11 @@ interface ChatHeaderProps {
   onHeaderActionsClick?: any;
   statusBarColor?: (colorCode: any) => void;
   isReconnecting?: boolean;
+  headerPaddingTop?: number;
+  headerPaddingHorizontal?: number;
+  headerPaddingLeft?: number;
+  headerPaddingRight?: number;
+  headerStyle?: any;
 }
 interface ChatHeaderState {}
 

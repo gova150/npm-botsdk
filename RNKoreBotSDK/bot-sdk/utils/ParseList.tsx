@@ -2,6 +2,7 @@
 import React from 'react';
 import {Alert, Linking, StyleSheet, Text, View} from 'react-native';
 import { FallbackCommunicationsAPI } from '../components/LazyCommunications';
+import {getButtonTheme} from '../theme/themeHelper';
 const WWW_URL_PATTERN = /^www\./i;
 
 const emojiMap = {
@@ -52,7 +53,21 @@ const htmlEntities = {
   '&raquo;': '»',
 };
 
-export function getParseList(): [] {
+export function getParseList(theme?: any, customLinkColor?: string): any[] {
+  let linkColor = customLinkColor;
+  if (!linkColor && theme) {
+    const bodyBtn =
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || '#002259';
+    linkColor =
+      bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+  }
+  if (!linkColor) {
+    linkColor = '#002259';
+  }
+
   // const renderText = (matchingString: any, matches: any) => {
   //   // matches => ["[@michel:5455345]", "@michel", "5455345"]
   //   let pattern = /\[(@[^:]+):([^\]]+)\]/i;
@@ -85,7 +100,7 @@ export function getParseList(): [] {
 
   const renderLink = (matchingString: string, matches: string[]) => (
     <Text
-      style={styles1.link}
+      style={[styles1.link, {color: linkColor, textDecorationLine: 'underline'}]}
       onPress={() => onUrlPress(matches[2] || matchingString)}>
       {matches[1]}
     </Text>
@@ -246,7 +261,9 @@ export function getParseList(): [] {
     matchingString: string,
     matches: string[],
   ) => (
-    <Text key={matchingString} style={styles1.footnoteReference}>
+    <Text
+      key={matchingString}
+      style={[styles1.footnoteReference, {color: linkColor, textDecorationLine: 'underline'}]}>
       {`[${matches[1]}]`}
     </Text>
   );
@@ -261,27 +278,33 @@ export function getParseList(): [] {
   );
 
   const renderPhone = (matchingString: string, matches: string[]) => (
-    <Text style={styles1.phone} onPress={() => onPhonePress(matches[0])}>
+    <Text
+      style={[styles1.phone, {color: linkColor, textDecorationLine: 'underline'}]}
+      onPress={() => onPhonePress(matches[0])}>
       {matches[0]}
     </Text>
   );
 
   const renderUrl = (matchingString: string, matches: string[]) => (
-    <Text style={styles1.url} onPress={() => onUrlPress(matches[0])}>
+    <Text
+      style={[styles1.url, {color: linkColor, textDecorationLine: 'underline'}]}
+      onPress={() => onUrlPress(matches[0])}>
       {matches[0]}
     </Text>
   );
   const renderUrl_2 = (matchingString: string, matches: string[]) => (
     <Text
       key={matchingString}
-      style={styles1.link}
+      style={[styles1.link, {color: linkColor, textDecorationLine: 'underline'}]}
       onPress={() => onUrlPress(matches[2] || matchingString)}>
       {matches[1]}
     </Text>
   );
 
   const renderEmail = (matchingString: string, matches: string[]) => (
-    <Text style={styles1.email} onPress={() => onEmailPress(matches[0])}>
+    <Text
+      style={[styles1.email, {color: linkColor, textDecorationLine: 'underline'}]}
+      onPress={() => onEmailPress(matches[0])}>
       {matches[0]}
     </Text>
   );
@@ -520,22 +543,24 @@ export function getParseList(): [] {
 
     {
       pattern: /^(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/,
+      style: [styles1.phone, {color: linkColor, textDecorationLine: 'underline'}],
       renderText: renderPhone,
       onPress: onPhonePress,
     },
     {
       pattern: /\[([^\]]+)\]\(([^)]+)\)/,
-      style: styles1.link,
+      style: [styles1.link, {color: linkColor, textDecorationLine: 'underline'}],
       renderText: (_matchingString: string, matches: string[]) => matches[1],
       onPress: onUrlPress,
     },
     {
       type: 'url',
-      style: styles1.url,
+      style: [styles1.url, {color: linkColor, textDecorationLine: 'underline'}],
       onPress: onUrlPress,
     },
     {
       pattern: /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)/,
+      style: [styles1.email, {color: linkColor, textDecorationLine: 'underline'}],
       renderText: renderEmail,
       onPress: onEmailPress,
     },
@@ -623,7 +648,7 @@ const styles1 = StyleSheet.create({
     //color: '#333', // Change the color as needed
   },
   footnoteReference: {
-    color: 'blue',
+    color: '#002259',
     textDecorationLine: 'underline',
   },
   container: {
@@ -645,7 +670,7 @@ const styles1 = StyleSheet.create({
     fontStyle: 'italic',
   },
   link: {
-    color: 'blue',
+    color: '#002259',
     textDecorationLine: 'underline',
   },
   h1: {
@@ -754,15 +779,15 @@ const styles1 = StyleSheet.create({
     paddingTop: 5,
   },
   phone: {
-    //color: 'blue',
+    color: '#002259',
     textDecorationLine: 'underline',
   },
   url: {
-    color: 'blue',
+    color: '#002259',
     textDecorationLine: 'underline',
   },
   email: {
-    color: 'blue',
+    color: '#002259',
     textDecorationLine: 'underline',
   },
 });

@@ -807,6 +807,11 @@ interface KoraChatProps {
     leaveChatSecondaryTextColor?: string;
     leaveChatTextAlign?: 'left' | 'center';
     fontFamily?: string;
+    headerPaddingTop?: number;
+    headerPaddingHorizontal?: number;
+    headerPaddingLeft?: number;
+    headerPaddingRight?: number;
+    headerStyle?: any;
     isKeyboardInternallyHandled?: boolean;
     bottomOffset?: number;
     templateInjection?: Map<string, CustomTemplate<CustomViewProps, CustomViewState>>;

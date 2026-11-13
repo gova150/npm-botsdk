@@ -237,10 +237,8 @@ export function Composer({
     theme?.v3?.body?.user_message?.bg_color ||
     theme?.v3?.general?.colors?.primary ||
     '#1B365D';
-  const focusBorderColor =
-    theme?.v3?.footer?.compose_bar?.['outline-color'] || sendButtonColor;
-  const outLineColor = isFocused ? focusBorderColor : bgColor;
-  const currentBorderWidth = 1;
+  const outLineColor = isFocused ? sendButtonColor : bgColor;
+  const currentBorderWidth = isFocused ? 2 : 1;
   const textColor = invertColor(bgColor, true);
 
   return (
@@ -263,8 +261,9 @@ export function Composer({
           style={{
             height: animatedHeight,
             justifyContent: 'center',
-            flexDirection: 'row',
+            flexDirection: 'column',
             alignItems: 'flex-start',
+            flex: 1,
             borderWidth: currentBorderWidth,
             borderColor: outLineColor,
             borderStyle: 'solid',
@@ -293,18 +292,21 @@ export function Composer({
             style={[
               styles.textInput,
               {
+                width: '100%',
                 flex: 1,
                 flexShrink: 1,
                 minHeight: MIN_HEIGHT,
-                paddingTop: 9,
-                paddingBottom: 9,
+                paddingTop: lineCount > 1 ? 9 : (Platform.OS === 'ios' ? 9.5 : 8),
+                paddingBottom: lineCount > 1 ? 9 : (Platform.OS === 'ios' ? 6 : 8),
                 paddingHorizontal: 12,
                 fontSize: 14,
-                lineHeight: 20,
+                lineHeight: lineCount > 1 ? 21 : (Platform.OS === 'android' ? 21 : undefined),
+                fontStyle: 'normal',
                 fontWeight: '400',
                 color: textColor,
                 alignSelf: 'stretch',
-                textAlignVertical: 'top',
+                textAlignVertical: lineCount > 1 ? 'top' : 'center',
+                includeFontPadding: false,
               },
             ]}
             autoFocus={textInputAutoFocus}
@@ -369,13 +371,15 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     minHeight: 38,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
+    fontStyle: 'normal',
     fontWeight: '400',
     paddingHorizontal: 12,
     paddingTop: 9,
     paddingBottom: 9,
     alignSelf: 'stretch',
-    textAlignVertical: 'top',
+    textAlignVertical: 'center',
+    includeFontPadding: false,
     color: Color.text_color,
   },
 });

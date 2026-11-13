@@ -7,7 +7,7 @@ import {TEMPLATE_STYLE_VALUES, leftBubbleStyles} from '../theme/styles';
 import BaseView, {BaseViewProps, BaseViewState} from './BaseView';
 import {ThemeContext} from '../theme/ThemeContext';
 import {botStyles} from '../theme/styles';
-import {getBubbleTheme} from '../theme/themeHelper';
+import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import ParsedText from 'react-native-parsed-text';
 import {getParseList} from '../utils/ParseList';
 
@@ -162,7 +162,17 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
   }
   render() {
     let text = this.props?.text;
-    const bubbleTheme = getBubbleTheme(this.props?.theme);
+    const theme = (this.props?.theme || this.context) as any;
+    const bodyBtn =
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
+    const buttonTheme = getButtonTheme(theme);
+    const brandingBtnBg = buttonTheme?.ACTIVE_BG_COLOR || '#002259';
+    const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || '#FFFFFF';
+    const brandingBtnBorder =
+      bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
+
+    const bubbleTheme = getBubbleTheme(theme);
 
     return text ? (
       <View style={{flexWrap: 'wrap', marginBottom: 5, marginEnd: 30}}>
@@ -174,7 +184,7 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
               backgroundColor: bubbleTheme.BUBBLE_LEFT_BG_COLOR,
             },
             leftBubbleStyles[
-              this.props?.theme?.v3?.body?.bubble_style || 'balloon'
+              theme?.v3?.body?.bubble_style || 'balloon'
             ].bubble_style,
           ]}>
           <ParsedText
@@ -182,15 +192,15 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
               styles.text,
               {
                 color: bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,
-                fontFamily: this.props.theme?.v3?.body?.font?.family || 'Inter',
+                fontFamily: theme?.v3?.body?.font?.family || 'Inter',
               },
-              botStyles[this.props?.theme?.v3?.body?.font?.size || 'medium']
+              botStyles[theme?.v3?.body?.font?.size || 'medium']
                 ?.size,
               this.props.text_color && {
                 color: this.props.text_color,
               },
             ]}
-            parse={getParseList()}>
+            parse={getParseList(theme, brandingBtnBorder)}>
             {this.props.isFilterApply
               ? text.toString().replace(/\s\s+/g, '\n').trim()
               : text.trim()}
