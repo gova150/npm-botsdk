@@ -858,6 +858,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     isKeyboardVisible: boolean;
     currentKeyboardHeight: number;
     lastAndroidKeyboardHeight: number;
+    currentBottomInset: number;
     static defaultProps: {
         messagesContainerStyle: null;
         text: null;
@@ -1065,7 +1066,7 @@ declare class QuickReplies extends BaseView<QuickProps, QuickState> {
 }
 
 declare const showPdfDownloadLoader: () => void;
-declare const hidePdfDownloadLoader: () => void;
+declare const hidePdfDownloadLoader: (success?: boolean) => void;
 
 interface PdfDownloadButtonItem {
     type: string;
@@ -1092,6 +1093,7 @@ interface PdfDownloadTemplateProps extends BaseViewProps {
 interface PdfDownloadTemplateState extends BaseViewState {
     isLoading: boolean;
     clickedIndices: Set<number>;
+    disabledIndices: Set<number>;
 }
 declare class PdfDownloadTemplate extends BaseView<PdfDownloadTemplateProps, PdfDownloadTemplateState> {
     private unsubscribeLoader?;

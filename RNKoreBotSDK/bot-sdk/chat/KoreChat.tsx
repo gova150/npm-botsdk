@@ -245,6 +245,7 @@ export default class KoreChat extends React.Component<
   isKeyboardVisible: boolean = false;
   currentKeyboardHeight: number = 0;
   lastAndroidKeyboardHeight: number = 290;
+  currentBottomInset: number = 0;
   static defaultProps: {
     messagesContainerStyle: null;
     text: null;
@@ -574,6 +575,9 @@ export default class KoreChat extends React.Component<
   private getThemeData = () => {
     this.themApi?.getThemeAPI(this.props.botConfig, (data: any) => {
       if (data?.v3) {
+        if (data.v3.header?.buttons?.reconnect) {
+          data.v3.header.buttons.reconnect.show = false;
+        }
         this.saveThemeData(data);
         this.setState({
           showLoader: false,
@@ -812,7 +816,6 @@ export default class KoreChat extends React.Component<
           return;
         }
         this.setIsBotResponseLoading(false);
-        hidePdfDownloadLoader();
         this.processMessage(data);
         if (isAgentConnect) {
           KoreBotClient.getInstance().sendEvent('message_read');
@@ -874,13 +877,14 @@ export default class KoreChat extends React.Component<
 
     const incomingTemplateType = getTemplateType(newMessages?.message);
     if (incomingTemplateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
-      hidePdfDownloadLoader();
       if (!newMessages?.isHistory && !newMessages?.isFromHistory) {
         const pdfPayload =
           newMessages?.message?.[0]?.component?.payload?.payload ||
           newMessages?.message?.[0]?.component?.payload;
         const msgId = newMessages?.messageId || newMessages?._id || itemId;
         downloadPdfDataResponse(pdfPayload, msgId, false);
+      } else {
+        hidePdfDownloadLoader(false);
       }
       return;
     }
@@ -1194,9 +1198,6 @@ export default class KoreChat extends React.Component<
   };
 
   private setIsBotResponseLoading = (value: boolean) => {
-    if (!value) {
-      hidePdfDownloadLoader();
-    }
     this.setState({
       isBotResponseLoading: value,
     });
@@ -1528,7 +1529,20 @@ export default class KoreChat extends React.Component<
       Linking.canOpenURL(navUrl)
         .then(supported => {
           if (supported) {
-            Linking.openURL(navUrl);
+            Linking.openURL(navUrl).catch(err => {
+              console.warn('Linking error for navUrl:', navUrl, err);
+              if (this.props.navigation?.navigate) {
+                const routeName = this.resolveRouteNameFromUrl(navUrl);
+                try {
+                  this.props.navigation.navigate(routeName, {
+                    data: item,
+                    navigationUrl: navUrl,
+                  });
+                } catch (e) {
+                  console.warn('Fallback navigation failed:', e);
+                }
+              }
+            });
           } else if (this.props.navigation?.navigate) {
             const routeName = this.resolveRouteNameFromUrl(navUrl);
             this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
@@ -1951,15 +1965,23 @@ export default class KoreChat extends React.Component<
     // If native OS window already shrunk (e.g. legacy adjustResize on older Android 10-13),
     // amountAlreadyShrunk will match keyboardHeight (within a ~15dp threshold).
     // In that case, neededPadding is 0 to avoid double padding.
-    // On modern Android (Android 14, 15, 16, 17 on Google Pixel / Samsung S24-S26),
-    // edge-to-edge prevents window resizing (amountAlreadyShrunk is ~0), so neededPadding is the full keyboardHeight.
+    // On modern Android (Android 14, 15, 16, 17 on Google Pixel / Samsung S24-S26 / OnePlus),
+    // React Native's keyboard height payload subtracts system navigation bar insets.
+    // Adding currentBottomInset ensures the input box and disclaimer text rise completely
+    // above tall keyboards (e.g. Samsung Keyboard number row and toolbar) without bottom clipping.
     let neededPadding = 0;
     if (amountAlreadyShrunk >= keyboardHeight - 15) {
       neededPadding = 0;
     } else {
       neededPadding = Math.max(
         0,
-        Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset),
+        Math.round(
+          keyboardHeight +
+            (this.currentBottomInset || 0) +
+            4 -
+            amountAlreadyShrunk -
+            bottomOffset,
+        ),
       );
     }
 
@@ -3031,23 +3053,42 @@ export default class KoreChat extends React.Component<
         <SafeAreaInsetsContext.Consumer>
           {insets => {
             const rawTopInset =
-              insets?.top ??
-              initialWindowMetrics?.insets?.top ??
-              0;
-
+              insets?.top ?? initialWindowMetrics?.insets?.top ?? 0;
+            const statusBarHeight =
+              Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
+            const screenH = Dimensions.get('screen').height;
+            const windowH = Dimensions.get('window').height;
+            const potentialNavBar = Math.max(
+              0,
+              Math.round(screenH - windowH - (statusBarHeight || 0)),
+            );
             const rawBottomInset =
-              insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
+              insets?.bottom ??
+              initialWindowMetrics?.insets?.bottom ??
+              (potentialNavBar > 16 ? potentialNavBar : 0);
+            this.currentBottomInset = rawBottomInset;
 
-            // If the view is already positioned below the status bar (e.g. standard window or parent SafeAreaView),
-            // rawTopInset is 0, so no top padding should be added to prevent dragging the header down.
-            // If the view is in edge-to-edge mode drawing behind the status bar, rawTopInset is > 0,
-            // so we pad by rawTopInset (matching the exact status bar / notch height).
-            const androidTopPadding =
-              Platform.OS === 'android'
-                ? rawTopInset > 0
-                  ? Math.max(rawTopInset, StatusBar.currentHeight || 0)
-                  : 0
-                : 0;
+            let androidTopPadding = 0;
+            if (Platform.OS === 'android') {
+              if (insets != null) {
+                // When SafeAreaProvider is present:
+                // If insets.top > 0, view draws under status bar / notch (edge-to-edge).
+                // If insets.top === 0, parent view already padded it (e.g. SafeAreaView).
+                androidTopPadding =
+                  insets.top > 0
+                    ? Math.max(insets.top, statusBarHeight, 44)
+                    : 0;
+              } else {
+                // When SafeAreaProvider is NOT present in host app (standard client integration):
+                // Ensure header is never under status bar or notch.
+                const fallbackTop =
+                  rawTopInset > 0 ? rawTopInset : statusBarHeight;
+                androidTopPadding =
+                  wrapInSafeArea !== false
+                    ? Math.max(fallbackTop, statusBarHeight, 44)
+                    : 0;
+              }
+            }
 
             // When keyboard is not active, ensure bottom navigation pill / gesture bar is respected
             const defaultBottomPadding =

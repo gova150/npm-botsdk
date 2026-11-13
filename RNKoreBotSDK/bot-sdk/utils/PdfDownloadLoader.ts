@@ -1,4 +1,4 @@
-type LoaderListener = (loading: boolean) => void;
+type LoaderListener = (loading: boolean, success?: boolean) => void;
 
 class PdfDownloadLoaderManager {
   private static instance: PdfDownloadLoaderManager;
@@ -21,8 +21,9 @@ class PdfDownloadLoaderManager {
       clearTimeout(this.timeoutId);
     }
     // Safety auto-dismiss: if bot or network never responds, clear spinner after 25s
+    // Not able to download -> success is false
     this.timeoutId = setTimeout(() => {
-      this.hideLoader();
+      this.hideLoader(false);
     }, timeoutMs);
 
     this.listeners.forEach(listener => {
@@ -34,7 +35,7 @@ class PdfDownloadLoaderManager {
     });
   }
 
-  public hideLoader(): void {
+  public hideLoader(success: boolean = false): void {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
@@ -42,7 +43,7 @@ class PdfDownloadLoaderManager {
     this.isLoading = false;
     this.listeners.forEach(listener => {
       try {
-        listener(false);
+        listener(false, success);
       } catch (e) {
         console.warn('PdfDownloadLoader listener error:', e);
       }
@@ -65,8 +66,8 @@ export const showPdfDownloadLoader = (): void => {
   PdfDownloadLoaderManager.getInstance().showLoader();
 };
 
-export const hidePdfDownloadLoader = (): void => {
-  PdfDownloadLoaderManager.getInstance().hideLoader();
+export const hidePdfDownloadLoader = (success: boolean = false): void => {
+  PdfDownloadLoaderManager.getInstance().hideLoader(success);
 };
 
 // Expose globally so external scripts or components can call it without imports

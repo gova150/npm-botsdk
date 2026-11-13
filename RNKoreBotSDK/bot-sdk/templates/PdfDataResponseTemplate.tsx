@@ -276,9 +276,6 @@ export const downloadPdfDataResponse = async (
   messageId?: string,
   isHistory?: boolean,
 ): Promise<string[]> => {
-  // Always hide loader once template arrives
-  hidePdfDownloadLoader();
-
   // NEVER run on history
   if (
     isHistory === true ||
@@ -287,18 +284,21 @@ export const downloadPdfDataResponse = async (
     payload?.payload?.isHistory === true
   ) {
     console.log('PdfDataResponseTemplate: Skipping download on history');
+    hidePdfDownloadLoader(false);
     return [];
   }
 
   const cards = extractPdfCards(payload);
   if (!cards || cards.length === 0) {
     console.warn('PdfDataResponseTemplate: No PDF cards found in payload');
+    hidePdfDownloadLoader(false);
     return [];
   }
 
   const destDir = getDocumentDirectory();
   if (!destDir) {
     console.warn('PdfDataResponseTemplate: No document directory available');
+    hidePdfDownloadLoader(false);
     return [];
   }
 
@@ -361,6 +361,12 @@ export const downloadPdfDataResponse = async (
     }
   }
 
+  if (savedPaths.length > 0) {
+    hidePdfDownloadLoader(true);
+  } else {
+    hidePdfDownloadLoader(false);
+  }
+
   return savedPaths;
 };
 
@@ -376,12 +382,10 @@ export default class PdfDataResponseTemplate extends React.Component<
   }
 
   componentDidMount() {
-    hidePdfDownloadLoader();
-    // Do NOT run download on mount - downloads are strictly handled for live messages only
+    // Downloads are strictly handled in downloadPdfDataResponse for live messages
   }
 
   componentDidUpdate() {
-    hidePdfDownloadLoader();
   }
 
   render() {

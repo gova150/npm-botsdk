@@ -204,12 +204,7 @@ export default abstract class BaseHeader<
                 'Live Agent',
                 'HeaderTalk',
               )}
-            {buttons?.reconnect?.show &&
-              this.renderMenuItem(
-                HeaderIconsId.RECONNECT,
-                'Reconnect',
-                'HeaderHelp',
-              )}
+            {/* Reconnect button is always hidden */}
             {buttons?.minimise?.show &&
               this.renderMenuItem(
                 HeaderIconsId.MINIMISE,
@@ -307,15 +302,7 @@ export default abstract class BaseHeader<
             styleProps,
             iconColor,
           )}
-        {buttons?.reconnect?.show &&
-          this.renderIcon(
-            HeaderIconsId.RECONNECT,
-            'HeaderReconnect',
-            14,
-            14,
-            styleProps,
-            iconColor,
-          )}
+        {/* Reconnect button is always hidden */}
         {buttons?.close?.show !== false &&
           this.renderIcon(
             HeaderIconsId.CLOSE,
@@ -341,9 +328,7 @@ export default abstract class BaseHeader<
     if (theme?.v3?.header?.buttons?.live_agent?.show) {
       count++;
     }
-    if (theme?.v3?.header?.buttons?.reconnect?.show) {
-      count++;
-    }
+    // Reconnect button is always hidden
     if (theme?.v3?.header?.buttons?.expand?.show) {
       count++;
     }

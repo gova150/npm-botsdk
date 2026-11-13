@@ -49,6 +49,7 @@ export interface PdfDownloadTemplateProps extends BaseViewProps {
 export interface PdfDownloadTemplateState extends BaseViewState {
   isLoading: boolean;
   clickedIndices: Set<number>;
+  disabledIndices: Set<number>;
 }
 
 const DownloadIcon = ({
@@ -91,19 +92,71 @@ export default class PdfDownloadTemplate extends BaseView<
 
   constructor(props: PdfDownloadTemplateProps) {
     super(props);
+    const initialDisabled = new Set<number>();
+    const rawPayload = props?.payload;
+    const payload: PdfDownloadPayloadData =
+      rawPayload?.payload && typeof rawPayload.payload === 'object'
+        ? rawPayload.payload
+        : rawPayload;
+    const buttons: PdfDownloadButtonItem[] = payload?.buttons || [];
+    buttons.forEach((btn, idx) => {
+      if (btn?.isDownloaded || btn?.disabled) {
+        initialDisabled.add(idx);
+      }
+    });
+
     this.state = {
       isLoading: false,
       clickedIndices: new Set<number>(),
+      disabledIndices: initialDisabled,
     };
   }
 
   componentDidMount() {
     this.unsubscribeLoader = PdfDownloadLoaderManager.getInstance().subscribe(
-      (loading: boolean) => {
-        this.setState(prevState => ({
-          isLoading: loading,
-          clickedIndices: loading ? prevState.clickedIndices : new Set<number>(),
-        }));
+      (loading: boolean, success?: boolean) => {
+        this.setState(prevState => {
+          if (loading) {
+            return {
+              isLoading: true,
+              clickedIndices: prevState.clickedIndices,
+              disabledIndices: prevState.disabledIndices,
+            };
+          }
+
+          // Loader is stopping:
+          if (success === true) {
+            // SUCCESS: Permanently disable all clicked buttons
+            const nextDisabled = new Set(prevState.disabledIndices);
+            const rawPayload = this.props?.payload;
+            const payload: PdfDownloadPayloadData =
+              rawPayload?.payload && typeof rawPayload.payload === 'object'
+                ? rawPayload.payload
+                : rawPayload;
+            const buttons: PdfDownloadButtonItem[] = payload?.buttons || [];
+
+            prevState.clickedIndices.forEach(idx => {
+              nextDisabled.add(idx);
+              if (buttons[idx]) {
+                buttons[idx].isDownloaded = true;
+                buttons[idx].disabled = true;
+              }
+            });
+
+            return {
+              isLoading: false,
+              clickedIndices: new Set<number>(),
+              disabledIndices: nextDisabled,
+            };
+          } else {
+            // FAILED / NOT ABLE TO DOWNLOAD: Re-enable the button for another try
+            return {
+              isLoading: false,
+              clickedIndices: new Set<number>(),
+              disabledIndices: prevState.disabledIndices,
+            };
+          }
+        });
       },
     );
   }
@@ -129,8 +182,13 @@ export default class PdfDownloadTemplate extends BaseView<
     const title = button?.title || '';
     const placeholderName = button?.titleName || 'Download';
     const isLastButton = index === totalButtons - 1;
-    const isClicked = this.state.clickedIndices.has(index);
-    const isButtonDisabled = isClicked || this.state.isLoading;
+    const isPermanentlyDisabled =
+      button?.isDownloaded === true ||
+      button?.disabled === true ||
+      this.state.disabledIndices.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices.has(index);
+    const isButtonDisabled =
+      isPermanentlyDisabled || isCurrentlyClicked || this.state.isLoading;
 
     return (
       <View
@@ -165,18 +223,26 @@ export default class PdfDownloadTemplate extends BaseView<
           style={[
             styles.button,
             {
-              backgroundColor: buttonBgColor,
-              borderColor: buttonBorderColor,
-              opacity: isClicked ? 0.5 : 1,
+              backgroundColor: isPermanentlyDisabled
+                ? '#98A2B3'
+                : buttonBgColor,
+              borderColor: isPermanentlyDisabled
+                ? '#98A2B3'
+                : buttonBorderColor,
+              opacity: isButtonDisabled ? 0.6 : 1,
             },
           ]}
           onPress={() => {
+            if (isButtonDisabled) {
+              return;
+            }
             this.setState(prevState => {
               const nextClicked = new Set(prevState.clickedIndices);
               nextClicked.add(index);
               return {
                 clickedIndices: nextClicked,
                 isLoading: true,
+                disabledIndices: prevState.disabledIndices,
               };
             });
 

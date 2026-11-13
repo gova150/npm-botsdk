@@ -17148,7 +17148,7 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
       clearTimeout(this.timeoutId);
     }
     this.timeoutId = setTimeout(() => {
-      this.hideLoader();
+      this.hideLoader(false);
     }, timeoutMs);
     this.listeners.forEach((listener) => {
       try {
@@ -17158,7 +17158,7 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
       }
     });
   }
-  hideLoader() {
+  hideLoader(success = false) {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = null;
@@ -17166,7 +17166,7 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
     this.isLoading = false;
     this.listeners.forEach((listener) => {
       try {
-        listener(false);
+        listener(false, success);
       } catch (e) {
         console.warn("PdfDownloadLoader listener error:", e);
       }
@@ -17185,8 +17185,8 @@ var PdfDownloadLoaderManager = class _PdfDownloadLoaderManager {
 var showPdfDownloadLoader = () => {
   PdfDownloadLoaderManager.getInstance().showLoader();
 };
-var hidePdfDownloadLoader = () => {
-  PdfDownloadLoaderManager.getInstance().hideLoader();
+var hidePdfDownloadLoader = (success = false) => {
+  PdfDownloadLoaderManager.getInstance().hideLoader(success);
 };
 if (typeof globalThis !== "undefined") {
   globalThis.showPdfDownloadLoader = showPdfDownloadLoader;
@@ -17234,18 +17234,57 @@ var PdfDownloadTemplate = class extends BaseView_default {
   unsubscribeLoader;
   constructor(props) {
     super(props);
+    const initialDisabled = /* @__PURE__ */ new Set();
+    const rawPayload = props?.payload;
+    const payload = rawPayload?.payload && typeof rawPayload.payload === "object" ? rawPayload.payload : rawPayload;
+    const buttons = payload?.buttons || [];
+    buttons.forEach((btn, idx) => {
+      if (btn?.isDownloaded || btn?.disabled) {
+        initialDisabled.add(idx);
+      }
+    });
     this.state = {
       isLoading: false,
-      clickedIndices: /* @__PURE__ */ new Set()
+      clickedIndices: /* @__PURE__ */ new Set(),
+      disabledIndices: initialDisabled
     };
   }
   componentDidMount() {
     this.unsubscribeLoader = PdfDownloadLoader_default.getInstance().subscribe(
-      (loading) => {
-        this.setState((prevState) => ({
-          isLoading: loading,
-          clickedIndices: loading ? prevState.clickedIndices : /* @__PURE__ */ new Set()
-        }));
+      (loading, success) => {
+        this.setState((prevState) => {
+          if (loading) {
+            return {
+              isLoading: true,
+              clickedIndices: prevState.clickedIndices,
+              disabledIndices: prevState.disabledIndices
+            };
+          }
+          if (success === true) {
+            const nextDisabled = new Set(prevState.disabledIndices);
+            const rawPayload = this.props?.payload;
+            const payload = rawPayload?.payload && typeof rawPayload.payload === "object" ? rawPayload.payload : rawPayload;
+            const buttons = payload?.buttons || [];
+            prevState.clickedIndices.forEach((idx) => {
+              nextDisabled.add(idx);
+              if (buttons[idx]) {
+                buttons[idx].isDownloaded = true;
+                buttons[idx].disabled = true;
+              }
+            });
+            return {
+              isLoading: false,
+              clickedIndices: /* @__PURE__ */ new Set(),
+              disabledIndices: nextDisabled
+            };
+          } else {
+            return {
+              isLoading: false,
+              clickedIndices: /* @__PURE__ */ new Set(),
+              disabledIndices: prevState.disabledIndices
+            };
+          }
+        });
       }
     );
   }
@@ -17258,8 +17297,9 @@ var PdfDownloadTemplate = class extends BaseView_default {
     const title = button?.title || "";
     const placeholderName = button?.titleName || "Download";
     const isLastButton = index === totalButtons - 1;
-    const isClicked = this.state.clickedIndices.has(index);
-    const isButtonDisabled = isClicked || this.state.isLoading;
+    const isPermanentlyDisabled = button?.isDownloaded === true || button?.disabled === true || this.state.disabledIndices.has(index);
+    const isCurrentlyClicked = this.state.clickedIndices.has(index);
+    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked || this.state.isLoading;
     return /* @__PURE__ */ React79.createElement(
       View66,
       {
@@ -17296,18 +17336,22 @@ var PdfDownloadTemplate = class extends BaseView_default {
           style: [
             styles61.button,
             {
-              backgroundColor: buttonBgColor,
-              borderColor: buttonBorderColor,
-              opacity: isClicked ? 0.5 : 1
+              backgroundColor: isPermanentlyDisabled ? "#98A2B3" : buttonBgColor,
+              borderColor: isPermanentlyDisabled ? "#98A2B3" : buttonBorderColor,
+              opacity: isButtonDisabled ? 0.6 : 1
             }
           ],
           onPress: () => {
+            if (isButtonDisabled) {
+              return;
+            }
             this.setState((prevState) => {
               const nextClicked = new Set(prevState.clickedIndices);
               nextClicked.add(index);
               return {
                 clickedIndices: nextClicked,
-                isLoading: true
+                isLoading: true,
+                disabledIndices: prevState.disabledIndices
               };
             });
             showPdfDownloadLoader();
@@ -17694,19 +17738,21 @@ function extractPdfCards(payload) {
   return result;
 }
 var downloadPdfDataResponse = async (payload, messageId, isHistory) => {
-  hidePdfDownloadLoader();
   if (isHistory === true || payload?.isHistory === true || payload?.isFromHistory === true || payload?.payload?.isHistory === true) {
     console.log("PdfDataResponseTemplate: Skipping download on history");
+    hidePdfDownloadLoader(false);
     return [];
   }
   const cards = extractPdfCards(payload);
   if (!cards || cards.length === 0) {
     console.warn("PdfDataResponseTemplate: No PDF cards found in payload");
+    hidePdfDownloadLoader(false);
     return [];
   }
   const destDir = getDocumentDirectory();
   if (!destDir) {
     console.warn("PdfDataResponseTemplate: No document directory available");
+    hidePdfDownloadLoader(false);
     return [];
   }
   const savedPaths = [];
@@ -17755,6 +17801,11 @@ var downloadPdfDataResponse = async (payload, messageId, isHistory) => {
       }
     }
   }
+  if (savedPaths.length > 0) {
+    hidePdfDownloadLoader(true);
+  } else {
+    hidePdfDownloadLoader(false);
+  }
   return savedPaths;
 };
 var PdfDataResponseTemplate = class extends React80.Component {
@@ -17765,10 +17816,8 @@ var PdfDataResponseTemplate = class extends React80.Component {
     };
   }
   componentDidMount() {
-    hidePdfDownloadLoader();
   }
   componentDidUpdate() {
-    hidePdfDownloadLoader();
   }
   render() {
     return null;
@@ -22460,10 +22509,6 @@ var BaseHeader = class extends React99.Component {
         HeaderIconsId.LIVE_AGENT,
         "Live Agent",
         "HeaderTalk"
-      ), buttons?.reconnect?.show && this.renderMenuItem(
-        HeaderIconsId.RECONNECT,
-        "Reconnect",
-        "HeaderHelp"
       ), buttons?.minimise?.show && this.renderMenuItem(
         HeaderIconsId.MINIMISE,
         "Minimise",
@@ -22535,14 +22580,6 @@ var BaseHeader = class extends React99.Component {
         styleProps,
         iconColor
       ),
-      buttons?.reconnect?.show && this.renderIcon(
-        HeaderIconsId.RECONNECT,
-        "HeaderReconnect",
-        14,
-        14,
-        styleProps,
-        iconColor
-      ),
       buttons?.close?.show !== false && this.renderIcon(
         HeaderIconsId.CLOSE,
         "HeaderClose",
@@ -22563,9 +22600,6 @@ var BaseHeader = class extends React99.Component {
       count++;
     }
     if (theme?.v3?.header?.buttons?.live_agent?.show) {
-      count++;
-    }
-    if (theme?.v3?.header?.buttons?.reconnect?.show) {
       count++;
     }
     if (theme?.v3?.header?.buttons?.expand?.show) {
@@ -24789,6 +24823,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   isKeyboardVisible = false;
   currentKeyboardHeight = 0;
   lastAndroidKeyboardHeight = 290;
+  currentBottomInset = 0;
   static defaultProps;
   _isChatMounted = false;
   fileUploadQueue;
@@ -25017,6 +25052,9 @@ var KoreChat = class _KoreChat extends React113.Component {
   getThemeData = () => {
     this.themApi?.getThemeAPI(this.props.botConfig, (data) => {
       if (data?.v3) {
+        if (data.v3.header?.buttons?.reconnect) {
+          data.v3.header.buttons.reconnect.show = false;
+        }
         this.saveThemeData(data);
         this.setState({
           showLoader: false,
@@ -25222,7 +25260,6 @@ var KoreChat = class _KoreChat extends React113.Component {
         return;
       }
       this.setIsBotResponseLoading(false);
-      hidePdfDownloadLoader();
       this.processMessage(data);
       if (isAgentConnect) {
         KoreBotClient4.getInstance().sendEvent("message_read");
@@ -25268,11 +25305,12 @@ var KoreChat = class _KoreChat extends React113.Component {
     const itemId = getItemId();
     const incomingTemplateType = getTemplateType(newMessages?.message);
     if (incomingTemplateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
-      hidePdfDownloadLoader();
       if (!newMessages?.isHistory && !newMessages?.isFromHistory) {
         const pdfPayload = newMessages?.message?.[0]?.component?.payload?.payload || newMessages?.message?.[0]?.component?.payload;
         const msgId = newMessages?.messageId || newMessages?._id || itemId;
         downloadPdfDataResponse(pdfPayload, msgId, false);
+      } else {
+        hidePdfDownloadLoader(false);
       }
       return;
     }
@@ -25531,9 +25569,6 @@ var KoreChat = class _KoreChat extends React113.Component {
     return this.state.typingDisabled;
   };
   setIsBotResponseLoading = (value) => {
-    if (!value) {
-      hidePdfDownloadLoader();
-    }
     this.setState({
       isBotResponseLoading: value
     });
@@ -25797,7 +25832,20 @@ var KoreChat = class _KoreChat extends React113.Component {
     if (navUrl.includes("://")) {
       Linking9.canOpenURL(navUrl).then((supported) => {
         if (supported) {
-          Linking9.openURL(navUrl);
+          Linking9.openURL(navUrl).catch((err) => {
+            console.warn("Linking error for navUrl:", navUrl, err);
+            if (this.props.navigation?.navigate) {
+              const routeName = this.resolveRouteNameFromUrl(navUrl);
+              try {
+                this.props.navigation.navigate(routeName, {
+                  data: item,
+                  navigationUrl: navUrl
+                });
+              } catch (e) {
+                console.warn("Fallback navigation failed:", e);
+              }
+            }
+          });
         } else if (this.props.navigation?.navigate) {
           const routeName = this.resolveRouteNameFromUrl(navUrl);
           this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
@@ -26154,7 +26202,9 @@ var KoreChat = class _KoreChat extends React113.Component {
     } else {
       neededPadding = Math.max(
         0,
-        Math.round(keyboardHeight - amountAlreadyShrunk - bottomOffset)
+        Math.round(
+          keyboardHeight + (this.currentBottomInset || 0) + 4 - amountAlreadyShrunk - bottomOffset
+        )
       );
     }
     if (this.state.androidKeyboardPadding !== neededPadding) {
@@ -27084,8 +27134,24 @@ var KoreChat = class _KoreChat extends React113.Component {
       const isBlackStatus = isBlackStatusBar(bgColor);
       return /* @__PURE__ */ React113.createElement(SafeAreaInsetsContext.Consumer, null, (insets) => {
         const rawTopInset = insets?.top ?? initialWindowMetrics?.insets?.top ?? 0;
-        const rawBottomInset = insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? 0;
-        const androidTopPadding = Platform22.OS === "android" ? rawTopInset > 0 ? Math.max(rawTopInset, StatusBar3.currentHeight || 0) : 0 : 0;
+        const statusBarHeight = Platform22.OS === "android" ? StatusBar3.currentHeight || 0 : 0;
+        const screenH = Dimensions36.get("screen").height;
+        const windowH = Dimensions36.get("window").height;
+        const potentialNavBar = Math.max(
+          0,
+          Math.round(screenH - windowH - (statusBarHeight || 0))
+        );
+        const rawBottomInset = insets?.bottom ?? initialWindowMetrics?.insets?.bottom ?? (potentialNavBar > 16 ? potentialNavBar : 0);
+        this.currentBottomInset = rawBottomInset;
+        let androidTopPadding = 0;
+        if (Platform22.OS === "android") {
+          if (insets != null) {
+            androidTopPadding = insets.top > 0 ? Math.max(insets.top, statusBarHeight, 44) : 0;
+          } else {
+            const fallbackTop = rawTopInset > 0 ? rawTopInset : statusBarHeight;
+            androidTopPadding = wrapInSafeArea !== false ? Math.max(fallbackTop, statusBarHeight, 44) : 0;
+          }
+        }
         const defaultBottomPadding = this.state.androidKeyboardPadding === 0 && Platform22.OS === "android" && wrapInSafeArea !== false && rawBottomInset > 0 ? rawBottomInset : 0;
         return /* @__PURE__ */ React113.createElement(ThemeProvider, { theme: this.state.themeData || null }, /* @__PURE__ */ React113.createElement(Wrapper, { style: [styles88.safeArea, { backgroundColor: bgColor }] }, /* @__PURE__ */ React113.createElement(
           View95,
