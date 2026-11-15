@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {View, Keyboard} from 'react-native';
 import {ChatHeaderType} from '../../../constants/Constant';
 import CompactHeader from './CompactHeader';
 import {ThemeContext} from '../../../theme/ThemeContext';
@@ -64,6 +65,10 @@ export default class ChatHeader extends React.Component<
   };
 
   render() {
-    return this.renderHeaderView();
+    return (
+      <View onTouchStart={() => Keyboard.dismiss()}>
+        {this.renderHeaderView()}
+      </View>
+    );
   }
 }

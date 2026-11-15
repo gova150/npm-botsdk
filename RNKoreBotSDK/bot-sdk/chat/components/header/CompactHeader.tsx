@@ -20,6 +20,7 @@ export default class CompactHeader extends BaseHeader<
   render() {
     const theme = this.context as ThemeType;
     const headerColor = theme?.v3?.header?.bg_color || '#FFFFFF';
+    const fontFamily = theme?.v3?.body?.font?.family || 'Inter';
 
     const titleName = theme?.v3?.header?.title?.name;
     const subTitleName = theme?.v3?.header?.sub_title?.name;
@@ -93,7 +94,10 @@ export default class CompactHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_text,
-                    {color: theme?.v3?.header?.sub_title?.color || '#6B7280'},
+                    {
+                      color: theme?.v3?.header?.sub_title?.color || '#6B7280',
+                      fontFamily,
+                    },
                   ]}>
                   {topText}
                 </Text>
@@ -103,7 +107,10 @@ export default class CompactHeader extends BaseHeader<
                   numberOfLines={1}
                   style={[
                     styles.title_sub_text,
-                    {color: theme?.v3?.header?.title?.color || '#111827'},
+                    {
+                      color: theme?.v3?.header?.title?.color || '#111827',
+                      fontFamily,
+                    },
                   ]}>
                   {bottomText}
                 </Text>

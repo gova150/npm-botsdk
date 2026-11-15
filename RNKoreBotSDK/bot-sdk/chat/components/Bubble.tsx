@@ -9,6 +9,7 @@ import {
   ToastAndroid,
   Platform,
   Animated,
+  Keyboard,
 } from 'react-native';
 
 import MessageText from '../../templates/MessageText';
@@ -625,6 +626,10 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
             wrapperStyle && wrapperStyle[position],
           ]}>
           <TouchableWithoutFeedback
+            onPress={(event: any) => {
+              Keyboard.dismiss();
+              this.props.onPress?.(this.props.currentMessage);
+            }}
             onLongPress={(event: any) =>
               this.onLongPress(event, position === 'right')
             }

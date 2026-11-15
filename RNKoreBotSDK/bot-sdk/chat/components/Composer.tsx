@@ -13,6 +13,7 @@ import {
   Animated,
   Easing,
   Platform,
+  Keyboard,
 } from 'react-native';
 import {
   MIN_COMPOSER_HEIGHT,
@@ -84,6 +85,22 @@ export function Composer({
   useEffect(() => {
     setTTS(isTTSenable);
   }, [isTTSenable]);
+
+  // Remove focus and reset border when keyboard is dismissed/hidden
+  useEffect(() => {
+    const onHide = () => {
+      textInputRef.current?.blur();
+      setIsFocused(false);
+    };
+
+    const willHideSub = Keyboard.addListener('keyboardWillHide', onHide);
+    const didHideSub = Keyboard.addListener('keyboardDidHide', onHide);
+
+    return () => {
+      willHideSub.remove();
+      didHideSub.remove();
+    };
+  }, []);
 
   const determineInputSizeChange = useCallback(
     (dimensions: {width: number; height: number}) => {
@@ -304,6 +321,7 @@ export function Composer({
                 fontStyle: 'normal',
                 fontWeight: '400',
                 color: textColor,
+                fontFamily: theme?.v3?.body?.font?.family || 'Inter',
                 alignSelf: 'stretch',
                 textAlignVertical: lineCount > 1 ? 'top' : 'center',
                 includeFontPadding: false,

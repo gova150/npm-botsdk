@@ -340,9 +340,6 @@ export default class KoreChat extends React.Component<
 
   constructor(props: KoraChatProps) {
     super(props);
-    if (props.fontFamily) {
-      TEMPLATE_STYLE_VALUES.FONT_FAMILY = props.fontFamily;
-    }
     this.themApi = new ActiveThemeAPI();
     this.fileUploadQueue = undefined;
     isAgentConnect = false;
@@ -598,7 +595,6 @@ export default class KoreChat extends React.Component<
           data.v3.body = data.v3.body || {};
           data.v3.body.font = data.v3.body.font || {};
           data.v3.body.font.family = this.props.fontFamily;
-          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
         }
         this.saveThemeData(data);
         this.setState({
@@ -618,7 +614,6 @@ export default class KoreChat extends React.Component<
               },
             },
           };
-          TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
         }
         this.saveThemeData(fallbackTheme);
         this.setState({
@@ -818,6 +813,16 @@ export default class KoreChat extends React.Component<
 
     if (text !== prevProps.text) {
       this.setTextFromProp(text);
+    }
+
+    if (this.props.fontFamily !== prevProps.fontFamily && this.props.fontFamily) {
+      if (this.state.themeData?.v3) {
+        const updatedTheme = {...this.state.themeData};
+        updatedTheme.v3.body = updatedTheme.v3.body || {};
+        updatedTheme.v3.body.font = updatedTheme.v3.body.font || {};
+        updatedTheme.v3.body.font.family = this.props.fontFamily;
+        this.setState({themeData: updatedTheme});
+      }
     }
 
     if (this.state.wlcomeModalVisible && !prevState.wlcomeModalVisible) {
@@ -1343,6 +1348,7 @@ export default class KoreChat extends React.Component<
     shouldResetInputToolbar = false,
     data_type = '',
   ): void => {
+    Keyboard.dismiss();
     this.stopTTS();
     if (this.props.onSend) {
       this.props.onSend(message.text, data_type);
@@ -1492,6 +1498,7 @@ export default class KoreChat extends React.Component<
     isDisplayUserMessage?: boolean;
   } = {}): void => {
     console.log('onSend called with message:', message);
+    Keyboard.dismiss();
 
     this.clearQuickReplies();
     if (shouldResetInputToolbar === true) {
@@ -2420,6 +2427,8 @@ export default class KoreChat extends React.Component<
                     marginBottom: 20,
                     textAlign: 'left',
                     color: '#333',
+                    fontFamily:
+                      this.state.themeData?.v3?.body?.font?.family || 'Inter',
                   }}
                 >
                   Menu
@@ -2620,7 +2629,13 @@ export default class KoreChat extends React.Component<
                 }, 100);
               }}
               style={{padding: 15, backgroundColor: Color.white, borderBottomWidth: 1, borderBottomColor: '#f0f0f0'}}>
-              <Text style={{fontSize: normalize(16), color: Color.text_color}}>
+              <Text
+                style={{
+                  fontSize: normalize(16),
+                  color: Color.text_color,
+                  fontFamily:
+                    this.state.themeData?.v3?.body?.font?.family || 'Inter',
+                }}>
                 {btn.title}
               </Text>
             </TouchableOpacity>
@@ -2730,7 +2745,13 @@ export default class KoreChat extends React.Component<
                 }, 150);
               }}
               style={{padding: 15, backgroundColor: Color.white, borderBottomWidth: 1, borderBottomColor: '#f0f0f0'}}>
-              <Text style={{fontSize: normalize(16), color: Color.text_color}}>
+              <Text
+                style={{
+                  fontSize: normalize(16),
+                  color: Color.text_color,
+                  fontFamily:
+                    this.state.themeData?.v3?.body?.font?.family || 'Inter',
+                }}>
                 {btn?.title}
               </Text>
             </TouchableOpacity>
@@ -2962,7 +2983,16 @@ export default class KoreChat extends React.Component<
             color={'#517BD2'}
           />
           <View style={styles.indicator_sub}>
-            <Text style={styles.loader_text}>{'Please wait'}</Text>
+            <Text
+              style={[
+                styles.loader_text,
+                {
+                  fontFamily:
+                    this.state.themeData?.v3?.body?.font?.family || 'Inter',
+                },
+              ]}>
+              {'Please wait'}
+            </Text>
           </View>
         </View>
       );

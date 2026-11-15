@@ -7,6 +7,7 @@ import {
   View,
   ViewProps,
   ViewStyle,
+  Keyboard,
 } from 'react-native';
 import Color from '../../theme/Color';
 import {normalize} from '../../utils/helpers';
@@ -60,6 +61,7 @@ export default class Send extends Component<SendProps> {
   }
 
   handleOnPress = (): void => {
+    Keyboard.dismiss();
     const {text, onSend} = this.props;
     if (text && text?.trim?.()?.length > 0) {
       onSend?.({text: text.trim()}, true);

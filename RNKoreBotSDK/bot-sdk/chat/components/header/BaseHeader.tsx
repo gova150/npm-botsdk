@@ -245,7 +245,13 @@ export default abstract class BaseHeader<
             marginStart: 0,
           })}
           <View style={styles.popover_item_text_main}>
-            <Text style={{fontSize: normalize(13), paddingEnd: 10}}>
+            <Text
+              style={{
+                fontSize: normalize(13),
+                paddingEnd: 10,
+                fontFamily:
+                  (this.context as ThemeType)?.v3?.body?.font?.family || 'Inter',
+              }}>
               {title}
             </Text>
           </View>

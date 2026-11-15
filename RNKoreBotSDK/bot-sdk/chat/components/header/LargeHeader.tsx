@@ -87,7 +87,8 @@ export default class LargeHeader extends BaseHeader<
                     styles.title_text,
                     {
                       color: theme?.v3?.header?.title?.color || '#000000',
-                      fontFamily: this.props.theme?.v3?.body?.font?.family,
+                      fontFamily:
+                        this.props.theme?.v3?.body?.font?.family || 'Inter',
                     },
                   ]}>
                   {this.getBotTitleName(theme?.v3?.header?.title?.name)}
@@ -97,7 +98,8 @@ export default class LargeHeader extends BaseHeader<
                     styles.sub_title_text,
                     {
                       color: theme?.v3?.header?.sub_title?.color || '#000000',
-                      fontFamily: this.props.theme?.v3?.body?.font?.family,
+                      fontFamily:
+                        this.props.theme?.v3?.body?.font?.family || 'Inter',
                     },
                   ]}>
                   {theme?.v3?.header?.sub_title?.name}

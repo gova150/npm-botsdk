@@ -656,6 +656,7 @@ export default class InputToolbar extends React.Component<
   };
 
   renderSTTView() {
+    const theme = this.context as IThemeType;
     return (
       <View style={{flex: 1}}>
         <FadeInToTop>
@@ -707,7 +708,15 @@ export default class InputToolbar extends React.Component<
               )}
             </View>
             <View style={{}}>
-              <Text style={styles.stt_title}>{this.getRecordTitle()}</Text>
+              <Text
+                style={[
+                  styles.stt_title,
+                  {
+                    fontFamily: theme?.v3?.body?.font?.family || 'Inter',
+                  },
+                ]}>
+                {this.getRecordTitle()}
+              </Text>
               {this.state.recordState !== RECORD_STATE.onSpeechStop && (
                 <TouchableOpacity
                   style={{
@@ -735,6 +744,7 @@ export default class InputToolbar extends React.Component<
                   <Text
                     style={{
                       color: '#4B4EDE',
+                      fontFamily: theme?.v3?.body?.font?.family || 'Inter',
                     }}>
                     {'Cancel'}
                   </Text>
@@ -835,7 +845,13 @@ export default class InputToolbar extends React.Component<
               : this.renderComposer()}
             {this.isShowActions() && this.renderSend()}
           </View>
-          <Text style={styles.disclaimerText}>
+          <Text
+            style={[
+              styles.disclaimerText,
+              {
+                fontFamily: theme?.v3?.body?.font?.family || 'Inter',
+              },
+            ]}>
             AI responses may occasionally be incorrect or outdated.
           </Text>
         </View>

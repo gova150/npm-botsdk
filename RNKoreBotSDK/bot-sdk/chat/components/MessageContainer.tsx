@@ -8,6 +8,7 @@ import {
   Platform,
   FlatList,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import Message, { MessageProps } from './Message';
 import Color from '../../theme/Color';
@@ -493,6 +494,9 @@ export default class MessageContainer extends PureComponent<
           this.props.alignTop ? styles.containerAlignTop : styles.container,
           { backgroundColor: this.getBackgroundColor() },
         ]}
+        onTouchStart={() => {
+          Keyboard.dismiss();
+        }}
       >
         {this.state.showScrollBottom && this.props.scrollToBottom
           ? this.renderScrollToBottomWrapper()
@@ -554,7 +558,7 @@ export default class MessageContainer extends PureComponent<
           {...this.props.listViewProps}
           nestedScrollEnabled={true}
           scrollEnabled={true}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           estimatedItemSize={100}
           contentInsetAdjustmentBehavior="scrollableAxes"
