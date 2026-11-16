@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F04700012D00000000000001 /* DMSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F04700022D00000000000001 /* DMSans-Bold.ttf */; };
+		F04700012D00000000000002 /* DMSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F04700022D00000000000002 /* DMSans-Italic.ttf */; };
+		F04700012D00000000000003 /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F04700022D00000000000003 /* DMSans-Medium.ttf */; };
+		F04700012D00000000000004 /* DMSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F04700022D00000000000004 /* DMSans-Regular.ttf */; };
+		F04700012D00000000000005 /* DMSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F04700022D00000000000005 /* DMSans-SemiBold.ttf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-SampleUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-SampleUI.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
@@ -16,6 +21,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F04700022D00000000000001 /* DMSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMSans-Bold.ttf"; path = "Fonts/DMSans-Bold.ttf"; sourceTree = "<group>"; };
+		F04700022D00000000000002 /* DMSans-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMSans-Italic.ttf"; path = "Fonts/DMSans-Italic.ttf"; sourceTree = "<group>"; };
+		F04700022D00000000000003 /* DMSans-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMSans-Medium.ttf"; path = "Fonts/DMSans-Medium.ttf"; sourceTree = "<group>"; };
+		F04700022D00000000000004 /* DMSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMSans-Regular.ttf"; path = "Fonts/DMSans-Regular.ttf"; sourceTree = "<group>"; };
+		F04700022D00000000000005 /* DMSans-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DMSans-SemiBold.ttf"; path = "Fonts/DMSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* SampleUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SampleUI/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SampleUI/Info.plist; sourceTree = "<group>"; };
@@ -41,6 +51,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F04700032D00000000000001 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				F04700022D00000000000001 /* DMSans-Bold.ttf */,
+				F04700022D00000000000002 /* DMSans-Italic.ttf */,
+				F04700022D00000000000003 /* DMSans-Medium.ttf */,
+				F04700022D00000000000004 /* DMSans-Regular.ttf */,
+				F04700022D00000000000005 /* DMSans-SemiBold.ttf */,
+			);
+			name = Fonts;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* SampleUI */ = {
 			isa = PBXGroup;
 			children = (
@@ -73,6 +95,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				F04700032D00000000000001 /* Fonts */,
 				13B07FAE1A68108700A75B9A /* SampleUI */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -161,6 +184,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F04700012D00000000000001 /* DMSans-Bold.ttf in Resources */,
+				F04700012D00000000000002 /* DMSans-Italic.ttf in Resources */,
+				F04700012D00000000000003 /* DMSans-Medium.ttf in Resources */,
+				F04700012D00000000000004 /* DMSans-Regular.ttf in Resources */,
+				F04700012D00000000000005 /* DMSans-SemiBold.ttf in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				B6FDE94DD064FFF0EA6ECACA /* PrivacyInfo.xcprivacy in Resources */,
