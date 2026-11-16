@@ -5,10 +5,10 @@ export const TEMPLATE_STYLE_VALUES = {
   BORDER_WIDTH: StyleSheet.hairlineWidth,
   BORDER_COLOR: '#728387', //'#E0E1E9',
   BORDER_RADIUS: 6,
-  BUBBLE_RADIUS: 10,
+  BUBBLE_RADIUS: 8,
 
   TEXT_COLOR: Color.text_color, //'#202124',
-  TEXT_SIZE: normalize(15),
+  TEXT_SIZE: 14,
   FONT_FAMILY: 'Inter',
   SUB_TEXT_SIZE: normalize(13),
 
@@ -45,17 +45,17 @@ export const botTimeStyles = {
 const BOT_STYLES = {
   medium: StyleSheet.create({
     size: {
-      fontSize: normalize(14),
+      fontSize: 14,
     },
   }),
   small: StyleSheet.create({
     size: {
-      fontSize: normalize(12),
+      fontSize: 12,
     },
   }),
   large: StyleSheet.create({
     size: {
-      fontSize: normalize(18),
+      fontSize: 18,
     },
   }),
 };
@@ -93,9 +93,10 @@ export const image_size = {
 export const rightBubbleStyles = {
   balloon: StyleSheet.create({
     bubble_style: {
-      borderBottomLeftRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
-      borderTopRightRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
-      borderTopLeftRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
+      borderTopLeftRadius: 8,
+      borderTopRightRadius: 8,
+      borderBottomRightRadius: 2,
+      borderBottomLeftRadius: 8,
     },
   }),
   rounded: StyleSheet.create({
@@ -118,9 +119,10 @@ export const rightBubbleStyles = {
 export const leftBubbleStyles = {
   balloon: StyleSheet.create({
     bubble_style: {
-      borderBottomRightRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
-      borderTopRightRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
-      borderTopLeftRadius: TEMPLATE_STYLE_VALUES.BUBBLE_RADIUS,
+      borderTopLeftRadius: 8,
+      borderTopRightRadius: 8,
+      borderBottomRightRadius: 8,
+      borderBottomLeftRadius: 2,
     },
   }),
   rounded: StyleSheet.create({

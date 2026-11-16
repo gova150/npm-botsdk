@@ -550,8 +550,10 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
           />
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 13,
+              fontStyle: 'normal',
               fontWeight: '700',
+              lineHeight: 19.5,
               color: primaryTextColor,
               fontFamily: fontFamily,
               marginLeft: 6,
@@ -573,8 +575,10 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
           }}>
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 13,
+              fontStyle: 'normal',
               fontWeight: '700',
+              lineHeight: 19.5,
               color: primaryTextColor,
               fontFamily: fontFamily,
               marginRight: 6,

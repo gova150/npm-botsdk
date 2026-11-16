@@ -343,9 +343,13 @@ export default class MessageContainer extends PureComponent<
     return <View style={styles.container} />;
   };
 
-  renderHeaderWrapper = (): any => (
-    <View style={styles.headerWrapper}>{this.renderLoadEarlier()}</View>
-  );
+  renderHeaderWrapper = (): any => {
+    const loadEarlierContent = this.renderLoadEarlier();
+    if (!loadEarlierContent) {
+      return null;
+    }
+    return <View style={styles.headerWrapper}>{loadEarlierContent}</View>;
+  };
 
   renderScrollBottomComponent(): any {
     const { scrollToBottomComponent } = this.props;
@@ -466,24 +470,10 @@ export default class MessageContainer extends PureComponent<
   };
 
   private renderLoadEarlier = () => {
-    //Show only if we already have 10+ messages
-    if (!this.state.isListScrollable) return null;
-
-    if (this.props.loadEarlier) {
-      return <ActivityIndicator size="small" style={{ padding: 10 }} />;
+    if (this.props.renderLoadEarlier) {
+      return this.props.renderLoadEarlier(this.props);
     }
-    return (
-      <View style={styles.history_container}>
-        <TouchableOpacity
-          style={[styles.card, styles.shadowProp]}
-          onPress={this.loadHistory}
-        >
-          <Text style={styles.heading}>
-            {LocalizationManager.getLocalizedString('load_earlier_messages')}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return null;
   };
 
   render() {
@@ -501,33 +491,6 @@ export default class MessageContainer extends PureComponent<
         {this.state.showScrollBottom && this.props.scrollToBottom
           ? this.renderScrollToBottomWrapper()
           : null}
-        <TouchableOpacity
-          style={{
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            borderRadius: 10,
-            backgroundColor: '#ffffff',
-            alignSelf: 'flex-end',
-            marginEnd: 5,
-          }}
-          onPress={(v) => {
-            if (!this.state.loadingHistory) {
-              this.setState({ loadingHistory: true });
-              this.loadHistory();
-            }
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 10,
-              color: '#000000',
-              fontWeight: 'bold',
-              display: 'none',
-            }}
-          >
-            Load history
-          </Text>
-        </TouchableOpacity>
         <FlatList
           ref={this.props.forwardRef}
           extraData={[this.props.extraData, this.props.isTyping]}

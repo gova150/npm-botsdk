@@ -24,6 +24,7 @@ export interface BaseHeaderProps {
   headerPaddingLeft?: number;
   headerPaddingRight?: number;
   headerStyle?: any;
+  fontFamily?: string;
 }
 export interface BaseHeaderState {
   showPopover: boolean;
@@ -250,7 +251,9 @@ export default abstract class BaseHeader<
                 fontSize: normalize(13),
                 paddingEnd: 10,
                 fontFamily:
-                  (this.context as ThemeType)?.v3?.body?.font?.family || 'Inter',
+                  this.props.fontFamily ||
+                  (this.context as ThemeType)?.v3?.body?.font?.family ||
+                  'DM Sans',
               }}>
               {title}
             </Text>

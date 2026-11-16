@@ -68,33 +68,5 @@ export function Day({
   isFirstMsz = false,
   theme,
 }: DayProps) {
-  const {getLocale} = useChatContext();
-
-  if (currentMessage == null || isSameDay(currentMessage, previousMessage)) {
-    if (!isFirstMsz) {
-      return null;
-    }
-  }
-
-  return (
-    <View style={[styles.container, containerStyle]}>
-      <View style={wrapperStyle}>
-        <Text
-          style={[
-            styles.text,
-            textStyle,
-
-            {
-              color: theme?.v3?.body?.time_stamp?.color,
-              fontFamily: theme?.v3?.body?.font?.family,
-              ...botTimeStyles[theme?.v3?.body?.font?.size || 'medium']?.size,
-            },
-          ]}>
-          {dayjs(currentMessage.createdOn)
-            .locale(getLocale())
-            .format(dateFormat)}
-        </Text>
-      </View>
-    </View>
-  );
+  return null;
 }

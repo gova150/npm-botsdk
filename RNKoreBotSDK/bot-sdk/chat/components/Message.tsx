@@ -273,7 +273,7 @@ export default class Message extends React.Component<MessageProps> {
       if (this.props.renderDay) {
         return this.props.renderDay(props);
       }
-      return <Day {...props} />;
+      return null;
     }
     return null;
   }

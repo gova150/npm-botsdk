@@ -47,7 +47,10 @@ interface MessageTextState extends BaseViewState {}
 const WWW_URL_PATTERN = /^www\./i;
 
 const textStyle: TextStyle = {
-  fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+  fontSize: 14,
+  fontStyle: 'normal',
+  fontWeight: '400',
+  lineHeight: 20,
   marginTop: 0,
   marginBottom: 0,
   marginLeft: 0,
@@ -351,17 +354,21 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
         <ParsedText
           style={[
             styles[position!]?.text,
+            botStyles[this.props?.theme?.v3?.body?.font?.size || 'medium']
+              ?.size,
             this.props.textStyle && this.props.textStyle[position!],
             this.props.customTextStyle,
 
             {
               fontFamily: this.props?.theme?.v3?.body?.font?.family,
+              fontSize: 14,
+              fontStyle: 'normal',
+              fontWeight: '400',
+              lineHeight: 20,
               color:
                 this.props?.theme?.v3?.general?.colors?.primary_text ||
                 '#ffffff',
             },
-            botStyles[this.props?.theme?.v3?.body?.font?.size || 'medium']
-              ?.size,
 
             position === 'left' && {
               color: bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,

@@ -19,7 +19,12 @@ export default class LargeHeader extends BaseHeader<
   static contextType = ThemeContext;
 
   render() {
-    const theme = this.context as ThemeType;
+    const theme = (this.props.theme || this.context) as ThemeType;
+    const fontFamily =
+      this.props.fontFamily ||
+      theme?.v3?.body?.font?.family ||
+      this.props.theme?.v3?.body?.font?.family ||
+      'DM Sans';
     const height: number = 140; //MIN_HEADER_HEIGHT || 45;78 79 217
     //const headerColor = '#4E4FD9'; //Color.blue; // theme?.v3?.header?.bg_color || Color.blue;
     const headerColor = theme?.v3?.header?.bg_color || Color.blue;
@@ -87,8 +92,7 @@ export default class LargeHeader extends BaseHeader<
                     styles.title_text,
                     {
                       color: theme?.v3?.header?.title?.color || '#000000',
-                      fontFamily:
-                        this.props.theme?.v3?.body?.font?.family || 'Inter',
+                      fontFamily,
                     },
                   ]}>
                   {this.getBotTitleName(theme?.v3?.header?.title?.name)}
@@ -98,8 +102,7 @@ export default class LargeHeader extends BaseHeader<
                     styles.sub_title_text,
                     {
                       color: theme?.v3?.header?.sub_title?.color || '#000000',
-                      fontFamily:
-                        this.props.theme?.v3?.body?.font?.family || 'Inter',
+                      fontFamily,
                     },
                   ]}>
                   {theme?.v3?.header?.sub_title?.name}
@@ -156,19 +159,19 @@ const styles = StyleSheet.create({
   },
   sub_title_text: {
     fontWeight: '700',
-    fontSize: normalize(15),
+    fontSize: 15,
     fontStyle: 'normal',
     lineHeight: 22.5,
   },
   title_sub_text: {
     fontWeight: '700',
-    fontSize: normalize(15),
+    fontSize: 15,
     fontStyle: 'normal',
     lineHeight: 22.5,
   },
   title_text: {
     fontWeight: '500',
-    fontSize: normalize(10), 
+    fontSize: 10,
     fontStyle: 'normal',
     lineHeight: 15,
     letterSpacing: 0.5,

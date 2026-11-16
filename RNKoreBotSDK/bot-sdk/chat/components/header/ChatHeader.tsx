@@ -18,6 +18,8 @@ interface ChatHeaderProps {
   headerPaddingLeft?: number;
   headerPaddingRight?: number;
   headerStyle?: any;
+  fontFamily?: string;
+  theme?: any;
 }
 interface ChatHeaderState {}
 
@@ -51,16 +53,43 @@ export default class ChatHeader extends React.Component<
 
     //console.log('type ----->:', type);
 
+    const fontFamily =
+      this.props.fontFamily || theme?.v3?.body?.font?.family;
+
     switch (type) {
       case ChatHeaderType.REGULAR:
-        return <MediumHeader {...this.props} theme={theme} />;
+        return (
+          <MediumHeader
+            {...this.props}
+            theme={theme}
+            fontFamily={fontFamily}
+          />
+        );
       case ChatHeaderType.LARGE:
-        return <CompactHeader {...this.props} theme={theme} />;
+        return (
+          <CompactHeader
+            {...this.props}
+            theme={theme}
+            fontFamily={fontFamily}
+          />
+        );
       case ChatHeaderType.COMPACT:
-        return <CompactHeader {...this.props} theme={theme} />;
+        return (
+          <CompactHeader
+            {...this.props}
+            theme={theme}
+            fontFamily={fontFamily}
+          />
+        );
 
       default:
-        return <CompactHeader {...this.props} theme={theme} />;
+        return (
+          <CompactHeader
+            {...this.props}
+            theme={theme}
+            fontFamily={fontFamily}
+          />
+        );
     }
   };
 

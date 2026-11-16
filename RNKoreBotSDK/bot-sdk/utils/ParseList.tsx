@@ -86,17 +86,21 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
 
   //start
 
-  const renderBold = (matchingString: string, matches: string[]) => (
-    <Text style={styles1.bold}>{matches[1]}</Text>
-  );
+  const renderBold = (_matchingString: string, matches: string[]) =>
+    matches[1];
 
-  const renderItalic = (matchingString: string, matches: string[]) => (
-    <Text style={[styles1.italic]}>{matches[1]}</Text>
-  );
+  const renderAsteriskBold = (_matchingString: string, matches: string[]) => {
+    const stars = matches[1];
+    const content = matches[2];
+    const remainingStars = stars.slice(1);
+    return remainingStars + content + remainingStars;
+  };
 
-  const renderBoldItalic = (matchingString: string, matches: string[]) => (
-    <Text style={styles1.boldItalic}>{matches[1]}</Text>
-  );
+  const renderItalic = (_matchingString: string, matches: string[]) =>
+    matches[1];
+
+  const renderBoldItalic = (_matchingString: string, matches: string[]) =>
+    matches[1];
 
   const renderLink = (matchingString: string, matches: string[]) => (
     <Text
@@ -564,7 +568,7 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
       renderText: renderEmail,
       onPress: onEmailPress,
     },
-    {pattern: /~(.*?)~/, renderText: renderItalic},
+    {pattern: /~(.*?)~/, style: styles1.italic, renderText: renderItalic},
     {pattern: /<p>(.*?)<\/p>/, renderText: renderParagraph},
     {pattern: /<div>(.*?)<\/div>/g, renderText: renderHTML},
     {pattern: /(^|\s)(#)\s(.*)/, renderText: renderHeader(1)},
@@ -604,9 +608,17 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
     {pattern: /^\[\^(\d+)\]:\s*(.*)$/gm, renderText: renderFootnote},
     {pattern: /\[\^(\d+)\]/g, renderText: renderFootnoteReference},
 
-    {pattern: /\*\*\*(.*?)\*\*\*/, renderText: renderBoldItalic},
-    {pattern: /\*(.*?)\*/, renderText: renderBold},
-    //{pattern: /\*(.*?)\*/g, renderText: renderItalic}, // Correct renderText to renderItalic
+    // Bold tags & markdown emphasis
+    {
+      pattern: /\$boldLetterStart\$([\s\S]*?)\$boldLetterEnd\$/i,
+      style: styles1.bold,
+      renderText: renderBold,
+    },
+    {
+      pattern: /(\*+)([^*\s\r\n](?:[^*\r\n]*?[^*\s\r\n])?)\1/,
+      style: styles1.bold,
+      renderText: renderAsteriskBold,
+    },
 
     {pattern: /(?:^\s*\*\s)(.*)/gm, renderText: renderUnorderedList},
     {pattern: /^\s*-\s+(.*)$/, renderText: renderUnorderedList},
@@ -660,13 +672,13 @@ const styles1 = StyleSheet.create({
     fontSize: 16,
   },
   bold: {
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   italic: {
     fontStyle: 'italic',
   },
   boldItalic: {
-    fontWeight: 'bold',
+    fontWeight: '700',
     fontStyle: 'italic',
   },
   link: {

@@ -346,7 +346,7 @@ export default class PdfDownloadTemplate extends BaseView<
         themeSeparator.startsWith('rgb') ||
         themeSeparator.startsWith('hsl'));
 
-    const dividerColor = isValidSeparatorColor ? themeSeparator : '#D0D5DD';
+    const dividerColor = isValidSeparatorColor ? themeSeparator : '#E5E7EB';
     const templateType =
       rawPayload?.template_type ||
       payload?.template_type ||
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     width: '100%',
-    backgroundColor: '#D0D5DD',
+    backgroundColor: '#E5E7EB',
     marginTop: 6,
     marginBottom: 12,
   },

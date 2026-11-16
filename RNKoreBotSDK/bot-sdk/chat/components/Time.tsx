@@ -141,12 +141,14 @@ export default class Time extends BaseView<TimeProps, TimeState> {
           <Text
             style={[
               {
-                fontSize: 12,
+                fontSize: 13,
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: 19.5,
                 color:
                   this.props?.theme?.v3?.body?.time_stamp?.color || '#6B7280',
                 fontFamily:
                   this.props?.theme?.v3?.body?.font?.family || 'Inter',
-                fontWeight: '400',
               },
             ]}>
             {this.dateToFromNowDaily(createdOn)}

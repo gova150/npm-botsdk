@@ -22,9 +22,13 @@ export default class MediumHeader extends BaseHeader<
   }
 
   render() {
-    const theme = this.context as ThemeType;
+    const theme = (this.props.theme || this.context) as ThemeType;
     const headerColor = theme?.v3?.header?.bg_color || '#FFFFFF';
-    const fontFamily = theme?.v3?.body?.font?.family || 'Inter';
+    const fontFamily =
+      this.props.fontFamily ||
+      theme?.v3?.body?.font?.family ||
+      this.props.theme?.v3?.body?.font?.family ||
+      'DM Sans';
 
     const titleName = theme?.v3?.header?.title?.name;
     const subTitleName = theme?.v3?.header?.sub_title?.name;
@@ -161,14 +165,14 @@ const styles = StyleSheet.create({
   },
   title_sub_text: {
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 15,
     fontStyle: 'normal',
-    lineHeight: 22,
+    lineHeight: 22.5,
     color: '#111827',
   },
   title_text: {
-    fontWeight: '600',
-    fontSize: 11,
+    fontWeight: '500',
+    fontSize: 10,
     fontStyle: 'normal',
     lineHeight: 15,
     letterSpacing: 0.5,

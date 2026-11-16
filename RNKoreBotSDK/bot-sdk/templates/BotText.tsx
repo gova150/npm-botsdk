@@ -190,12 +190,16 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
           <ParsedText
             style={[
               styles.text,
+              botStyles[theme?.v3?.body?.font?.size || 'medium']
+                ?.size,
               {
                 color: bubbleTheme.BUBBLE_LEFT_TEXT_COLOR,
                 fontFamily: theme?.v3?.body?.font?.family || 'Inter',
+                fontSize: 14,
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: 20,
               },
-              botStyles[theme?.v3?.body?.font?.size || 'medium']
-                ?.size,
               this.props.text_color && {
                 color: this.props.text_color,
               },
@@ -216,7 +220,10 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
 const styles = StyleSheet.create({
   text: {
     color: '#202124',
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20,
     marginTop: 0,
     marginBottom: 0,
     marginLeft: 0,
