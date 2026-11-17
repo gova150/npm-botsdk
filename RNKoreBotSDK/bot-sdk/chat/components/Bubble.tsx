@@ -432,20 +432,38 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
     return false;
   };
   private getPayload = (type?: string) => {
-    let payloadProps = {};
+    let payloadProps: any = {};
+    const msg = Array.isArray(this.props?.currentMessage?.message)
+      ? this.props?.currentMessage?.message?.[0]
+      : this.props?.currentMessage?.message;
+
     if (
       type === TEMPLATE_TYPES.TEXT ||
       type === TEMPLATE_TYPES.USER_ATTACHEMENT_TEMPLATE
     ) {
-      payloadProps = this.props?.currentMessage?.message?.[0]?.component;
+      payloadProps = msg?.component;
     } else {
+      let rawCompPayload = msg?.component?.payload;
+      if (typeof rawCompPayload === 'string') {
+        try {
+          rawCompPayload = JSON.parse(rawCompPayload);
+        } catch (e) {}
+      }
       payloadProps =
-        this.props?.currentMessage?.message?.[0]?.component?.payload?.payload ||
-        this.props?.currentMessage?.message?.[0]?.component?.payload;
+        rawCompPayload?.payload ||
+        rawCompPayload ||
+        msg?.component ||
+        msg;
     }
 
-    if (!payloadProps) {
-      return {};
+    if (typeof payloadProps === 'string') {
+      try {
+        payloadProps = JSON.parse(payloadProps);
+      } catch (e) {}
+    }
+
+    if (!payloadProps || typeof payloadProps !== 'object') {
+      payloadProps = {};
     }
     return {
       ...payloadProps,

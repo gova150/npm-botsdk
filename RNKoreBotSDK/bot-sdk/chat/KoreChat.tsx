@@ -969,9 +969,13 @@ export default class KoreChat extends React.Component<
       return;
     }
 
-    const hasRealAttachments = newMessages?.message?.[0]?.component?.payload?.attachments && 
-                              newMessages?.message?.[0]?.component?.payload?.attachments !== "attachments" &&
-                              newMessages?.message?.[0]?.component?.payload?.attachments !== "";
+    const hasRealAttachments =
+      Array.isArray(newMessages?.message?.[0]?.component?.payload?.attachments)
+        ? newMessages?.message?.[0]?.component?.payload?.attachments.length > 0
+        : (newMessages?.message?.[0]?.component?.payload?.attachments && 
+           newMessages?.message?.[0]?.component?.payload?.attachments !== "attachments" &&
+           newMessages?.message?.[0]?.component?.payload?.attachments !== "postback" &&
+           newMessages?.message?.[0]?.component?.payload?.attachments !== "");
 
     if (hasRealAttachments) {
       let attachmentTemplate = {
@@ -1512,7 +1516,7 @@ export default class KoreChat extends React.Component<
       var messageData = KoreBotClient.getInstance()?.sendMessage(
         message.text,
         data,
-        data_type,
+        data_type === 'attachments' ? data_type : undefined,
       );
 
       if (isDisplayUserMessage) {
@@ -1556,6 +1560,9 @@ export default class KoreChat extends React.Component<
       item?.url ||
       item?.route ||
       item?.actionUrl ||
+      item?.LinkUrl ||
+      item?.linkUrl ||
+      item?.routeName ||
       '';
 
     // 1. If host provided an onAppNavigation callback, invoke it:
@@ -1794,7 +1801,31 @@ export default class KoreChat extends React.Component<
         }
 
         break;
+      case TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS:
+      case 'customTemplate_displayClaims':
+        if (!isFromViewMore) {
+          const rawClaimNumber =
+            typeof item === 'string'
+              ? item
+              : item?.claimNumber || item?.payload || '';
+          const cleanClaimNumber = String(rawClaimNumber)
+            .replace(/^More details for\s*/i, '')
+            .replace(/^#/, '')
+            .trim();
+          const msgToSend = `More details for ${cleanClaimNumber}`;
+          if (cleanClaimNumber) {
+            this.onSend({
+              message: {text: msgToSend},
+              data: msgToSend,
+              isDisplayUserMessage: true,
+            });
+          }
+        }
+
+        break;
       case TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE:
+      case TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE:
+      case 'claimMoreDetails_template':
         if (!isFromViewMore) {
           this.handleInternalAppNavigation(item, template_type);
         }

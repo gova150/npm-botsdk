@@ -40,6 +40,8 @@ import DigitalFormTemplate from './DigitalFormTemplate';
 import PdfDownloadTemplate from './PdfDownloadTemplate';
 import PdfDataResponseTemplate from './PdfDataResponseTemplate';
 import InternalAppNavigationTemplate from './InternalAppNavigationTemplate';
+import DisplayClaimsTemplate from './DisplayClaimsTemplate';
+import ClaimMoreDetailsTemplate from './ClaimMoreDetailsTemplate';
 export interface BotTemplateProps {
   templateType: string;
   textContainerStyle?: any;
@@ -108,7 +110,34 @@ export default class BotTemplate extends React.Component<
     // console.log('templateType ----->:', templateType);
     // console.log('template payload ----->:', JSON.stringify(payload));
     // console.log('================ ================ ===============');
-    switch (templateType) {
+    let resolvedType = (templateType || '').trim();
+    if (
+      !resolvedType ||
+      resolvedType === 'other' ||
+      resolvedType === TEMPLATE_TYPES.OTHER ||
+      resolvedType === 'template'
+    ) {
+      let parsedPayload = payload;
+      if (typeof payload === 'string') {
+        try {
+          parsedPayload = JSON.parse(payload);
+        } catch (e) {}
+      }
+      const extracted =
+        parsedPayload?.template_type ||
+        parsedPayload?.payload?.template_type ||
+        parsedPayload?.type ||
+        this.props.currentMessage?.message?.[0]?.component?.payload?.template_type ||
+        this.props.currentMessage?.message?.[0]?.component?.payload?.payload?.template_type ||
+        this.props.currentMessage?.message?.[0]?.component?.template_type ||
+        this.props.currentMessage?.message?.[0]?.template_type;
+
+      if (extracted && typeof extracted === 'string') {
+        resolvedType = extracted.trim();
+      }
+    }
+
+    switch (resolvedType) {
       case TEMPLATE_TYPES.TEXT:
       case TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE:
       case TEMPLATE_TYPES.SYSTEM_TEMPLATE:
@@ -204,7 +233,60 @@ export default class BotTemplate extends React.Component<
               onListItemClick={this.props.onListItemClick}
             />
           );
+      case TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS:
+      case 'customTemplate_displayClaims':
+          return (
+            <DisplayClaimsTemplate
+              payload={payload}
+              theme={theme}
+              currentMessage={this.props.currentMessage}
+              onListItemClick={this.props.onListItemClick}
+            />
+          );
+      case TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE:
+      case 'claimMoreDetails_template':
+          return (
+            <ClaimMoreDetailsTemplate
+              payload={payload}
+              theme={theme}
+              currentMessage={this.props.currentMessage}
+              onListItemClick={this.props.onListItemClick}
+            />
+          );
     }
+
+    if (
+      resolvedType === 'customTemplate_displayClaims' ||
+      resolvedType === TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS ||
+      payload?.template_type === 'customTemplate_displayClaims' ||
+      payload?.payload?.template_type === 'customTemplate_displayClaims'
+    ) {
+      return (
+        <DisplayClaimsTemplate
+          payload={payload}
+          theme={theme}
+          currentMessage={this.props.currentMessage}
+          onListItemClick={this.props.onListItemClick}
+        />
+      );
+    }
+
+    if (
+      resolvedType === 'claimMoreDetails_template' ||
+      resolvedType === TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE ||
+      payload?.template_type === 'claimMoreDetails_template' ||
+      payload?.payload?.template_type === 'claimMoreDetails_template'
+    ) {
+      return (
+        <ClaimMoreDetailsTemplate
+          payload={payload}
+          theme={theme}
+          currentMessage={this.props.currentMessage}
+          onListItemClick={this.props.onListItemClick}
+        />
+      );
+    }
+
     return (
       <Text style={{padding: 10}}>
         {'This template is under development...'}

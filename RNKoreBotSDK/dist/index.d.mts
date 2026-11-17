@@ -86,6 +86,8 @@ declare const TEMPLATE_TYPES: {
     PDF_DOWNLOAD_TEMPLATE: string;
     PDF_DATA_RESPONSE: string;
     INTERNAL_APP_NAVIGATION_TEMPLATE: string;
+    CUSTOM_TEMPLATE_DISPLAY_CLAIMS: string;
+    CLAIM_MORE_DETAILS_TEMPLATE: string;
 };
 declare const RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 declare const KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -1149,6 +1151,104 @@ declare class InternalAppNavigationTemplate extends BaseView<InternalAppNavigati
     render(): React.JSX.Element;
 }
 
+interface DisplayClaimsItem {
+    claimNumber?: string;
+    claimType?: string;
+    dateOfService?: string;
+    memberName?: string;
+    patientName?: string;
+    providerName?: string;
+    claimStatus?: string;
+    totalCharged?: string;
+    whatYouOwe?: string;
+    totalMemberLiability?: string;
+    [key: string]: any;
+}
+interface DisplayClaimsPayloadData {
+    template_type?: string;
+    header_msg?: string;
+    headerMsg?: string;
+    footer_msg?: string;
+    footerMsg?: string;
+    numberOfClaims?: number;
+    moreDetailBtnName?: string;
+    buttons?: DisplayClaimsItem[];
+    payload?: any;
+    [key: string]: any;
+}
+interface DisplayClaimsTemplateProps extends BaseViewProps {
+    payload?: DisplayClaimsPayloadData;
+    theme?: IThemeType;
+    currentMessage?: any;
+    onListItemClick?: (type: string, item: any) => void;
+    onBottomSheetClose?: any;
+}
+interface DisplayClaimsTemplateState extends BaseViewState {
+    copiedClaimNumber?: string | null;
+}
+/**
+ * Format camelCase object keys into space-separated sentence case labels (first letter capitalized).
+ * E.g., 'whatYouOwe' -> 'What you owe'
+ */
+declare const formatCamelCaseToLabel: (key: string) => string;
+declare class DisplayClaimsTemplate extends BaseView<DisplayClaimsTemplateProps, DisplayClaimsTemplateState> {
+    constructor(props: DisplayClaimsTemplateProps);
+    private handleCopyClaimNumber;
+    private handleCardAction;
+    private getStatusBadgeStyle;
+    private renderCard;
+    render(): React.JSX.Element;
+    private renderFooterMessage;
+}
+
+interface ClaimHeaderItem {
+    title?: string;
+    value?: string;
+    styles?: {
+        color?: string;
+        'font-size'?: string;
+        'font-weight'?: string;
+        [key: string]: any;
+    };
+}
+interface ClaimMoreDetailsPayloadData {
+    template_type?: string;
+    footer_msg?: string;
+    footerMsg?: string;
+    moreDetailData?: {
+        claims?: Array<Record<string, any>>;
+        LinkUrl?: string;
+        linkUrl?: string;
+        Linktitle?: string;
+        linkTitle?: string;
+        claims_headers?: {
+            item1?: ClaimHeaderItem;
+            item2?: ClaimHeaderItem;
+            item3?: ClaimHeaderItem;
+            [key: string]: any;
+        };
+        [key: string]: any;
+    };
+    payload?: any;
+    [key: string]: any;
+}
+interface ClaimMoreDetailsTemplateProps extends BaseViewProps {
+    payload?: ClaimMoreDetailsPayloadData;
+    theme?: IThemeType;
+    currentMessage?: any;
+    onListItemClick?: (type: string, item: any) => void;
+    onBottomSheetClose?: any;
+}
+interface ClaimMoreDetailsTemplateState extends BaseViewState {
+}
+declare class ClaimMoreDetailsTemplate extends BaseView<ClaimMoreDetailsTemplateProps, ClaimMoreDetailsTemplateState> {
+    private getStatusBadgeStyle;
+    private parseClaimField;
+    private handleLinkPress;
+    private renderFooterMessage;
+    render(): React.JSX.Element;
+}
+
 interface PdfCardItem {
     PDFData: string;
     fileName: string;
@@ -1530,4 +1630,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };

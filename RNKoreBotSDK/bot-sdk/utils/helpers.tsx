@@ -284,19 +284,50 @@ export function isBlackStatusBar(color: any): boolean {
 }
 
 export function getTemplateType(message: any) {
+  const msg = Array.isArray(message) ? message[0] : message;
+
+  let compPayload = msg?.component?.payload;
+  if (typeof compPayload === 'string') {
+    try {
+      compPayload = JSON.parse(compPayload);
+    } catch (e) {}
+  }
+
+  // Direct check for customTemplate_displayClaims regardless of nesting
+  const detectedCustomType =
+    compPayload?.payload?.template_type ||
+    compPayload?.template_type ||
+    compPayload?.type ||
+    msg?.component?.template_type ||
+    msg?.template_type;
+
   if (
-    message?.[0]?.component?.type === 'template' &&
-    (message[0].component?.payload?.type === 'template' ||
-      message[0].component?.payload?.payload?.template_type ||
-      message[0].component?.payload?.template_type)
+    detectedCustomType === TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS ||
+    detectedCustomType === 'customTemplate_displayClaims'
+  ) {
+    return TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS;
+  }
+
+  if (
+    detectedCustomType === TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE ||
+    detectedCustomType === 'claimMoreDetails_template'
+  ) {
+    return TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE;
+  }
+
+  if (
+    (msg?.component?.type === 'template' || compPayload?.template_type || compPayload?.payload?.template_type) &&
+    (compPayload?.type === 'template' ||
+      compPayload?.payload?.template_type ||
+      compPayload?.template_type)
   ) {
     const templateType =
-      message[0].component.payload?.payload?.template_type ||
-      message[0].component.payload?.template_type;
+      compPayload?.payload?.template_type ||
+      compPayload?.template_type;
 
     if (
       templateType === TEMPLATE_TYPES.BUTTON &&
-      message[0].component.payload.formData != null
+      compPayload?.formData != null
     ) {
       return TEMPLATE_TYPES.DIGITALFORM_TEMPLATE;
     }

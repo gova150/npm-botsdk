@@ -138,6 +138,8 @@ export const TEMPLATE_TYPES = {
   PDF_DOWNLOAD_TEMPLATE: 'pdf_download',
   PDF_DATA_RESPONSE: 'pdf_dataResponse',
   INTERNAL_APP_NAVIGATION_TEMPLATE: 'internal_app_navigation',
+  CUSTOM_TEMPLATE_DISPLAY_CLAIMS: 'customTemplate_displayClaims',
+  CLAIM_MORE_DETAILS_TEMPLATE: 'claimMoreDetails_template',
 };
 
 export const RENDER_KORA_BUBBLE = 'RENDER_KORA_BUBBLE';
