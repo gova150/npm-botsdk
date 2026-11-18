@@ -581,8 +581,8 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
     {pattern: /\~\~(.*?)\~\~/, renderText: renderStrikethrough},
     // {pattern: /~(.*?)~/, renderText: renderItalic},
 
-    {pattern: />(.*?)$/, renderText: renderBlockquote},
-    {pattern: />\s*(.*)$/gm, renderText: renderBlockquote},
+    {pattern: /<br\s*\/?>/gi, renderText: () => '\n'},
+    {pattern: /^\s*>\s*(.*)$/gm, renderText: renderBlockquote},
     {pattern: /`([^`]*)`/, renderText: renderCode},
     {pattern: /^\d+\.\s(.*?)$/, renderText: renderOrderedList},
     {pattern: /^---$/, renderText: renderHorizontalRule},

@@ -70,42 +70,28 @@ export const formatCamelCaseToLabel = (key: string): string => {
 };
 
 /**
- * Extract branding body > buttons color from theme.
+ * Extract bg_color from buttons key in theme.
+ * Defaults to static color #2574BB if nothing is coming from it.
  */
 export const getBrandingButtonColor = (theme?: IThemeType): string => {
+  const STATIC_COLOR = '#2574BB';
+
   const bodyBtn =
     (theme?.v3?.body as any)?.buttons ||
     (theme?.v3?.body as any)?.button ||
     (theme as any)?.body?.buttons;
 
-  if (bodyBtn) {
-    if (
-      bodyBtn.color &&
-      typeof bodyBtn.color === 'string' &&
-      bodyBtn.color.toLowerCase() !== '#ffffff' &&
-      bodyBtn.color.toLowerCase() !== '#fff'
-    ) {
-      return bodyBtn.color;
-    }
-    if (bodyBtn.bg_color && typeof bodyBtn.bg_color === 'string') {
-      return bodyBtn.bg_color;
-    }
-    if (bodyBtn.color && typeof bodyBtn.color === 'string') {
-      return bodyBtn.color;
-    }
+  const btnBg = bodyBtn?.bg_color || bodyBtn?.bgColor;
+  if (btnBg && typeof btnBg === 'string' && btnBg.trim().length > 0) {
+    return btnBg.trim();
   }
 
-  const primary = theme?.v3?.general?.colors?.primary;
-  if (primary && typeof primary === 'string') {
-    return primary;
-  }
-
-  return '#0D4877';
+  return STATIC_COLOR;
 };
 
 const CopyIcon = ({
   size = 12,
-  color = '#0D4877',
+  color = '#2574BB',
 }: {
   size?: number;
   color?: string;
@@ -130,7 +116,7 @@ const CopyIcon = ({
 
 const RightArrowIcon = ({
   size = 18,
-  color = '#0D4877',
+  color = '#2574BB',
 }: {
   size?: number;
   color?: string;
@@ -280,6 +266,7 @@ export default class DisplayClaimsTemplate extends BaseView<
     botMsgColor: string = '#282828',
   ) => {
     const isLastCard = index === totalCards - 1;
+    const activeBtnColor = brandingBtnColor || '#2574BB';
     const rawClaimNum = String(item?.claimNumber || '').trim();
     const displayClaimNum = rawClaimNum.startsWith('#')
       ? rawClaimNum
@@ -330,7 +317,7 @@ export default class DisplayClaimsTemplate extends BaseView<
               accessibilityRole="button"
               accessibilityLabel={`Copy claim number ${rawClaimNum}`}
               onPress={() => this.handleCopyClaimNumber(rawClaimNum)}>
-              <CopyIcon size={12} color={brandingBtnColor} />
+              <CopyIcon size={12} color={activeBtnColor} />
             </TouchableOpacity>
             <Text
               style={[
@@ -430,12 +417,12 @@ export default class DisplayClaimsTemplate extends BaseView<
           <Text
             style={[
               styles.actionButtonText,
-              {color: brandingBtnColor},
+              {color: activeBtnColor},
               fontFamily ? {fontFamily} : null,
             ]}>
             {moreDetailBtnName}
           </Text>
-          <RightArrowIcon size={18} color={brandingBtnColor} />
+          <RightArrowIcon size={18} color={activeBtnColor} />
         </TouchableOpacity>
       </View>
     );
@@ -478,10 +465,12 @@ export default class DisplayClaimsTemplate extends BaseView<
       payload?.template_type ||
       TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS;
 
+    const activeTheme: IThemeType =
+      this.props?.theme || (this.context as IThemeType);
     const fontFamily =
-      this.props?.theme?.v3?.body?.font?.family ||
+      activeTheme?.v3?.body?.font?.family ||
       TEMPLATE_STYLE_VALUES.FONT_FAMILY;
-    const brandingBtnColor = getBrandingButtonColor(this.props?.theme);
+    const brandingBtnColor = getBrandingButtonColor(activeTheme);
 
     // Bot message background & text color from branding theme
     const botMsgBg =
@@ -594,7 +583,7 @@ export default class DisplayClaimsTemplate extends BaseView<
               {color: textColor},
               fontFamily ? {fontFamily} : null,
             ]}>
-            {footerMsg}
+            {footerMsg.replace(/<br\s*\/?>/gi, '\n')}
           </Text>
         </View>
       </View>

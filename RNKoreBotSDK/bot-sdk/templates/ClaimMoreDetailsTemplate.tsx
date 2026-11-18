@@ -106,12 +106,12 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
     }
 
     // 3. 'denied'
-    // #FFECEC as background color and color - #AD2929
+    // #FFECEC as background color, borderColor #E53A3A, and color #AD2929
     if (status === 'denied') {
       return {
         container: {
           backgroundColor: '#FFECEC',
-          borderColor: '#FFECEC',
+          borderColor: '#E53A3A',
           borderWidth: 1,
         },
         text: {
@@ -235,7 +235,7 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
               {color: textColor},
               fontFamily ? {fontFamily} : null,
             ]}>
-            {footerMsg}
+            {footerMsg.replace(/<br\s*\/?>/gi, '\n')}
           </Text>
         </View>
       </View>
@@ -269,16 +269,18 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
       payload?.template_type ||
       TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE;
 
+    const activeTheme: IThemeType =
+      this.props?.theme || (this.context as IThemeType);
     const fontFamily =
-      this.props?.theme?.v3?.body?.font?.family ||
+      activeTheme?.v3?.body?.font?.family ||
       TEMPLATE_STYLE_VALUES.FONT_FAMILY;
-    const brandingBtnColor = getBrandingButtonColor(this.props?.theme);
+    const brandingBtnColor = getBrandingButtonColor(activeTheme);
 
     // Bot message branding color for template text
     const botMsgColor =
-      this.props?.theme?.v3?.body?.bot_message?.color ||
-      (this.props?.theme as any)?.body?.bot_message?.color ||
-      (this.props?.theme as any)?.body?.botMessage?.color;
+      activeTheme?.v3?.body?.bot_message?.color ||
+      (activeTheme as any)?.body?.bot_message?.color ||
+      (activeTheme as any)?.body?.botMessage?.color;
     const textColor =
       botMsgColor && botMsgColor !== '#FFFFFF'
         ? botMsgColor
@@ -286,9 +288,9 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
 
     // Bot message background color for the footer bubble
     const botMsgBg =
-      this.props?.theme?.v3?.body?.bot_message?.bg_color ||
-      (this.props?.theme as any)?.body?.bot_message?.bg_color ||
-      (this.props?.theme as any)?.body?.botMessage?.bgColor;
+      activeTheme?.v3?.body?.bot_message?.bg_color ||
+      (activeTheme as any)?.body?.bot_message?.bg_color ||
+      (activeTheme as any)?.body?.botMessage?.bgColor;
     const footerBgColor =
       botMsgBg && botMsgBg !== '#3F51B5' ? botMsgBg : '#EFF1F5';
 
@@ -332,9 +334,29 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
       it.key.toLowerCase().includes('provider'),
     );
     const providerKey = providerItem?.key
-      ? `${providerItem.key}:`
+      ? (providerItem.key.endsWith(':') ? providerItem.key : `${providerItem.key}:`)
       : 'Provider Name:';
     const providerValue = providerItem?.value || '';
+
+    // 5c. Date of Service (pending / if present): below Provider Name
+    const serviceDateItem = allClaimItems.find(it => {
+      const k = it.key.toLowerCase();
+      return (
+        k.includes('date of service') ||
+        k.includes('service date') ||
+        (k.includes('service') && k.includes('date'))
+      );
+    });
+    const serviceDateKey = serviceDateItem?.key
+      ? (serviceDateItem.key.endsWith(':') ? serviceDateItem.key : `${serviceDateItem.key}:`)
+      : 'Date of service:';
+    const serviceDateValue =
+      serviceDateItem?.value ||
+      moreDetailData?.['Date of service'] ||
+      moreDetailData?.dateOfService ||
+      payload?.['Date of service'] ||
+      payload?.dateOfService ||
+      '';
 
     // 7a. Claim Finalized Date: from claims.Claim finalized date
     const finalizedDateItem = allClaimItems.find(
@@ -343,30 +365,66 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
         it.key.toLowerCase().includes('finalis'),
     );
     const finalizedKey = finalizedDateItem?.key
-      ? `${finalizedDateItem.key}:`
+      ? (finalizedDateItem.key.endsWith(':') ? finalizedDateItem.key : `${finalizedDateItem.key}:`)
       : 'Claim Finalized Date:';
     const finalizedValue = finalizedDateItem?.value || '';
 
-    // 6. 2x2 Financials Grid: remaining keys (excluding provider and finalized date)
+    // 6b. Processing message (pending status): below gridRows
+    const processingMsgItem = allClaimItems.find(it => {
+      const k = it.key.toLowerCase();
+      return (
+        k.includes('processing message') ||
+        k.replace(/[\s_-]+/g, '').includes('processingmessage')
+      );
+    });
+    const processingMessage =
+      processingMsgItem?.value ||
+      moreDetailData?.['Processing message'] ||
+      moreDetailData?.processingMessage ||
+      moreDetailData?.['Processing Message'] ||
+      payload?.['Processing message'] ||
+      payload?.processingMessage ||
+      '';
+
+    // 7b. Denial Reason (denied status): below Claim Finalized Date
+    const denialReasonItem = allClaimItems.find(it => {
+      const k = it.key.toLowerCase();
+      return (
+        k.includes('denial reason') ||
+        k.includes('denial') ||
+        k.replace(/[\s_-]+/g, '').includes('denialreason')
+      );
+    });
+    const denialReasonKey = denialReasonItem?.key
+      ? denialReasonItem.key.replace(/:$/, '').trim()
+      : 'Denial Reason';
+    const denialReasonValue =
+      denialReasonItem?.value ||
+      moreDetailData?.['Denial Reason'] ||
+      moreDetailData?.denialReason ||
+      payload?.['Denial Reason'] ||
+      payload?.denialReason ||
+      '';
+
+    // 7c. Link / Action: directly from payload.moreDetailData.Linktitle and LinkUrl
+    const linkTitle = moreDetailData?.Linktitle || '';
+    const linkUrl = moreDetailData?.LinkUrl || '';
+
+    // 6. 2x2 Financials Grid: remaining keys (excluding provider, date of service, finalized date, processing message, denial reason)
     const gridItems = allClaimItems.filter(
-      it => it !== providerItem && it !== finalizedDateItem,
+      it =>
+        it !== providerItem &&
+        it !== serviceDateItem &&
+        it !== finalizedDateItem &&
+        it !== processingMsgItem &&
+        it !== denialReasonItem &&
+        !it.key.toLowerCase().includes('linktitle') &&
+        !it.key.toLowerCase().includes('linkurl'),
     );
     const gridRows: ClaimFieldItem[][] = [];
     for (let i = 0; i < gridItems.length; i += 2) {
       gridRows.push(gridItems.slice(i, i + 2));
     }
-
-    // 7b. Link / Action
-    const linkTitle =
-      moreDetailData?.Linktitle ||
-      moreDetailData?.linkTitle ||
-      moreDetailData?.LinkTitle ||
-      '';
-    const linkUrl =
-      moreDetailData?.LinkUrl ||
-      moreDetailData?.linkUrl ||
-      moreDetailData?.LinkURL ||
-      '';
 
     const cardWidth = Math.min(getWindowWidth() * 0.85, 380);
 
@@ -463,13 +521,34 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
                 </Text>
               </View>
             ) : null}
+
+            {/* 5c. Date of Service (pending / if present): below Provider Name */}
+            {serviceDateValue ? (
+              <View style={styles.fieldGroup}>
+                <Text
+                  style={[
+                    styles.fieldLabel,
+                    {color: textColor},
+                    fontFamily ? {fontFamily} : null,
+                  ]}>
+                  {serviceDateKey}
+                </Text>
+                <Text
+                  style={[
+                    styles.serviceDateValue,
+                    fontFamily ? {fontFamily} : null,
+                  ]}>
+                  {serviceDateValue}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
-          {/* 5c. Horizontal divider: #E5E7EB */}
+          {/* 5d. Horizontal divider: #E5E7EB */}
           <View style={styles.divider} />
 
-          {/* 6. 2x2 Financials Grid */}
-          {gridRows.length > 0 ? (
+          {/* 6. Financials Grid & Processing Message */}
+          {gridRows.length > 0 || processingMessage ? (
             <View style={styles.section}>
               {gridRows.map((row, rIdx) => (
                 <View key={`grid_row_${rIdx}`} style={styles.gridRow}>
@@ -518,13 +597,26 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
                   </View>
                 </View>
               ))}
+
+              {/* 6b. Processing message (pending status): below the gridRows */}
+              {processingMessage ? (
+                <Text
+                  style={[
+                    styles.processingMessageText,
+                    fontFamily ? {fontFamily} : null,
+                  ]}>
+                  {processingMessage}
+                </Text>
+              ) : null}
             </View>
           ) : null}
 
-          {/* 6c. Horizontal divider: #E5E7EB */}
-          <View style={styles.divider} />
+          {/* 6c. Horizontal divider before Bottom Section: only if Finalized Date or Denial Reason exists */}
+          {finalizedValue || denialReasonValue ? (
+            <View style={styles.divider} />
+          ) : null}
 
-          {/* 7. Finalized Date & Link */}
+          {/* 7. Finalized Date, Denial Reason & Link */}
           <View style={styles.section}>
             {/* 7a. Claim Finalized Date: key 14/700/20, value 14/400/20 */}
             {finalizedValue ? (
@@ -548,7 +640,27 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
               </View>
             ) : null}
 
-            {/* 7b. Link / Action: underlined blue action link */}
+            {/* 7b. Denial Reason (denied status): below Claim Finalized Date in same block */}
+            {denialReasonValue ? (
+              <View style={styles.denialReasonContainer}>
+                <Text
+                  style={[
+                    styles.denialReasonKey,
+                    fontFamily ? {fontFamily} : null,
+                  ]}>
+                  {denialReasonKey}
+                </Text>
+                <Text
+                  style={[
+                    styles.denialReasonValue,
+                    fontFamily ? {fontFamily} : null,
+                  ]}>
+                  {denialReasonValue}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* 7c. Link / Action: underlined blue action link */}
             {linkTitle ? (
               <TouchableOpacity
                 activeOpacity={0.7}
@@ -558,7 +670,10 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
                 <Text
                   style={[
                     styles.actionLink,
-                    {color: brandingBtnColor},
+                    {
+                      color: brandingBtnColor,
+                      textDecorationColor: brandingBtnColor,
+                    },
                     fontFamily ? {fontFamily} : null,
                   ]}>
                   {linkTitle}
@@ -647,6 +762,13 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 20,
   },
+  serviceDateValue: {
+    color: '#333333',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20,
+  },
   gridRow: {
     flexDirection: 'row',
     marginBottom: 12,
@@ -672,13 +794,45 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 20,
   },
+  processingMessageText: {
+    color: '#333333',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  denialReasonContainer: {
+    backgroundColor: '#FFECEC',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  denialReasonKey: {
+    color: '#AD2929',
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  denialReasonValue: {
+    color: '#333333',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 17,
+  },
   actionLink: {
     fontSize: 14,
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 20,
     textDecorationLine: 'underline',
-    textDecorationColor: '#257488',
+    textDecorationColor: '#2574BB',
+    marginTop: 4,
   },
   footerMessageWrapper: {
     marginTop: 16,

@@ -169,9 +169,8 @@ export default abstract class BaseHeader<
 
   private onDropdownMenuView = (theme?: ThemeType, iconColor?: string) => {
     let buttons = theme?.v3?.header?.buttons;
-    const height: number = MIN_HEADER_HEIGHT || 45;
     return (
-      <View style={[styles.dropdown_main, {height: normalize(height)}]}>
+      <View style={styles.dropdown_main}>
         <LazyPopover
           mode={'rn-modal'}
           placement={'bottom'}
@@ -183,7 +182,7 @@ export default abstract class BaseHeader<
           }}
           from={
             <TouchableOpacity
-              style={[styles.pop_main]}
+              style={[styles.pop_main, styles.header_right_button]}
               onPress={() => {
                 this.setState({
                   showPopover: true,
@@ -191,8 +190,8 @@ export default abstract class BaseHeader<
               }}>
               <SvgIcon
                 name={'ThreeDots'}
-                width={normalize(18)}
-                height={normalize(18)}
+                width={20}
+                height={20}
                 color={
                   iconColor
                     ? iconColor
@@ -286,34 +285,34 @@ export default abstract class BaseHeader<
           {
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 12,
+            gap: 0,
           },
           stylePropsMain,
         ]}>
         {this.renderIcon(
           HeaderIconsId.MINIMISE,
           'HeaderMenu',
-          14,
-          14,
-          styleProps,
+          20,
+          20,
+          [styleProps, styles.header_right_button],
           iconColor,
         )}
         {buttons?.help?.show !== false &&
           this.renderIcon(
             HeaderIconsId.HELP,
             'HeaderHelp',
-            14,
-            14,
-            styleProps,
+            20,
+            20,
+            [styleProps, styles.header_right_button],
             iconColor,
           )}
         {buttons?.live_agent?.show &&
           this.renderIcon(
             HeaderIconsId.LIVE_AGENT,
             'HeaderTalk',
-            14,
-            14,
-            styleProps,
+            20,
+            20,
+            [styleProps, styles.header_right_button],
             iconColor,
           )}
         {/* Reconnect button is always hidden */}
@@ -321,9 +320,9 @@ export default abstract class BaseHeader<
           this.renderIcon(
             HeaderIconsId.CLOSE,
             'HeaderClose',
-            11,
-            14,
-            styleProps,
+            20,
+            20,
+            [styleProps, styles.header_right_button],
             iconColor,
           )}
         {buttons?.threeDots?.show && this.onDropdownMenuView(theme, iconColor)}
@@ -371,20 +370,25 @@ const styles = StyleSheet.create({
     minWidth: normalize(80),
   },
   pop_main: {
-    position: 'absolute',
-    end: 0,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
-    paddingLeft: 15,
-    paddingTop: 5,
-    paddingEnd: 10,
-    paddingBottom: 5,
-    marginEnd: 5,
+    alignItems: 'center',
+    fontSize: 20,
     zIndex: 1,
   },
   dropdown_main: {
     alignItems: 'center',
     justifyContent: 'center',
-    // backgroundColor: 'green',
+    width: 40,
+    height: 40,
+  },
+  header_right_button: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
   },
   popover_item_text_main: {
     alignItems: 'center',

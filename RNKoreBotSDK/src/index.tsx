@@ -28,6 +28,7 @@ export {default as InternalAppNavigationTemplate} from '../bot-sdk/templates/Int
 export {
   default as DisplayClaimsTemplate,
   formatCamelCaseToLabel,
+  getBrandingButtonColor,
 } from '../bot-sdk/templates/DisplayClaimsTemplate';
 export {default as ClaimMoreDetailsTemplate} from '../bot-sdk/templates/ClaimMoreDetailsTemplate';
 export {

@@ -243,10 +243,14 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
   }
 
   parseTextWithIcons = (text: string) => {
+    if (!text || typeof text !== 'string') {
+      return text;
+    }
     const entityRegex = /&#(\d+);/g;
-    const parsedText = text?.replace(entityRegex, (match, decimal) =>
+    let parsedText = text.replace(entityRegex, (_match, decimal) =>
       String.fromCodePoint(decimal),
     );
+    parsedText = parsedText.replace(/<br\s*\/?>/gi, '\n');
     return parsedText;
   };
 

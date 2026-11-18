@@ -206,8 +206,8 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
             ]}
             parse={getParseList(theme, brandingBtnBorder)}>
             {this.props.isFilterApply
-              ? text.toString().replace(/\s\s+/g, '\n').trim()
-              : text.trim()}
+              ? text.toString().replace(/<br\s*\/?>/gi, '\n').replace(/\s\s+/g, '\n').trim()
+              : text.toString().replace(/<br\s*\/?>/gi, '\n').trim()}
           </ParsedText>
         </View>
       </View>

@@ -1,196 +1,219 @@
 import * as React from 'react';
 import {Component} from 'react';
+import {Animated, Easing, StyleSheet, Text, View} from 'react-native';
 import {ThemeContext} from '../../theme/ThemeContext';
 import {ThemeType} from '../../theme/ThemeType';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BOT_ICON_URL} from '../../constants/Constant';
 import {normalize} from '../../utils/helpers';
-import {StyleSheet, Text, View, Image} from 'react-native';
-import CustomLoadingDots from '../../components/CustomLoadingDots';
-
-import KoraBotClient from 'rn-kore-bot-socket-lib-v79';
-import {botStyles} from '../../theme/styles';
-import {isIOS} from '../../utils/PlatformCheck';
-import Color from '../../theme/Color';
 
 interface TypingProps {
   isTypingIndicator?: boolean;
 }
-interface TypingState {}
+
+interface TypingState {
+  indicatorText: string;
+}
 
 export default class TypingIndicator extends Component<
   TypingProps,
   TypingState
 > {
   static contextType = ThemeContext;
-  botIconUrl: any = null;
-  theme?: any;
-  bgColor: any;
+  private typingTimer: ReturnType<typeof setTimeout> | null = null;
+  private animatedColor = new Animated.Value(0);
+  private animationLoop: Animated.CompositeAnimation | null = null;
+  private _isMounted: boolean = false;
 
-  private getBackgroundColor = () => {
-    const theme = this.context as ThemeType;
-    if (theme?.v3?.body?.background?.type === 'color') {
-      return theme?.v3?.body?.background?.color || '#FFFFFF';
-    }
-    return '#FFFFFF';
-  };
-
-  private getAvatarBgColor = () => {
-    const theme = this.context as ThemeType;
-    if (theme?.v3?.general?.colors?.primary) {
-      return theme?.v3?.general?.colors?.primary || '#000000';
-    }
-
-    return '#000000';
-  };
-  private getDotColor = () => {
-    const theme = this.context as ThemeType;
-    if (theme?.v3?.body?.time_stamp?.color) {
-      return theme?.v3?.body?.time_stamp?.color + 'c8' || '#000000c8';
-    }
-    return '#000000c8';
-  };
-
-  private getBotIconUrl = () => {
-    //if (!this.botIconUrl) {
-    AsyncStorage.getItem(BOT_ICON_URL).then(url => {
-      this.botIconUrl = url;
-    });
-    // }
-    return this.botIconUrl;
-  };
-
-  renderBotName(): React.ReactNode {
-    let name = KoraBotClient.getInstance().getBotName() || ' ';
-
-    const theme = this.context as ThemeType;
-    let textColor = theme?.v3?.general?.colors?.secondary_text || '#FFFFFF';
-
-    return (
-      <Text
-        style={[
-          {
-            color: textColor,
-            fontFamily: theme?.v3?.body?.font?.family,
-            ...botStyles['small']?.size,
-          },
-        ]}>
-        {name?.[0]}
-      </Text>
-    );
+  constructor(props: TypingProps) {
+    super(props);
+    this.state = {
+      indicatorText: 'Typing',
+    };
   }
 
-  private renderBotIcon = (url: any) => {
-    let bg = this.getAvatarBgColor();
-    return (
-      <View style={styles.bot_icon_con}>
-        <View
-          style={[
-            styles.bot_icon_con2,
-            {
-              backgroundColor: url ? Color.transparent : bg,
-            },
-          ]}>
-          {url ? (
-            <Image
-              source={{
-                uri: url,
-              }}
-              style={[styles.bot_icon]}
-            />
-          ) : (
-            this.renderBotName()
-          )}
-        </View>
-      </View>
+  componentDidMount() {
+    this._isMounted = true;
+    if (this.props.isTypingIndicator) {
+      this.startTypingFlow();
+    }
+  }
+
+  componentDidUpdate(prevProps: TypingProps) {
+    if (this.props.isTypingIndicator !== prevProps.isTypingIndicator) {
+      if (this.props.isTypingIndicator) {
+        this.startTypingFlow();
+      } else {
+        this.stopTypingFlow();
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.clearTimer();
+    this.stopAnimation();
+  }
+
+  private startTypingFlow = () => {
+    this.clearTimer();
+    if (this._isMounted) {
+      this.setState({indicatorText: 'Typing'});
+    }
+
+    this.typingTimer = setTimeout(() => {
+      if (this._isMounted && this.props.isTypingIndicator) {
+        this.setState({indicatorText: 'Please wait'});
+      }
+    }, 1500);
+
+    this.startAnimation();
+  };
+
+  private stopTypingFlow = () => {
+    this.clearTimer();
+    this.stopAnimation();
+    if (this._isMounted) {
+      this.setState({indicatorText: 'Typing'});
+    }
+  };
+
+  private clearTimer = () => {
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+      this.typingTimer = null;
+    }
+  };
+
+  private startAnimation = () => {
+    if (this.animationLoop) {
+      this.animationLoop.stop();
+    }
+    this.animatedColor.setValue(0);
+    this.animationLoop = Animated.loop(
+      Animated.timing(this.animatedColor, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }),
     );
+    this.animationLoop.start();
+  };
+
+  private stopAnimation = () => {
+    if (this.animationLoop) {
+      this.animationLoop.stop();
+      this.animationLoop = null;
+    }
+    this.animatedColor.setValue(0);
   };
 
   render() {
+    if (!this.props.isTypingIndicator) {
+      return null;
+    }
+
+    const theme = this.context as ThemeType;
+    const botMsgColor =
+      theme?.v3?.body?.bot_message?.color ||
+      (theme as any)?.body?.bot_message?.color ||
+      '#282828';
+    const fontFamily =
+      theme?.v3?.body?.font?.family ||
+      (theme as any)?.body?.font?.family;
+
+    const dot1Color = this.animatedColor.interpolate({
+      inputRange: [0, 1 / 3, 2 / 3, 1],
+      outputRange: ['#DBE7F2', '#C3DAEB', '#B3D1EB', '#DBE7F2'],
+    });
+
+    const dot2Color = this.animatedColor.interpolate({
+      inputRange: [0, 1 / 3, 2 / 3, 1],
+      outputRange: ['#C3DAEB', '#B3D1EB', '#DBE7F2', '#C3DAEB'],
+    });
+
+    const dot3Color = this.animatedColor.interpolate({
+      inputRange: [0, 1 / 3, 2 / 3, 1],
+      outputRange: ['#B3D1EB', '#DBE7F2', '#C3DAEB', '#B3D1EB'],
+    });
+
     return (
       <View style={styles.container}>
-        <View style={[styles.box, styles.box1]}>{this.renderTyping()}</View>
+        <View style={[styles.box, styles.box1]}>
+          <View style={styles.row}>
+            <Text
+              style={[
+                styles.text,
+                {
+                  color: botMsgColor,
+                  ...(fontFamily ? {fontFamily} : {}),
+                },
+              ]}>
+              {this.state.indicatorText}
+            </Text>
+            <View style={styles.dotsContainer}>
+              <Animated.View
+                style={[
+                  styles.dot,
+                  styles.dotSpacing,
+                  {backgroundColor: dot1Color},
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.dot,
+                  styles.dotSpacing,
+                  {backgroundColor: dot2Color},
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.dot,
+                  {backgroundColor: dot3Color},
+                ]}
+              />
+            </View>
+          </View>
+        </View>
       </View>
     );
   }
-
-  renderTyping = (): React.ReactNode => {
-    let isTypingIndicator = this.props.isTypingIndicator;
-    // let bgColor = this.getBackgroundColor();
-    let url = undefined;
-    if (isTypingIndicator) {
-      url = this.getBotIconUrl();
-    }
-    // console.log('getBotIconUrl ---->', url);
-    // console.log('getBackgroundColor ---->:', bgColor);
-
-    return (
-      <View style={styles.main}>
-        {isTypingIndicator && (
-          <View style={styles.horizontalContainer}>
-            {this.renderBotIcon(url)}
-            <CustomLoadingDots
-              animation="typing"
-              color={this.getDotColor()}
-              size={isIOS ? 7 : 4}
-              spacing={isIOS ? 8 : 7}
-              delay={isIOS ? 120 : 180}
-            />
-          </View>
-        )}
-      </View>
-    );
-  };
 }
 
 const styles = StyleSheet.create({
-  bot_icon: {
-    height: normalize(22),
-    width: normalize(22),
-
-    margin: 0,
-    alignSelf: 'center',
-    resizeMode: 'stretch',
-  },
-  bot_icon_con2: {
-    height: normalize(22),
-    width: normalize(22),
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bot_icon_con: {
-    marginLeft: 16,
-  },
-  main: {
-    //height: normalize(22),
-    //marginBottom: normalize(isIOS ? 0 : 8),
-    // position: 'absolute',
-    //left: 0,
-    //top: 0,
-    //bottom: 0,
-    //zIndex: 200,
-    //marginBottom: 3,
-
-    backgroundColor: 'transparency',
-  },
-
   container: {
-    //flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative', // Parent container needs to have position relative
+    position: 'relative',
   },
   box: {
     position: 'absolute',
   },
   box1: {
-    top: -normalize(23),
-    left: 0,
-    zIndex: 1, // Higher zIndex brings the element to the front
+    top: -normalize(25),
+    left: normalize(16),
+    zIndex: 1,
   },
-  horizontalContainer: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  text: {
+    fontSize: 11,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 19.5,
+    marginRight: 10,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  dotSpacing: {
+    marginRight: 6,
   },
 });

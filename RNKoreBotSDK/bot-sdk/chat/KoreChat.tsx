@@ -1108,7 +1108,11 @@ export default class KoreChat extends React.Component<
     }
     
     try {
-      await this.ttsModule.speak(message, {
+      const cleanMsg =
+        typeof message === 'string'
+          ? message.replace(/<br\s*\/?>/gi, ' ')
+          : message;
+      await this.ttsModule.speak(cleanMsg, {
         iosVoiceId: 'com.apple.ttsbundle.Moira-compact',
         rate: 0.5,
         pitch: 1.0,
@@ -1117,7 +1121,11 @@ export default class KoreChat extends React.Component<
       console.error('TTS: Speak failed:', error);
       // Try a simpler speak call without options
       try {
-        await this.ttsModule.speak(message);
+        const cleanMsg =
+          typeof message === 'string'
+            ? message.replace(/<br\s*\/?>/gi, ' ')
+            : message;
+        await this.ttsModule.speak(cleanMsg);
       } catch (fallbackError) {
         console.error('TTS: Fallback speak also failed:', fallbackError);
       }
