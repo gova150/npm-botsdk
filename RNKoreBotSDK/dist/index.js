@@ -687,6 +687,7 @@ __export(src_exports, {
   BOT_ICON_URL: () => BOT_ICON_URL,
   BRANDING_RESPONSE_FILE: () => BRANDING_RESPONSE_FILE,
   BotTemplate: () => BotTemplate,
+  CONNECTION_STATE: () => CONNECTION_STATE,
   ChatHeaderType: () => ChatHeaderType,
   ClaimMoreDetailsTemplate: () => ClaimMoreDetailsTemplate,
   Color: () => Color_default,
@@ -767,6 +768,11 @@ var attach_menu_buttons = [
     title: "Upload Video"
   }
 ];
+var CONNECTION_STATE = {
+  CONNECTING: 0,
+  CONNECTED: 1,
+  DISCONNECTED: 2
+};
 var HeaderIconsId = {
   BACK: "BACK",
   HELP: "HELP",
@@ -18740,7 +18746,6 @@ var DisplayClaimsTemplate = class extends BaseView_default {
         {
           style: [
             styles66.claimNumberText,
-            { color: botMsgColor },
             fontFamily ? { fontFamily } : null
           ]
         },
@@ -19009,7 +19014,7 @@ var styles66 = import_react_native79.StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: 16,
-    color: "#282828"
+    color: "#666666"
   },
   providerName: {
     marginBottom: 8,
@@ -19043,7 +19048,7 @@ var styles66 = import_react_native79.StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: 16,
-    color: "#6B7280",
+    color: "#666666",
     marginBottom: 2
   },
   gridValueMedium: {
@@ -20068,17 +20073,10 @@ function Composer({
     setTTS(isTTSenable);
   }, [isTTSenable]);
   (0, import_react34.useEffect)(() => {
-    const onHide = () => {
-      textInputRef.current?.blur();
-      setIsFocused(false);
-    };
-    const willHideSub = import_react_native82.Keyboard.addListener("keyboardWillHide", onHide);
-    const didHideSub = import_react_native82.Keyboard.addListener("keyboardDidHide", onHide);
-    return () => {
-      willHideSub.remove();
-      didHideSub.remove();
-    };
-  }, []);
+    if (textInputAutoFocus) {
+      setIsFocused(true);
+    }
+  }, [textInputAutoFocus]);
   const determineInputSizeChange = (0, import_react34.useCallback)(
     (dimensions) => {
       if (!dimensions) {
@@ -20142,6 +20140,7 @@ function Composer({
     inputTextRef.current = currentVal;
     setInputText(currentVal);
     if (!currentVal || currentVal.trim().length === 0) {
+      textInputRef.current?.clear?.();
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
       }
@@ -20186,6 +20185,9 @@ function Composer({
   const handleChangeText = (newText) => {
     inputTextRef.current = newText;
     setInputText(newText);
+    if (!isFocused) {
+      setIsFocused(true);
+    }
     if (!newText || newText.trim().length === 0) {
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
@@ -20198,11 +20200,11 @@ function Composer({
     }
     onTextChanged(newText);
   };
-  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
-  const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#1B365D";
-  const outLineColor = isFocused ? sendButtonColor : bgColor;
-  const currentBorderWidth = isFocused ? 2 : 1;
-  const textColor = invertColor(bgColor, true);
+  const inputBoxBgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
+  const buttonBgColor = sendButtonBgColor || theme?.v3?.body?.buttons?.bg_color || theme?.v3?.body?.button?.bg_color || theme?.v3?.footer?.buttons?.send?.bg_color || theme?.v3?.general?.buttons?.bg_color || theme?.v3?.general?.colors?.primary || theme?.v3?.general?.primaryColor || theme?.v3?.body?.user_message?.bg_color || "#1B365D";
+  const outLineColor = isFocused ? buttonBgColor : inputBoxBgColor;
+  const currentBorderWidth = 2;
+  const textColor = invertColor(inputBoxBgColor, true);
   return /* @__PURE__ */ import_react34.default.createElement(
     import_react_native82.View,
     {
@@ -20213,114 +20215,119 @@ function Composer({
       }
     },
     /* @__PURE__ */ import_react34.default.createElement(
-      import_react_native82.TouchableWithoutFeedback,
+      import_react_native82.Animated.View,
       {
-        onPress: () => textInputRef.current?.focus(),
-        accessible: false
+        onLayout: (e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - containerWidth) > 5) {
+            setContainerWidth(w);
+          }
+        },
+        onTouchStart: () => {
+          setIsFocused(true);
+          if (!textInputRef.current?.isFocused?.()) {
+            textInputRef.current?.focus?.();
+          }
+        },
+        style: {
+          height: animatedHeight,
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          flex: 1,
+          borderWidth: currentBorderWidth,
+          borderColor: outLineColor,
+          borderStyle: "solid",
+          borderRadius: 8,
+          backgroundColor: inputBoxBgColor,
+          minHeight: MIN_HEIGHT,
+          maxHeight: MAX_HEIGHT
+        }
       },
       /* @__PURE__ */ import_react34.default.createElement(
-        import_react_native82.Animated.View,
+        import_react_native82.TextInput,
         {
-          onLayout: (e) => {
-            const w = e.nativeEvent.layout.width;
-            if (w > 0 && Math.abs(w - containerWidth) > 5) {
-              setContainerWidth(w);
+          testID: placeholder2,
+          accessible: true,
+          accessibilityLabel: placeholder2,
+          placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
+          placeholderTextColor: "#9CA3AF",
+          selectionColor: textColor,
+          multiline,
+          scrollEnabled: import_react_native82.Platform.OS === "ios" ? true : lineCount >= 4,
+          maxLength: MAX_INPUT_TEXT_LENGTH,
+          editable: !disableComposer,
+          onContentSizeChange: handleContentSizeChange,
+          onChangeText: handleChangeText,
+          style: [
+            styles68.textInput,
+            {
+              width: "100%",
+              flex: 1,
+              flexShrink: 1,
+              minHeight: MIN_HEIGHT,
+              paddingTop: lineCount > 1 ? 9 : import_react_native82.Platform.OS === "ios" ? 9.5 : 8,
+              paddingBottom: lineCount > 1 ? 9 : import_react_native82.Platform.OS === "ios" ? 6 : 8,
+              paddingHorizontal: 12,
+              fontSize: 14,
+              lineHeight: lineCount > 1 ? 21 : import_react_native82.Platform.OS === "android" ? 21 : void 0,
+              fontStyle: "normal",
+              fontWeight: "400",
+              color: textColor,
+              fontFamily: theme?.v3?.body?.font?.family || "Inter",
+              alignSelf: "stretch",
+              textAlignVertical: lineCount > 1 ? "top" : "center",
+              includeFontPadding: false
+            }
+          ],
+          autoFocus: textInputAutoFocus,
+          value: text || "",
+          enablesReturnKeyAutomatically: true,
+          underlineColorAndroid: "transparent",
+          keyboardAppearance,
+          ...textInputProps,
+          ref: (ref) => {
+            textInputRef.current = ref;
+            if (typeof textInputProps?.ref === "function") {
+              textInputProps.ref(ref);
+            } else if (textInputProps?.ref) {
+              textInputProps.ref.current = ref;
             }
           },
+          onFocus: (e) => {
+            setIsFocused(true);
+            textInputProps?.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            textInputProps?.onBlur?.(e);
+          }
+        }
+      ),
+      theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ import_react34.default.createElement(
+        import_react_native82.TouchableOpacity,
+        {
+          onPress: () => {
+            const spacker = !isTTS;
+            setTTS(spacker);
+            onSpeakerClicked(spacker);
+          },
           style: {
-            height: animatedHeight,
+            padding: 10,
+            backgroundColor: Color_default.transparent,
+            alignItems: "center",
             justifyContent: "center",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            flex: 1,
-            borderWidth: currentBorderWidth,
-            borderColor: outLineColor,
-            borderStyle: "solid",
-            borderRadius: 8,
-            backgroundColor: bgColor,
-            minHeight: MIN_HEIGHT,
-            maxHeight: MAX_HEIGHT,
-            overflow: "hidden"
+            alignSelf: "flex-end"
           }
         },
         /* @__PURE__ */ import_react34.default.createElement(
-          import_react_native82.TextInput,
+          SvgIcon,
           {
-            ref: textInputRef,
-            testID: placeholder2,
-            accessible: true,
-            accessibilityLabel: placeholder2,
-            placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
-            placeholderTextColor: "#9CA3AF",
-            selectionColor: textColor,
-            multiline,
-            scrollEnabled: import_react_native82.Platform.OS === "ios" ? true : lineCount >= 4,
-            maxLength: MAX_INPUT_TEXT_LENGTH,
-            editable: !disableComposer,
-            onContentSizeChange: handleContentSizeChange,
-            onChangeText: handleChangeText,
-            style: [
-              styles68.textInput,
-              {
-                width: "100%",
-                flex: 1,
-                flexShrink: 1,
-                minHeight: MIN_HEIGHT,
-                paddingTop: lineCount > 1 ? 9 : import_react_native82.Platform.OS === "ios" ? 9.5 : 8,
-                paddingBottom: lineCount > 1 ? 9 : import_react_native82.Platform.OS === "ios" ? 6 : 8,
-                paddingHorizontal: 12,
-                fontSize: 14,
-                lineHeight: lineCount > 1 ? 21 : import_react_native82.Platform.OS === "android" ? 21 : void 0,
-                fontStyle: "normal",
-                fontWeight: "400",
-                color: textColor,
-                fontFamily: theme?.v3?.body?.font?.family || "Inter",
-                alignSelf: "stretch",
-                textAlignVertical: lineCount > 1 ? "top" : "center",
-                includeFontPadding: false
-              }
-            ],
-            autoFocus: textInputAutoFocus,
-            value: text,
-            enablesReturnKeyAutomatically: true,
-            underlineColorAndroid: "transparent",
-            keyboardAppearance,
-            ...textInputProps,
-            onFocus: (e) => {
-              setIsFocused(true);
-              textInputProps?.onFocus?.(e);
-            },
-            onBlur: (e) => {
-              setIsFocused(false);
-              textInputProps?.onBlur?.(e);
-            }
+            name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
+            width: normalize(18),
+            height: normalize(18),
+            color: textColor
           }
-        ),
-        theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ import_react34.default.createElement(
-          import_react_native82.TouchableOpacity,
-          {
-            onPress: () => {
-              const spacker = !isTTS;
-              setTTS(spacker);
-              onSpeakerClicked(spacker);
-            },
-            style: {
-              padding: 10,
-              backgroundColor: Color_default.transparent,
-              alignItems: "center",
-              justifyContent: "center",
-              alignSelf: "flex-end"
-            }
-          },
-          /* @__PURE__ */ import_react34.default.createElement(
-            SvgIcon,
-            {
-              name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
-              width: normalize(18),
-              height: normalize(18),
-              color: textColor
-            }
-          )
         )
       )
     )
@@ -23304,15 +23311,23 @@ function applyKoreBotClientPatches() {
         return;
       const botName = cfg.botName || "";
       const botId = cfg.botId || "";
-      const identity = cfg.identity || "";
+      const identity = cfg.identity || client.userInfo?.identity || "";
       const userName = cfg.userName || "";
+      const userCustomData = cfg.customData || cfg.botCustomData || client.customData || {};
+      const mergedCustomData = {
+        ...typeof userCustomData === "object" && !Array.isArray(userCustomData) ? userCustomData : {},
+        ...identity ? { identity } : {},
+        ...userName ? { userName } : {}
+      };
       if (!client.botCustomData) {
         client.botCustomData = /* @__PURE__ */ new Map();
       }
       if (client.botCustomData?.set) {
-        client.botCustomData.set("identity", identity);
-        client.botCustomData.set("username", userName);
+        for (const [key, value] of Object.entries(mergedCustomData)) {
+          client.botCustomData.set(key, value);
+        }
       }
+      client.customData = mergedCustomData;
       client.botUrl = cfg.botUrl || client.botUrl || "";
       client.botInfo = {
         chatBot: botName,
@@ -23321,10 +23336,7 @@ function applyKoreBotClientPatches() {
         botId,
         name: botName,
         _id: botId,
-        customData: {
-          identity,
-          userName
-        },
+        customData: mergedCustomData,
         channelClient: import_react_native94.Platform.OS
       };
       if (typeof client.initialize === "function") {
@@ -23335,16 +23347,18 @@ function applyKoreBotClientPatches() {
       if (!config) {
         throw new Error("BotConfigModel object cannot be null");
       }
+      const botName = config.botName;
+      const botId = config.botId;
       const hasDynamicToken = typeof config.getJwtToken === "function" || config.getJwtToken && typeof config.getJwtToken.then === "function";
       const hasStaticToken = typeof config.jwtToken === "string" && config.jwtToken.length > 0 || typeof config.getJwtToken === "string" && config.getJwtToken.length > 0;
       if (hasDynamicToken || hasStaticToken) {
-        if (!config.botId || !config.botUrl || !config.botName) {
+        if (!botId || !config.botUrl || !botName) {
           throw new Error(
             "BotConfigModel requires botName, botId, and botUrl when jwtToken or getJwtToken is provided"
           );
         }
       } else {
-        if (!config.botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
+        if (!botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
           throw new Error("BotConfigModel object has some values are missing");
         }
       }
@@ -23424,10 +23438,55 @@ function applyKoreBotClientPatches() {
       );
       return true;
     };
+    proto.setCustomData = function(customData) {
+      if (!customData || typeof customData !== "object")
+        return;
+      const existing = this.botInfo?.customData || this.customData || {};
+      const updated = { ...existing, ...customData };
+      this.customData = updated;
+      if (!this.botInfo) {
+        this.botInfo = {};
+      }
+      this.botInfo.customData = updated;
+      if (!this.botCustomData) {
+        this.botCustomData = /* @__PURE__ */ new Map();
+      }
+      if (this.botCustomData?.set) {
+        for (const [k, v] of Object.entries(updated)) {
+          this.botCustomData.set(k, v);
+        }
+      }
+    };
+    proto.getCustomData = function() {
+      return this.botInfo?.customData || this.customData || {};
+    };
     const originalSend = proto.send;
     proto.send = function(message) {
-      if (message && message.type !== "ping") {
-        console.log("\u{1F4E4} [WebSocket Sent]:", JSON.stringify(message, null, 2));
+      if (message) {
+        const customData = this.botInfo?.customData || this.customData || this.botConfig?.customData;
+        if (customData && typeof customData === "object") {
+          if (this.botInfo) {
+            this.botInfo.customData = {
+              ...this.botInfo.customData || {},
+              ...customData
+            };
+          }
+          if (message.botInfo) {
+            message.botInfo.customData = {
+              ...message.botInfo.customData || {},
+              ...customData
+            };
+          }
+          if (message.message) {
+            message.message.customData = {
+              ...message.message.customData || {},
+              ...customData
+            };
+          }
+        }
+        if (message.type !== "ping") {
+          console.log("\u{1F4E4} [WebSocket Sent]:", JSON.stringify(message, null, 2));
+        }
       }
       return originalSend.call(this, message);
     };
@@ -23441,6 +23500,23 @@ function applyKoreBotClientPatches() {
       } catch (e) {
       }
       return originalOnMessage.call(this, messageData, isJsonObj);
+    };
+    let cachedMessagesList = [];
+    let isClientMinimized = false;
+    proto.setCachedMessages = function(messages) {
+      cachedMessagesList = Array.isArray(messages) ? [...messages] : [];
+    };
+    proto.getCachedMessages = function() {
+      return cachedMessagesList;
+    };
+    proto.clearCachedMessages = function() {
+      cachedMessagesList = [];
+    };
+    proto.setMinimized = function(minimized) {
+      isClientMinimized = !!minimized;
+    };
+    proto.isMinimized = function() {
+      return isClientMinimized;
     };
   } catch (e) {
   }
@@ -24009,7 +24085,8 @@ var BaseHeader = class extends import_react42.default.Component {
           {
             flexDirection: "row",
             alignItems: "center",
-            gap: 0
+            gap: 0,
+            marginRight: -12
           },
           stylePropsMain
         ]
@@ -26333,6 +26410,7 @@ var windowWidth29 = import_react_native112.Dimensions.get("window").width;
 var isAgentConnect = false;
 var isMinimizedWindow = false;
 var historyMessages = 1;
+var cachedChatMessages = [];
 var KoreChat = class _KoreChat extends React115.Component {
   _messageContainerRef = React115.createRef();
   ttsModule = null;
@@ -26363,15 +26441,16 @@ var KoreChat = class _KoreChat extends React115.Component {
     this.themApi = new import_rn_kore_bot_socket_lib_v799.ActiveThemeAPI();
     this.fileUploadQueue = void 0;
     isAgentConnect = false;
+    const initialCached = cachedChatMessages.length > 0 ? cachedChatMessages : import_rn_kore_bot_socket_lib_v799.default.getInstance()?.getCachedMessages?.() || [];
     this.state = {
       isInitialized: false,
       composerHeight: 0,
       messagesContainerHeight: 0,
       typingDisabled: false,
       text: "",
-      messages: [],
+      messages: initialCached.length > 0 ? [...initialCached] : [],
       isNetConnected: false,
-      showLoader: true,
+      showLoader: initialCached.length === 0,
       quickReplies: [],
       modalVisible: false,
       viewMoreObj: void 0,
@@ -26490,9 +26569,11 @@ var KoreChat = class _KoreChat extends React115.Component {
     const botClient = import_rn_kore_bot_socket_lib_v799.default.getInstance();
     botClient.setAppState(import_rn_kore_bot_socket_lib_v799.APP_STATE.ACTIVE);
     botClient.once(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.CONNECTING, () => {
-      this.setState({
-        showLoader: true
-      });
+      if (!this.state.messages || this.state.messages.length === 0) {
+        this.setState({
+          showLoader: true
+        });
+      }
     });
     botClient.on(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ERROR, (data) => {
       hidePdfDownloadLoader();
@@ -26513,7 +26594,9 @@ var KoreChat = class _KoreChat extends React115.Component {
     botClient.on(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_OPEN, (data) => {
       console.log("-----> SUCCESS TO KORA BOT CONNECTED <------:", data);
       if (isMinimizedWindow) {
-        this.loadHistory();
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.loadHistory();
+        }
         isMinimizedWindow = false;
       }
       this.getThemeData();
@@ -26535,7 +26618,24 @@ var KoreChat = class _KoreChat extends React115.Component {
         });
       }
     });
-    botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+    const isAlreadyConnected = typeof botClient.getConnectionState === "function" && botClient.getConnectionState() === CONNECTION_STATE.CONNECTED;
+    if (isAlreadyConnected) {
+      console.log("-----> KORA BOT ALREADY CONNECTED (RESUMING SESSION) <------");
+      this.setState({
+        showLoader: false,
+        isThemeLoaded: true
+      });
+      this.setBotClientListeners();
+      this.getThemeData();
+      if (isMinimizedWindow) {
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.loadHistory();
+        }
+        isMinimizedWindow = false;
+      }
+    } else {
+      botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+    }
   };
   showAlert = (title, message, isBack) => {
     const { current } = this.alertRef;
@@ -26624,11 +26724,24 @@ var KoreChat = class _KoreChat extends React115.Component {
     }
     return messages.concat(currentMessages);
   }
+  minimizeChat = () => {
+    isMinimizedWindow = true;
+    cachedChatMessages = this.state.messages || [];
+    const botClient = import_rn_kore_bot_socket_lib_v799.default.getInstance();
+    botClient?.setCachedMessages?.(cachedChatMessages);
+    botClient?.setMinimized?.(true);
+    try {
+      botClient?.sendEvent?.("minimize_button_event");
+    } catch (error) {
+      console.warn("Unable to send minimize event:", error);
+    }
+  };
   handleBackPress = () => {
     if (this.state.showBackButtonDialog) {
       this.handleDialogCancel();
       return true;
     }
+    this.minimizeChat();
     try {
       if (this.props.navigation?.canGoBack?.()) {
         this.allowNavigation = true;
@@ -26647,12 +26760,16 @@ var KoreChat = class _KoreChat extends React115.Component {
   };
   handleDialogClose = () => {
     isMinimizedWindow = false;
+    cachedChatMessages = [];
+    const botClient = import_rn_kore_bot_socket_lib_v799.default.getInstance();
+    botClient?.clearCachedMessages?.();
+    botClient?.setMinimized?.(false);
     this.setState({ showBackButtonDialog: false });
     try {
       if (isAgentConnect) {
-        import_rn_kore_bot_socket_lib_v799.default.getInstance().sendEvent("close_agent_chat");
+        botClient?.sendEvent?.("close_agent_chat");
       } else {
-        import_rn_kore_bot_socket_lib_v799.default.getInstance().sendEvent("close_button_event");
+        botClient?.sendEvent?.("close_button_event");
       }
     } catch (error) {
       console.warn("Unable to send the close event:", error);
@@ -26675,9 +26792,8 @@ var KoreChat = class _KoreChat extends React115.Component {
     }, 100);
   };
   handleDialogMinimize = () => {
-    isMinimizedWindow = true;
+    this.minimizeChat();
     this.setState({ showBackButtonDialog: false });
-    import_rn_kore_bot_socket_lib_v799.default.getInstance().sendEvent("minimize_button_event");
     setTimeout(() => {
       try {
         if (this.props.navigation?.canGoBack?.()) {
@@ -26768,7 +26884,13 @@ var KoreChat = class _KoreChat extends React115.Component {
     botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.CONNECTING);
     botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_OPEN);
     botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_MESSAGE);
-    botClient?.disconnect();
+    botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_ACK);
+    botClient.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_EVENTS);
+    if (!isMinimizedWindow) {
+      botClient?.disconnect();
+      cachedChatMessages = [];
+      botClient?.clearCachedMessages?.();
+    }
     this.stopTTS();
   }
   componentDidUpdate(prevProps, prevState) {
@@ -26800,6 +26922,9 @@ var KoreChat = class _KoreChat extends React115.Component {
   }
   setBotClientListeners = () => {
     const botClient = import_rn_kore_bot_socket_lib_v799.default.getInstance();
+    botClient?.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_ACK);
+    botClient?.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_EVENTS);
+    botClient?.removeAllListeners(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_MESSAGE);
     botClient?.on(import_rn_kore_bot_socket_lib_v799.RTM_EVENT.ON_ACK, (data) => {
       if (data.type === "ack") {
       }
@@ -27091,7 +27216,7 @@ var KoreChat = class _KoreChat extends React115.Component {
     }
   };
   getTextFromProp = (fallback) => {
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === void 0) {
       return fallback;
     }
     return this.props.text;
@@ -27105,6 +27230,9 @@ var KoreChat = class _KoreChat extends React115.Component {
         );
       }
       historyMessages = nextMessages.length;
+      cachedChatMessages = nextMessages;
+      const botClient = import_rn_kore_bot_socket_lib_v799.default.getInstance();
+      botClient?.setCachedMessages?.(nextMessages);
       return { messages: nextMessages };
     });
   };
@@ -27215,11 +27343,14 @@ var KoreChat = class _KoreChat extends React115.Component {
       data_type: "attachments"
     };
   };
-  onSendText = (message, shouldResetInputToolbar = false, data_type = "") => {
+  onSendText = (message, shouldResetInputToolbar = true, data_type = "") => {
     import_react_native112.Keyboard.dismiss();
     this.stopTTS();
     if (this.props.onSend) {
       this.props.onSend(message.text, data_type);
+      if (shouldResetInputToolbar) {
+        this.resetInputToolbar();
+      }
     } else {
       let data;
       if (this.state?.mediaPayload?.length > 0) {
@@ -27337,7 +27468,6 @@ var KoreChat = class _KoreChat extends React115.Component {
     data_type = "",
     isDisplayUserMessage = true
   } = {}) => {
-    console.log("onSend called with message:", message);
     import_react_native112.Keyboard.dismiss();
     this.clearQuickReplies();
     if (shouldResetInputToolbar === true) {
@@ -27384,6 +27514,7 @@ var KoreChat = class _KoreChat extends React115.Component {
   };
   handleInternalAppNavigation = (item = {}, template_type = "") => {
     const navUrl = item?.navigationUrl || item?.url || item?.route || item?.actionUrl || item?.LinkUrl || item?.linkUrl || item?.routeName || "";
+    this.minimizeChat();
     if (this.props.onAppNavigation) {
       this.props.onAppNavigation(navUrl, item);
       return;
@@ -27540,6 +27671,9 @@ var KoreChat = class _KoreChat extends React115.Component {
     }
   };
   onListItemClick = (template_type, item, isFromViewMore, theme) => {
+    if (template_type === TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE || template_type === TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE || template_type === "claimMoreDetails_template") {
+      this.minimizeChat();
+    }
     if (this.props.onListItemClick) {
       let onClick = this.props.onListItemClick(
         template_type,
@@ -27690,11 +27824,12 @@ var KoreChat = class _KoreChat extends React115.Component {
   }
   resetInputToolbar = () => {
     if (this.textInput) {
-      this.textInput.clear();
+      this.textInput.clear?.();
+      this.textInput.blur?.();
     }
     this.notifyInputTextReset();
     this.setState({
-      text: this.getTextFromProp("")
+      text: ""
     });
   };
   onInputSizeChanged = (_size) => {
@@ -27735,7 +27870,7 @@ var KoreChat = class _KoreChat extends React115.Component {
     if (this.props.renderSuggestionsView) {
       this.props.renderSuggestionsView(text);
     }
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === void 0) {
       this.setState({ text });
     }
   };
@@ -27868,7 +28003,7 @@ var KoreChat = class _KoreChat extends React115.Component {
       textInputProps: {
         ...this.props.textInputProps,
         ref: (textInput) => this.textInput = textInput,
-        maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength,
+        maxLength: this.props.maxInputLength || MAX_INPUT_TEXT_LENGTH,
         onFocus: this.onInputFocus,
         onBlur: this.onInputBlur
       },
@@ -28565,6 +28700,7 @@ var KoreChat = class _KoreChat extends React115.Component {
   onHeaderActionsClick = (item) => {
     switch (item) {
       case HeaderIconsId.BACK:
+        this.minimizeChat();
         try {
           if (this.props.navigation?.canGoBack?.()) {
             this.allowNavigation = true;
@@ -28609,6 +28745,9 @@ var KoreChat = class _KoreChat extends React115.Component {
       return this.props.renderChatHeader();
     }
     let onClick = (item) => {
+      if (item === HeaderIconsId.BACK || item === HeaderIconsId.MINIMISE) {
+        this.minimizeChat();
+      }
       if (this.props?.onHeaderActionsClick) {
         this.props?.onHeaderActionsClick?.(item);
       } else {
@@ -28903,10 +29042,11 @@ var KoreChat = class _KoreChat extends React115.Component {
     this.setMessages(newMessages);
   };
   loadHistory = async () => {
+    const limit = Math.max(20, historyMessages);
     const apiService = new import_rn_kore_bot_socket_lib_v799.ApiService(this.props.botConfig.botUrl, import_rn_kore_bot_socket_lib_v799.default.getInstance());
-    await apiService.getBotHistory(0, historyMessages > 20 ? 20 : historyMessages, this.props.botConfig, (response) => {
-      if (response == null) {
-        console.log("BotHistory null");
+    await apiService.getBotHistory(0, limit, this.props.botConfig, (response) => {
+      if (response == null || !response?.data?.botHistory) {
+        console.log("BotHistory null or empty");
         return;
       }
       this.onHistoryLoaded(response.data.botHistory);
@@ -29355,6 +29495,7 @@ var src_default = KoreChat;
   BOT_ICON_URL,
   BRANDING_RESPONSE_FILE,
   BotTemplate,
+  CONNECTION_STATE,
   ChatHeaderType,
   ClaimMoreDetailsTemplate,
   Color,

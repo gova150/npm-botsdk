@@ -286,6 +286,7 @@ export default abstract class BaseHeader<
             flexDirection: 'row',
             alignItems: 'center',
             gap: 0,
+            marginRight: -12,
           },
           stylePropsMain,
         ]}>

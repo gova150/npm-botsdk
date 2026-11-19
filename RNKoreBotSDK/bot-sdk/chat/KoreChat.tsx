@@ -47,6 +47,8 @@ import {
   MAX_FILE_NAME_LENGTH,
   HeaderIconsId,
   BRANDING_RESPONSE_FILE,
+  CONNECTION_STATE,
+  MAX_INPUT_TEXT_LENGTH,
 } from '../constants/Constant';
 import { LocalizationManager } from '../constants/Localization';
 
@@ -62,11 +64,17 @@ import { applyKoreBotClientPatches } from '../utils/patchKoreBotClient';
 // Runtime safeguard to ensure KoreBotClient supports direct jwtToken and dynamic getJwtToken
 applyKoreBotClientPatches();
 
-// Extend KoreBotClient type to include event emitter methods
+// Extend KoreBotClient type to include event emitter methods and session helpers
 type ExtendedKoreBotClient = ReturnType<typeof KoreBotClient.getInstance> & {
   once(event: string, listener: (...args: any[]) => void): any;
   on(event: string, listener: (...args: any[]) => void): any;
   removeAllListeners(event?: string): any;
+  getConnectionState?(): number;
+  setCachedMessages?(messages: any[]): void;
+  getCachedMessages?(): any[];
+  clearCachedMessages?(): void;
+  setMinimized?(minimized: boolean): void;
+  isMinimized?(): boolean;
 };
 import {TEMPLATE_STYLE_VALUES} from '../theme/styles';
 import {
@@ -127,8 +135,9 @@ dayjs.extend(localizedFormat);
 const imageFilesTypes = ['jpg', 'jpeg', 'png'];
 const windowWidth = Dimensions.get('window').width;
 var isAgentConnect = false;
-var isMinimizedWindow = false
+var isMinimizedWindow = false;
 var historyMessages = 1;
+var cachedChatMessages: any[] = [];
 interface KoraChatProps {
   messages?: any[];
   messagesContainerStyle?: any;
@@ -344,15 +353,20 @@ export default class KoreChat extends React.Component<
     this.fileUploadQueue = undefined;
     isAgentConnect = false;
 
+    const initialCached =
+      cachedChatMessages.length > 0
+        ? cachedChatMessages
+        : (KoreBotClient.getInstance() as ExtendedKoreBotClient)?.getCachedMessages?.() || [];
+
     this.state = {
       isInitialized: false,
       composerHeight: 0,
       messagesContainerHeight: 0,
       typingDisabled: false,
       text: '',
-      messages: [],
+      messages: initialCached.length > 0 ? [...initialCached] : [],
       isNetConnected: false,
-      showLoader: true,
+      showLoader: initialCached.length === 0,
       quickReplies: [],
       modalVisible: false,
       viewMoreObj: undefined,
@@ -481,9 +495,11 @@ export default class KoreChat extends React.Component<
     botClient.setAppState(APP_STATE.ACTIVE);
     botClient
       .once(RTM_EVENT.CONNECTING, () => {
-        this.setState({
-          showLoader: true,
-        });
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.setState({
+            showLoader: true,
+          });
+        }
       });
 
     botClient
@@ -512,7 +528,9 @@ export default class KoreChat extends React.Component<
       .on(RTM_EVENT.ON_OPEN, (data: any) => {
         console.log('-----> SUCCESS TO KORA BOT CONNECTED <------:', data);
         if (isMinimizedWindow) {
-          this.loadHistory();
+          if (!this.state.messages || this.state.messages.length === 0) {
+            this.loadHistory();
+          }
           isMinimizedWindow = false;
         }
         this.getThemeData();
@@ -536,7 +554,28 @@ export default class KoreChat extends React.Component<
         }
 
       });
-    botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+
+    const isAlreadyConnected =
+      typeof botClient.getConnectionState === 'function' &&
+      botClient.getConnectionState() === CONNECTION_STATE.CONNECTED;
+
+    if (isAlreadyConnected) {
+      console.log('-----> KORA BOT ALREADY CONNECTED (RESUMING SESSION) <------');
+      this.setState({
+        showLoader: false,
+        isThemeLoaded: true,
+      });
+      this.setBotClientListeners();
+      this.getThemeData();
+      if (isMinimizedWindow) {
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.loadHistory();
+        }
+        isMinimizedWindow = false;
+      }
+    } else {
+      botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+    }
   };
 
   private showAlert = (title: string, message: string, isBack?: boolean) => {
@@ -632,11 +671,25 @@ export default class KoreChat extends React.Component<
     return messages.concat(currentMessages);
   }
 
+  public minimizeChat = () => {
+    isMinimizedWindow = true;
+    cachedChatMessages = this.state.messages || [];
+    const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
+    botClient?.setCachedMessages?.(cachedChatMessages);
+    botClient?.setMinimized?.(true);
+    try {
+      botClient?.sendEvent?.('minimize_button_event');
+    } catch (error) {
+      console.warn('Unable to send minimize event:', error);
+    }
+  };
+
   private handleBackPress = (): boolean => {
     if (this.state.showBackButtonDialog) {
       this.handleDialogCancel();
       return true;
     }
+    this.minimizeChat();
     try {
       if (this.props.navigation?.canGoBack?.()) {
         this.allowNavigation = true;
@@ -657,12 +710,16 @@ export default class KoreChat extends React.Component<
 
   private handleDialogClose = () => {
     isMinimizedWindow = false;
+    cachedChatMessages = [];
+    const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
+    botClient?.clearCachedMessages?.();
+    botClient?.setMinimized?.(false);
     this.setState({ showBackButtonDialog: false });
     try {
       if (isAgentConnect) {
-        KoreBotClient.getInstance().sendEvent('close_agent_chat');
+        botClient?.sendEvent?.('close_agent_chat');
       } else {
-        KoreBotClient.getInstance().sendEvent('close_button_event');
+        botClient?.sendEvent?.('close_button_event');
       }
     } catch (error) {
       console.warn('Unable to send the close event:', error);
@@ -688,9 +745,8 @@ export default class KoreChat extends React.Component<
   };
 
   private handleDialogMinimize = () => {
-    isMinimizedWindow = true
+    this.minimizeChat();
     this.setState({ showBackButtonDialog: false });
-    KoreBotClient.getInstance().sendEvent('minimize_button_event');
     setTimeout(() => {
       try {
         if (this.props.navigation?.canGoBack?.()) {
@@ -792,7 +848,15 @@ export default class KoreChat extends React.Component<
     botClient.removeAllListeners(RTM_EVENT.CONNECTING);
     botClient.removeAllListeners(RTM_EVENT.ON_OPEN);
     botClient.removeAllListeners(RTM_EVENT.ON_MESSAGE);
-    botClient?.disconnect();
+    botClient.removeAllListeners(RTM_EVENT.ON_ACK);
+    botClient.removeAllListeners(RTM_EVENT.ON_EVENTS);
+
+    // Only close WebSocket and clear cache if NOT minimized
+    if (!isMinimizedWindow) {
+      botClient?.disconnect();
+      cachedChatMessages = [];
+      botClient?.clearCachedMessages?.();
+    }
     this.stopTTS();
   }
 
@@ -837,6 +901,9 @@ export default class KoreChat extends React.Component<
 
   private setBotClientListeners = () => {
     const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
+    botClient?.removeAllListeners(RTM_EVENT.ON_ACK);
+    botClient?.removeAllListeners(RTM_EVENT.ON_EVENTS);
+    botClient?.removeAllListeners(RTM_EVENT.ON_MESSAGE);
     botClient
       ?.on(RTM_EVENT.ON_ACK, (data: any) => {
         if (data.type === 'ack') {
@@ -1203,7 +1270,7 @@ export default class KoreChat extends React.Component<
   };
 
   private getTextFromProp = (fallback: string | null | undefined) => {
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === undefined) {
       return fallback;
     }
     return this.props.text;
@@ -1222,6 +1289,9 @@ export default class KoreChat extends React.Component<
         );
       }
       historyMessages = nextMessages.length;
+      cachedChatMessages = nextMessages;
+      const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
+      botClient?.setCachedMessages?.(nextMessages);
       return { messages: nextMessages };
     });
   };
@@ -1357,13 +1427,16 @@ export default class KoreChat extends React.Component<
   };
   onSendText = (
     message: any,
-    shouldResetInputToolbar = false,
+    shouldResetInputToolbar = true,
     data_type = '',
   ): void => {
     Keyboard.dismiss();
     this.stopTTS();
     if (this.props.onSend) {
       this.props.onSend(message.text, data_type);
+      if (shouldResetInputToolbar) {
+        this.resetInputToolbar();
+      }
     } else {
       let data: any;
 
@@ -1509,7 +1582,6 @@ export default class KoreChat extends React.Component<
     data_type?: string;
     isDisplayUserMessage?: boolean;
   } = {}): void => {
-    console.log('onSend called with message:', message);
     Keyboard.dismiss();
 
     this.clearQuickReplies();
@@ -1572,6 +1644,10 @@ export default class KoreChat extends React.Component<
       item?.linkUrl ||
       item?.routeName ||
       '';
+
+    // Trigger minimize button functionality instead of closing:
+    // Keeps WebSocket connected and retains messages for when the user returns
+    this.minimizeChat();
 
     // 1. If host provided an onAppNavigation callback, invoke it:
     if (this.props.onAppNavigation) {
@@ -1758,6 +1834,16 @@ export default class KoreChat extends React.Component<
     isFromViewMore?: boolean,
     theme?: IThemeType,
   ) => {
+    // If it's an internal navigation or claim more details click, trigger minimize state
+    // so that if the host app navigates away inside onListItemClick, the session is preserved
+    if (
+      template_type === TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE ||
+      template_type === TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE ||
+      template_type === 'claimMoreDetails_template'
+    ) {
+      this.minimizeChat();
+    }
+
     if (this.props.onListItemClick) {
       let onClick = this.props.onListItemClick(
         template_type,
@@ -1770,8 +1856,6 @@ export default class KoreChat extends React.Component<
         return;
       }
     }
-    // console.log('Korachat template_type --->:', template_type);
-    // console.log('Korachat item --->:', item);
     switch (template_type) {
       case TEMPLATE_TYPES.BUTTON:
       case TEMPLATE_TYPES.CARD_TEMPLATE:
@@ -1936,11 +2020,12 @@ export default class KoreChat extends React.Component<
 
   private resetInputToolbar = () => {
     if (this.textInput) {
-      this.textInput.clear();
+      this.textInput.clear?.();
+      this.textInput.blur?.();
     }
     this.notifyInputTextReset();
     this.setState({
-      text: this.getTextFromProp(''),
+      text: '',
     });
   };
 
@@ -1989,7 +2074,7 @@ export default class KoreChat extends React.Component<
     if (this.props.renderSuggestionsView) {
       this.props.renderSuggestionsView(text);
     }
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === undefined) {
       this.setState({text});
     }
   };
@@ -2170,7 +2255,7 @@ export default class KoreChat extends React.Component<
       textInputProps: {
         ...this.props.textInputProps,
         ref: (textInput: any) => (this.textInput = textInput),
-        maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength,
+        maxLength: this.props.maxInputLength || MAX_INPUT_TEXT_LENGTH,
         onFocus: this.onInputFocus,
         onBlur: this.onInputBlur,
       },
@@ -2948,6 +3033,7 @@ export default class KoreChat extends React.Component<
   private onHeaderActionsClick = (item: any) => {
     switch (item) {
       case HeaderIconsId.BACK:
+        this.minimizeChat();
         try {
           if (this.props.navigation?.canGoBack?.()) {
             this.allowNavigation = true;
@@ -2996,6 +3082,9 @@ export default class KoreChat extends React.Component<
       return this.props.renderChatHeader();
     }
     let onClick = (item: any) => {
+      if (item === HeaderIconsId.BACK || item === HeaderIconsId.MINIMISE) {
+        this.minimizeChat();
+      }
       if (this.props?.onHeaderActionsClick) {
         this.props?.onHeaderActionsClick?.(item);
       } else {
@@ -3377,11 +3466,12 @@ export default class KoreChat extends React.Component<
   };
 
   private loadHistory = async () => {
+      const limit = Math.max(20, historyMessages);
       const apiService = new ApiService(this.props.botConfig.botUrl, KoreBotClient.getInstance());
-      await apiService.getBotHistory(0, historyMessages > 20 ? 20 : historyMessages, this.props.botConfig, (response: any) => {
+      await apiService.getBotHistory(0, limit, this.props.botConfig, (response: any) => {
 
-        if (response == null) {
-          console.log('BotHistory null');
+        if (response == null || !response?.data?.botHistory) {
+          console.log('BotHistory null or empty');
           return;
         }
         this.onHistoryLoaded(response.data.botHistory);

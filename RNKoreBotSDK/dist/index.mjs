@@ -310,6 +310,11 @@ var attach_menu_buttons = [
     title: "Upload Video"
   }
 ];
+var CONNECTION_STATE = {
+  CONNECTING: 0,
+  CONNECTED: 1,
+  DISCONNECTED: 2
+};
 var HeaderIconsId = {
   BACK: "BACK",
   HELP: "HELP",
@@ -18482,7 +18487,6 @@ var DisplayClaimsTemplate = class extends BaseView_default {
         {
           style: [
             styles64.claimNumberText,
-            { color: botMsgColor },
             fontFamily ? { fontFamily } : null
           ]
         },
@@ -18751,7 +18755,7 @@ var styles64 = StyleSheet62.create({
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: 16,
-    color: "#282828"
+    color: "#666666"
   },
   providerName: {
     marginBottom: 8,
@@ -18785,7 +18789,7 @@ var styles64 = StyleSheet62.create({
     fontStyle: "normal",
     fontWeight: "400",
     lineHeight: 16,
-    color: "#6B7280",
+    color: "#666666",
     marginBottom: 2
   },
   gridValueMedium: {
@@ -19738,12 +19742,12 @@ import {
   TouchableOpacity as TouchableOpacity50,
   Modal as Modal9,
   ScrollView as ScrollView5,
-  Keyboard as Keyboard10,
+  Keyboard as Keyboard9,
   KeyboardAvoidingView,
   Dimensions as Dimensions36,
   StatusBar as StatusBar3,
   BackHandler as BackHandler2,
-  TouchableWithoutFeedback as TouchableWithoutFeedback4,
+  TouchableWithoutFeedback as TouchableWithoutFeedback3,
   LayoutAnimation as LayoutAnimation2,
   UIManager as UIManager2
 } from "react-native";
@@ -19810,11 +19814,9 @@ import {
   TextInput as TextInput7,
   View as View71,
   TouchableOpacity as TouchableOpacity42,
-  TouchableWithoutFeedback as TouchableWithoutFeedback2,
   Animated as Animated6,
   Easing as Easing2,
-  Platform as Platform14,
-  Keyboard as Keyboard5
+  Platform as Platform14
 } from "react-native";
 function Composer({
   composerHeight = MIN_COMPOSER_HEIGHT,
@@ -19856,17 +19858,10 @@ function Composer({
     setTTS(isTTSenable);
   }, [isTTSenable]);
   useEffect3(() => {
-    const onHide = () => {
-      textInputRef.current?.blur();
-      setIsFocused(false);
-    };
-    const willHideSub = Keyboard5.addListener("keyboardWillHide", onHide);
-    const didHideSub = Keyboard5.addListener("keyboardDidHide", onHide);
-    return () => {
-      willHideSub.remove();
-      didHideSub.remove();
-    };
-  }, []);
+    if (textInputAutoFocus) {
+      setIsFocused(true);
+    }
+  }, [textInputAutoFocus]);
   const determineInputSizeChange = useCallback(
     (dimensions) => {
       if (!dimensions) {
@@ -19930,6 +19925,7 @@ function Composer({
     inputTextRef.current = currentVal;
     setInputText(currentVal);
     if (!currentVal || currentVal.trim().length === 0) {
+      textInputRef.current?.clear?.();
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
       }
@@ -19974,6 +19970,9 @@ function Composer({
   const handleChangeText = (newText) => {
     inputTextRef.current = newText;
     setInputText(newText);
+    if (!isFocused) {
+      setIsFocused(true);
+    }
     if (!newText || newText.trim().length === 0) {
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
@@ -19986,11 +19985,11 @@ function Composer({
     }
     onTextChanged(newText);
   };
-  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
-  const sendButtonColor = sendButtonBgColor || theme?.v3?.body?.user_message?.bg_color || theme?.v3?.general?.colors?.primary || "#1B365D";
-  const outLineColor = isFocused ? sendButtonColor : bgColor;
-  const currentBorderWidth = isFocused ? 2 : 1;
-  const textColor = invertColor(bgColor, true);
+  const inputBoxBgColor = theme?.v3?.footer?.compose_bar?.bg_color || "#F3F4F6";
+  const buttonBgColor = sendButtonBgColor || theme?.v3?.body?.buttons?.bg_color || theme?.v3?.body?.button?.bg_color || theme?.v3?.footer?.buttons?.send?.bg_color || theme?.v3?.general?.buttons?.bg_color || theme?.v3?.general?.colors?.primary || theme?.v3?.general?.primaryColor || theme?.v3?.body?.user_message?.bg_color || "#1B365D";
+  const outLineColor = isFocused ? buttonBgColor : inputBoxBgColor;
+  const currentBorderWidth = 2;
+  const textColor = invertColor(inputBoxBgColor, true);
   return /* @__PURE__ */ React86.createElement(
     View71,
     {
@@ -20001,114 +20000,119 @@ function Composer({
       }
     },
     /* @__PURE__ */ React86.createElement(
-      TouchableWithoutFeedback2,
+      Animated6.View,
       {
-        onPress: () => textInputRef.current?.focus(),
-        accessible: false
+        onLayout: (e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - containerWidth) > 5) {
+            setContainerWidth(w);
+          }
+        },
+        onTouchStart: () => {
+          setIsFocused(true);
+          if (!textInputRef.current?.isFocused?.()) {
+            textInputRef.current?.focus?.();
+          }
+        },
+        style: {
+          height: animatedHeight,
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          flex: 1,
+          borderWidth: currentBorderWidth,
+          borderColor: outLineColor,
+          borderStyle: "solid",
+          borderRadius: 8,
+          backgroundColor: inputBoxBgColor,
+          minHeight: MIN_HEIGHT,
+          maxHeight: MAX_HEIGHT
+        }
       },
       /* @__PURE__ */ React86.createElement(
-        Animated6.View,
+        TextInput7,
         {
-          onLayout: (e) => {
-            const w = e.nativeEvent.layout.width;
-            if (w > 0 && Math.abs(w - containerWidth) > 5) {
-              setContainerWidth(w);
+          testID: placeholder2,
+          accessible: true,
+          accessibilityLabel: placeholder2,
+          placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
+          placeholderTextColor: "#9CA3AF",
+          selectionColor: textColor,
+          multiline,
+          scrollEnabled: Platform14.OS === "ios" ? true : lineCount >= 4,
+          maxLength: MAX_INPUT_TEXT_LENGTH,
+          editable: !disableComposer,
+          onContentSizeChange: handleContentSizeChange,
+          onChangeText: handleChangeText,
+          style: [
+            styles66.textInput,
+            {
+              width: "100%",
+              flex: 1,
+              flexShrink: 1,
+              minHeight: MIN_HEIGHT,
+              paddingTop: lineCount > 1 ? 9 : Platform14.OS === "ios" ? 9.5 : 8,
+              paddingBottom: lineCount > 1 ? 9 : Platform14.OS === "ios" ? 6 : 8,
+              paddingHorizontal: 12,
+              fontSize: 14,
+              lineHeight: lineCount > 1 ? 21 : Platform14.OS === "android" ? 21 : void 0,
+              fontStyle: "normal",
+              fontWeight: "400",
+              color: textColor,
+              fontFamily: theme?.v3?.body?.font?.family || "Inter",
+              alignSelf: "stretch",
+              textAlignVertical: lineCount > 1 ? "top" : "center",
+              includeFontPadding: false
+            }
+          ],
+          autoFocus: textInputAutoFocus,
+          value: text || "",
+          enablesReturnKeyAutomatically: true,
+          underlineColorAndroid: "transparent",
+          keyboardAppearance,
+          ...textInputProps,
+          ref: (ref) => {
+            textInputRef.current = ref;
+            if (typeof textInputProps?.ref === "function") {
+              textInputProps.ref(ref);
+            } else if (textInputProps?.ref) {
+              textInputProps.ref.current = ref;
             }
           },
+          onFocus: (e) => {
+            setIsFocused(true);
+            textInputProps?.onFocus?.(e);
+          },
+          onBlur: (e) => {
+            setIsFocused(false);
+            textInputProps?.onBlur?.(e);
+          }
+        }
+      ),
+      theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React86.createElement(
+        TouchableOpacity42,
+        {
+          onPress: () => {
+            const spacker = !isTTS;
+            setTTS(spacker);
+            onSpeakerClicked(spacker);
+          },
           style: {
-            height: animatedHeight,
+            padding: 10,
+            backgroundColor: Color_default.transparent,
+            alignItems: "center",
             justifyContent: "center",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            flex: 1,
-            borderWidth: currentBorderWidth,
-            borderColor: outLineColor,
-            borderStyle: "solid",
-            borderRadius: 8,
-            backgroundColor: bgColor,
-            minHeight: MIN_HEIGHT,
-            maxHeight: MAX_HEIGHT,
-            overflow: "hidden"
+            alignSelf: "flex-end"
           }
         },
         /* @__PURE__ */ React86.createElement(
-          TextInput7,
+          SvgIcon,
           {
-            ref: textInputRef,
-            testID: placeholder2,
-            accessible: true,
-            accessibilityLabel: placeholder2,
-            placeholder: theme?.v3?.footer?.compose_bar?.placeholder || placeholder2,
-            placeholderTextColor: "#9CA3AF",
-            selectionColor: textColor,
-            multiline,
-            scrollEnabled: Platform14.OS === "ios" ? true : lineCount >= 4,
-            maxLength: MAX_INPUT_TEXT_LENGTH,
-            editable: !disableComposer,
-            onContentSizeChange: handleContentSizeChange,
-            onChangeText: handleChangeText,
-            style: [
-              styles66.textInput,
-              {
-                width: "100%",
-                flex: 1,
-                flexShrink: 1,
-                minHeight: MIN_HEIGHT,
-                paddingTop: lineCount > 1 ? 9 : Platform14.OS === "ios" ? 9.5 : 8,
-                paddingBottom: lineCount > 1 ? 9 : Platform14.OS === "ios" ? 6 : 8,
-                paddingHorizontal: 12,
-                fontSize: 14,
-                lineHeight: lineCount > 1 ? 21 : Platform14.OS === "android" ? 21 : void 0,
-                fontStyle: "normal",
-                fontWeight: "400",
-                color: textColor,
-                fontFamily: theme?.v3?.body?.font?.family || "Inter",
-                alignSelf: "stretch",
-                textAlignVertical: lineCount > 1 ? "top" : "center",
-                includeFontPadding: false
-              }
-            ],
-            autoFocus: textInputAutoFocus,
-            value: text,
-            enablesReturnKeyAutomatically: true,
-            underlineColorAndroid: "transparent",
-            keyboardAppearance,
-            ...textInputProps,
-            onFocus: (e) => {
-              setIsFocused(true);
-              textInputProps?.onFocus?.(e);
-            },
-            onBlur: (e) => {
-              setIsFocused(false);
-              textInputProps?.onBlur?.(e);
-            }
+            name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
+            width: normalize(18),
+            height: normalize(18),
+            color: textColor
           }
-        ),
-        theme?.v3?.footer?.buttons?.speaker?.show && /* @__PURE__ */ React86.createElement(
-          TouchableOpacity42,
-          {
-            onPress: () => {
-              const spacker = !isTTS;
-              setTTS(spacker);
-              onSpeakerClicked(spacker);
-            },
-            style: {
-              padding: 10,
-              backgroundColor: Color_default.transparent,
-              alignItems: "center",
-              justifyContent: "center",
-              alignSelf: "flex-end"
-            }
-          },
-          /* @__PURE__ */ React86.createElement(
-            SvgIcon,
-            {
-              name: isTTS ? "SpeakerIcon" : "SpeakerOffIcon",
-              width: normalize(18),
-              height: normalize(18),
-              color: textColor
-            }
-          )
         )
       )
     )
@@ -20154,7 +20158,7 @@ import {
   Text as Text56,
   TouchableOpacity as TouchableOpacity43,
   View as View72,
-  Keyboard as Keyboard6
+  Keyboard as Keyboard5
 } from "react-native";
 var styles67 = StyleSheet65.create({
   container: {
@@ -20181,7 +20185,7 @@ var Send = class extends Component24 {
     super(props);
   }
   handleOnPress = () => {
-    Keyboard6.dismiss();
+    Keyboard5.dismiss();
     const { text, onSend } = this.props;
     if (text && text?.trim?.()?.length > 0) {
       onSend?.({ text: text.trim() }, true);
@@ -21748,7 +21752,7 @@ import {
   Platform as Platform19,
   FlatList as FlatList5,
   ActivityIndicator as ActivityIndicator5,
-  Keyboard as Keyboard8
+  Keyboard as Keyboard7
 } from "react-native";
 
 // bot-sdk/chat/components/Message.tsx
@@ -21921,12 +21925,12 @@ import * as React94 from "react";
 import {
   Text as Text59,
   StyleSheet as StyleSheet71,
-  TouchableWithoutFeedback as TouchableWithoutFeedback3,
+  TouchableWithoutFeedback as TouchableWithoutFeedback2,
   View as View78,
   ToastAndroid,
   Platform as Platform18,
   Animated as Animated10,
-  Keyboard as Keyboard7
+  Keyboard as Keyboard6
 } from "react-native";
 
 // bot-sdk/chat/BotChatContext.tsx
@@ -22338,10 +22342,10 @@ var Bubble = class extends React94.Component {
           ]
         },
         /* @__PURE__ */ React94.createElement(
-          TouchableWithoutFeedback3,
+          TouchableWithoutFeedback2,
           {
             onPress: (event) => {
-              Keyboard7.dismiss();
+              Keyboard6.dismiss();
               this.props.onPress?.(this.props.currentMessage);
             },
             onLongPress: (event) => this.onLongPress(event, position === "right"),
@@ -23029,7 +23033,7 @@ var MessageContainer = class extends PureComponent {
           { backgroundColor: this.getBackgroundColor() }
         ],
         onTouchStart: () => {
-          Keyboard8.dismiss();
+          Keyboard7.dismiss();
         }
       },
       this.state.showScrollBottom && this.props.scrollToBottom ? this.renderScrollToBottomWrapper() : null,
@@ -23125,15 +23129,23 @@ function applyKoreBotClientPatches() {
         return;
       const botName = cfg.botName || "";
       const botId = cfg.botId || "";
-      const identity = cfg.identity || "";
+      const identity = cfg.identity || client.userInfo?.identity || "";
       const userName = cfg.userName || "";
+      const userCustomData = cfg.customData || cfg.botCustomData || client.customData || {};
+      const mergedCustomData = {
+        ...typeof userCustomData === "object" && !Array.isArray(userCustomData) ? userCustomData : {},
+        ...identity ? { identity } : {},
+        ...userName ? { userName } : {}
+      };
       if (!client.botCustomData) {
         client.botCustomData = /* @__PURE__ */ new Map();
       }
       if (client.botCustomData?.set) {
-        client.botCustomData.set("identity", identity);
-        client.botCustomData.set("username", userName);
+        for (const [key, value] of Object.entries(mergedCustomData)) {
+          client.botCustomData.set(key, value);
+        }
       }
+      client.customData = mergedCustomData;
       client.botUrl = cfg.botUrl || client.botUrl || "";
       client.botInfo = {
         chatBot: botName,
@@ -23142,10 +23154,7 @@ function applyKoreBotClientPatches() {
         botId,
         name: botName,
         _id: botId,
-        customData: {
-          identity,
-          userName
-        },
+        customData: mergedCustomData,
         channelClient: Platform20.OS
       };
       if (typeof client.initialize === "function") {
@@ -23156,16 +23165,18 @@ function applyKoreBotClientPatches() {
       if (!config) {
         throw new Error("BotConfigModel object cannot be null");
       }
+      const botName = config.botName;
+      const botId = config.botId;
       const hasDynamicToken = typeof config.getJwtToken === "function" || config.getJwtToken && typeof config.getJwtToken.then === "function";
       const hasStaticToken = typeof config.jwtToken === "string" && config.jwtToken.length > 0 || typeof config.getJwtToken === "string" && config.getJwtToken.length > 0;
       if (hasDynamicToken || hasStaticToken) {
-        if (!config.botId || !config.botUrl || !config.botName) {
+        if (!botId || !config.botUrl || !botName) {
           throw new Error(
             "BotConfigModel requires botName, botId, and botUrl when jwtToken or getJwtToken is provided"
           );
         }
       } else {
-        if (!config.botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
+        if (!botId || !config.clientId || !config.clientSecret || !config.botUrl || !config.identity || !config.value_aud) {
           throw new Error("BotConfigModel object has some values are missing");
         }
       }
@@ -23245,10 +23256,55 @@ function applyKoreBotClientPatches() {
       );
       return true;
     };
+    proto.setCustomData = function(customData) {
+      if (!customData || typeof customData !== "object")
+        return;
+      const existing = this.botInfo?.customData || this.customData || {};
+      const updated = { ...existing, ...customData };
+      this.customData = updated;
+      if (!this.botInfo) {
+        this.botInfo = {};
+      }
+      this.botInfo.customData = updated;
+      if (!this.botCustomData) {
+        this.botCustomData = /* @__PURE__ */ new Map();
+      }
+      if (this.botCustomData?.set) {
+        for (const [k, v] of Object.entries(updated)) {
+          this.botCustomData.set(k, v);
+        }
+      }
+    };
+    proto.getCustomData = function() {
+      return this.botInfo?.customData || this.customData || {};
+    };
     const originalSend = proto.send;
     proto.send = function(message) {
-      if (message && message.type !== "ping") {
-        console.log("\u{1F4E4} [WebSocket Sent]:", JSON.stringify(message, null, 2));
+      if (message) {
+        const customData = this.botInfo?.customData || this.customData || this.botConfig?.customData;
+        if (customData && typeof customData === "object") {
+          if (this.botInfo) {
+            this.botInfo.customData = {
+              ...this.botInfo.customData || {},
+              ...customData
+            };
+          }
+          if (message.botInfo) {
+            message.botInfo.customData = {
+              ...message.botInfo.customData || {},
+              ...customData
+            };
+          }
+          if (message.message) {
+            message.message.customData = {
+              ...message.message.customData || {},
+              ...customData
+            };
+          }
+        }
+        if (message.type !== "ping") {
+          console.log("\u{1F4E4} [WebSocket Sent]:", JSON.stringify(message, null, 2));
+        }
       }
       return originalSend.call(this, message);
     };
@@ -23262,6 +23318,23 @@ function applyKoreBotClientPatches() {
       } catch (e) {
       }
       return originalOnMessage.call(this, messageData, isJsonObj);
+    };
+    let cachedMessagesList = [];
+    let isClientMinimized = false;
+    proto.setCachedMessages = function(messages) {
+      cachedMessagesList = Array.isArray(messages) ? [...messages] : [];
+    };
+    proto.getCachedMessages = function() {
+      return cachedMessagesList;
+    };
+    proto.clearCachedMessages = function() {
+      cachedMessagesList = [];
+    };
+    proto.setMinimized = function(minimized) {
+      isClientMinimized = !!minimized;
+    };
+    proto.isMinimized = function() {
+      return isClientMinimized;
     };
   } catch (e) {
   }
@@ -23632,7 +23705,7 @@ var styles77 = StyleSheet75.create({
 // bot-sdk/chat/components/header/ChatHeader.tsx
 init_esm_shims();
 import * as React102 from "react";
-import { View as View86, Keyboard as Keyboard9 } from "react-native";
+import { View as View86, Keyboard as Keyboard8 } from "react-native";
 
 // bot-sdk/chat/components/header/CompactHeader.tsx
 init_esm_shims();
@@ -23837,7 +23910,8 @@ var BaseHeader = class extends React99.Component {
           {
             flexDirection: "row",
             alignItems: "center",
-            gap: 0
+            gap: 0,
+            marginRight: -12
           },
           stylePropsMain
         ]
@@ -24372,7 +24446,7 @@ var ChatHeader = class extends React102.Component {
     }
   };
   render() {
-    return /* @__PURE__ */ React102.createElement(View86, { onTouchStart: () => Keyboard9.dismiss() }, this.renderHeaderView());
+    return /* @__PURE__ */ React102.createElement(View86, { onTouchStart: () => Keyboard8.dismiss() }, this.renderHeaderView());
   }
 };
 
@@ -26169,6 +26243,7 @@ var windowWidth29 = Dimensions36.get("window").width;
 var isAgentConnect = false;
 var isMinimizedWindow = false;
 var historyMessages = 1;
+var cachedChatMessages = [];
 var KoreChat = class _KoreChat extends React113.Component {
   _messageContainerRef = React113.createRef();
   ttsModule = null;
@@ -26199,15 +26274,16 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.themApi = new ActiveThemeAPI();
     this.fileUploadQueue = void 0;
     isAgentConnect = false;
+    const initialCached = cachedChatMessages.length > 0 ? cachedChatMessages : KoreBotClient6.getInstance()?.getCachedMessages?.() || [];
     this.state = {
       isInitialized: false,
       composerHeight: 0,
       messagesContainerHeight: 0,
       typingDisabled: false,
       text: "",
-      messages: [],
+      messages: initialCached.length > 0 ? [...initialCached] : [],
       isNetConnected: false,
-      showLoader: true,
+      showLoader: initialCached.length === 0,
       quickReplies: [],
       modalVisible: false,
       viewMoreObj: void 0,
@@ -26326,9 +26402,11 @@ var KoreChat = class _KoreChat extends React113.Component {
     const botClient = KoreBotClient6.getInstance();
     botClient.setAppState(APP_STATE2.ACTIVE);
     botClient.once(RTM_EVENT2.CONNECTING, () => {
-      this.setState({
-        showLoader: true
-      });
+      if (!this.state.messages || this.state.messages.length === 0) {
+        this.setState({
+          showLoader: true
+        });
+      }
     });
     botClient.on(RTM_EVENT2.ERROR, (data) => {
       hidePdfDownloadLoader();
@@ -26349,7 +26427,9 @@ var KoreChat = class _KoreChat extends React113.Component {
     botClient.on(RTM_EVENT2.ON_OPEN, (data) => {
       console.log("-----> SUCCESS TO KORA BOT CONNECTED <------:", data);
       if (isMinimizedWindow) {
-        this.loadHistory();
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.loadHistory();
+        }
         isMinimizedWindow = false;
       }
       this.getThemeData();
@@ -26371,7 +26451,24 @@ var KoreChat = class _KoreChat extends React113.Component {
         });
       }
     });
-    botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+    const isAlreadyConnected = typeof botClient.getConnectionState === "function" && botClient.getConnectionState() === CONNECTION_STATE.CONNECTED;
+    if (isAlreadyConnected) {
+      console.log("-----> KORA BOT ALREADY CONNECTED (RESUMING SESSION) <------");
+      this.setState({
+        showLoader: false,
+        isThemeLoaded: true
+      });
+      this.setBotClientListeners();
+      this.getThemeData();
+      if (isMinimizedWindow) {
+        if (!this.state.messages || this.state.messages.length === 0) {
+          this.loadHistory();
+        }
+        isMinimizedWindow = false;
+      }
+    } else {
+      botClient.initializeBotClient(this.props.botConfig, !isMinimizedWindow);
+    }
   };
   showAlert = (title, message, isBack) => {
     const { current } = this.alertRef;
@@ -26460,11 +26557,24 @@ var KoreChat = class _KoreChat extends React113.Component {
     }
     return messages.concat(currentMessages);
   }
+  minimizeChat = () => {
+    isMinimizedWindow = true;
+    cachedChatMessages = this.state.messages || [];
+    const botClient = KoreBotClient6.getInstance();
+    botClient?.setCachedMessages?.(cachedChatMessages);
+    botClient?.setMinimized?.(true);
+    try {
+      botClient?.sendEvent?.("minimize_button_event");
+    } catch (error) {
+      console.warn("Unable to send minimize event:", error);
+    }
+  };
   handleBackPress = () => {
     if (this.state.showBackButtonDialog) {
       this.handleDialogCancel();
       return true;
     }
+    this.minimizeChat();
     try {
       if (this.props.navigation?.canGoBack?.()) {
         this.allowNavigation = true;
@@ -26483,12 +26593,16 @@ var KoreChat = class _KoreChat extends React113.Component {
   };
   handleDialogClose = () => {
     isMinimizedWindow = false;
+    cachedChatMessages = [];
+    const botClient = KoreBotClient6.getInstance();
+    botClient?.clearCachedMessages?.();
+    botClient?.setMinimized?.(false);
     this.setState({ showBackButtonDialog: false });
     try {
       if (isAgentConnect) {
-        KoreBotClient6.getInstance().sendEvent("close_agent_chat");
+        botClient?.sendEvent?.("close_agent_chat");
       } else {
-        KoreBotClient6.getInstance().sendEvent("close_button_event");
+        botClient?.sendEvent?.("close_button_event");
       }
     } catch (error) {
       console.warn("Unable to send the close event:", error);
@@ -26511,9 +26625,8 @@ var KoreChat = class _KoreChat extends React113.Component {
     }, 100);
   };
   handleDialogMinimize = () => {
-    isMinimizedWindow = true;
+    this.minimizeChat();
     this.setState({ showBackButtonDialog: false });
-    KoreBotClient6.getInstance().sendEvent("minimize_button_event");
     setTimeout(() => {
       try {
         if (this.props.navigation?.canGoBack?.()) {
@@ -26552,7 +26665,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.setTextFromProp(text);
     this.stopTTS();
     const showEvent = Platform22.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    this.keyboardListener = Keyboard10.addListener(showEvent, (e) => {
+    this.keyboardListener = Keyboard9.addListener(showEvent, (e) => {
       if (Platform22.OS === "android") {
         const keyboardHeight = e?.endCoordinates?.height || 0;
         if (keyboardHeight > 100) {
@@ -26568,7 +26681,7 @@ var KoreChat = class _KoreChat extends React113.Component {
       setTimeout(() => this.scrollToBottom(true), 150);
     });
     const hideEvent = Platform22.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-    this.keyboardHideListener = Keyboard10.addListener(hideEvent, () => {
+    this.keyboardHideListener = Keyboard9.addListener(hideEvent, () => {
       if (Platform22.OS === "android") {
         this.currentKeyboardHeight = 0;
         this.isKeyboardVisible = false;
@@ -26604,7 +26717,13 @@ var KoreChat = class _KoreChat extends React113.Component {
     botClient.removeAllListeners(RTM_EVENT2.CONNECTING);
     botClient.removeAllListeners(RTM_EVENT2.ON_OPEN);
     botClient.removeAllListeners(RTM_EVENT2.ON_MESSAGE);
-    botClient?.disconnect();
+    botClient.removeAllListeners(RTM_EVENT2.ON_ACK);
+    botClient.removeAllListeners(RTM_EVENT2.ON_EVENTS);
+    if (!isMinimizedWindow) {
+      botClient?.disconnect();
+      cachedChatMessages = [];
+      botClient?.clearCachedMessages?.();
+    }
     this.stopTTS();
   }
   componentDidUpdate(prevProps, prevState) {
@@ -26636,6 +26755,9 @@ var KoreChat = class _KoreChat extends React113.Component {
   }
   setBotClientListeners = () => {
     const botClient = KoreBotClient6.getInstance();
+    botClient?.removeAllListeners(RTM_EVENT2.ON_ACK);
+    botClient?.removeAllListeners(RTM_EVENT2.ON_EVENTS);
+    botClient?.removeAllListeners(RTM_EVENT2.ON_MESSAGE);
     botClient?.on(RTM_EVENT2.ON_ACK, (data) => {
       if (data.type === "ack") {
       }
@@ -26927,7 +27049,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     }
   };
   getTextFromProp = (fallback) => {
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === void 0) {
       return fallback;
     }
     return this.props.text;
@@ -26941,6 +27063,9 @@ var KoreChat = class _KoreChat extends React113.Component {
         );
       }
       historyMessages = nextMessages.length;
+      cachedChatMessages = nextMessages;
+      const botClient = KoreBotClient6.getInstance();
+      botClient?.setCachedMessages?.(nextMessages);
       return { messages: nextMessages };
     });
   };
@@ -27051,11 +27176,14 @@ var KoreChat = class _KoreChat extends React113.Component {
       data_type: "attachments"
     };
   };
-  onSendText = (message, shouldResetInputToolbar = false, data_type = "") => {
-    Keyboard10.dismiss();
+  onSendText = (message, shouldResetInputToolbar = true, data_type = "") => {
+    Keyboard9.dismiss();
     this.stopTTS();
     if (this.props.onSend) {
       this.props.onSend(message.text, data_type);
+      if (shouldResetInputToolbar) {
+        this.resetInputToolbar();
+      }
     } else {
       let data;
       if (this.state?.mediaPayload?.length > 0) {
@@ -27173,8 +27301,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     data_type = "",
     isDisplayUserMessage = true
   } = {}) => {
-    console.log("onSend called with message:", message);
-    Keyboard10.dismiss();
+    Keyboard9.dismiss();
     this.clearQuickReplies();
     if (shouldResetInputToolbar === true) {
       this.setIsTypingDisabled(true);
@@ -27220,6 +27347,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   };
   handleInternalAppNavigation = (item = {}, template_type = "") => {
     const navUrl = item?.navigationUrl || item?.url || item?.route || item?.actionUrl || item?.LinkUrl || item?.linkUrl || item?.routeName || "";
+    this.minimizeChat();
     if (this.props.onAppNavigation) {
       this.props.onAppNavigation(navUrl, item);
       return;
@@ -27376,6 +27504,9 @@ var KoreChat = class _KoreChat extends React113.Component {
     }
   };
   onListItemClick = (template_type, item, isFromViewMore, theme) => {
+    if (template_type === TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE || template_type === TEMPLATE_TYPES.CLAIM_MORE_DETAILS_TEMPLATE || template_type === "claimMoreDetails_template") {
+      this.minimizeChat();
+    }
     if (this.props.onListItemClick) {
       let onClick = this.props.onListItemClick(
         template_type,
@@ -27452,7 +27583,7 @@ var KoreChat = class _KoreChat extends React113.Component {
         if (!isFromViewMore) {
           this.computePostBack(item, template_type);
         } else if (isFromViewMore) {
-          Keyboard10.dismiss();
+          Keyboard9.dismiss();
           const dataPayload = [
             {
               title: "Tab1",
@@ -27526,11 +27657,12 @@ var KoreChat = class _KoreChat extends React113.Component {
   }
   resetInputToolbar = () => {
     if (this.textInput) {
-      this.textInput.clear();
+      this.textInput.clear?.();
+      this.textInput.blur?.();
     }
     this.notifyInputTextReset();
     this.setState({
-      text: this.getTextFromProp("")
+      text: ""
     });
   };
   onInputSizeChanged = (_size) => {
@@ -27571,7 +27703,7 @@ var KoreChat = class _KoreChat extends React113.Component {
     if (this.props.renderSuggestionsView) {
       this.props.renderSuggestionsView(text);
     }
-    if (this.props.text === null) {
+    if (this.props.text === null || this.props.text === void 0) {
       this.setState({ text });
     }
   };
@@ -27704,7 +27836,7 @@ var KoreChat = class _KoreChat extends React113.Component {
       textInputProps: {
         ...this.props.textInputProps,
         ref: (textInput) => this.textInput = textInput,
-        maxLength: this.getIsTypingDisabled() ? 0 : this.props.maxInputLength,
+        maxLength: this.props.maxInputLength || MAX_INPUT_TEXT_LENGTH,
         onFocus: this.onInputFocus,
         onBlur: this.onInputBlur
       },
@@ -27733,12 +27865,12 @@ var KoreChat = class _KoreChat extends React113.Component {
           );
           return;
         }
-        Keyboard10.dismiss();
+        Keyboard9.dismiss();
         this.setState({ showAttachmentModal: true });
       },
       onMenuItemClick: (menuItems) => {
         console.log("menuItems ------->:", menuItems);
-        Keyboard10.dismiss();
+        Keyboard9.dismiss();
         this.setState({
           menuItems
         });
@@ -27895,7 +28027,7 @@ var KoreChat = class _KoreChat extends React113.Component {
         }
       },
       /* @__PURE__ */ React113.createElement(
-        TouchableWithoutFeedback4,
+        TouchableWithoutFeedback3,
         {
           onPress: () => {
             this.setState({ menuItems: void 0 });
@@ -27911,7 +28043,7 @@ var KoreChat = class _KoreChat extends React113.Component {
             }
           },
           /* @__PURE__ */ React113.createElement(
-            TouchableWithoutFeedback4,
+            TouchableWithoutFeedback3,
             {
               onPress: () => {
               }
@@ -28401,6 +28533,7 @@ var KoreChat = class _KoreChat extends React113.Component {
   onHeaderActionsClick = (item) => {
     switch (item) {
       case HeaderIconsId.BACK:
+        this.minimizeChat();
         try {
           if (this.props.navigation?.canGoBack?.()) {
             this.allowNavigation = true;
@@ -28416,7 +28549,7 @@ var KoreChat = class _KoreChat extends React113.Component {
         this.handleDialogMinimize();
         break;
       case HeaderIconsId.CLOSE:
-        Keyboard10.dismiss();
+        Keyboard9.dismiss();
         this.setState((prevState) => ({
           showBackButtonDialog: !prevState.showBackButtonDialog
         }));
@@ -28445,6 +28578,9 @@ var KoreChat = class _KoreChat extends React113.Component {
       return this.props.renderChatHeader();
     }
     let onClick = (item) => {
+      if (item === HeaderIconsId.BACK || item === HeaderIconsId.MINIMISE) {
+        this.minimizeChat();
+      }
       if (this.props?.onHeaderActionsClick) {
         this.props?.onHeaderActionsClick?.(item);
       } else {
@@ -28739,10 +28875,11 @@ var KoreChat = class _KoreChat extends React113.Component {
     this.setMessages(newMessages);
   };
   loadHistory = async () => {
+    const limit = Math.max(20, historyMessages);
     const apiService = new ApiService3(this.props.botConfig.botUrl, KoreBotClient6.getInstance());
-    await apiService.getBotHistory(0, historyMessages > 20 ? 20 : historyMessages, this.props.botConfig, (response) => {
-      if (response == null) {
-        console.log("BotHistory null");
+    await apiService.getBotHistory(0, limit, this.props.botConfig, (response) => {
+      if (response == null || !response?.data?.botHistory) {
+        console.log("BotHistory null or empty");
         return;
       }
       this.onHistoryLoaded(response.data.botHistory);
@@ -29189,6 +29326,7 @@ export {
   BOT_ICON_URL,
   BRANDING_RESPONSE_FILE,
   BotTemplate,
+  CONNECTION_STATE,
   ChatHeaderType,
   ClaimMoreDetailsTemplate,
   Color_default as Color,

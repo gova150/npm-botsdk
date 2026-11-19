@@ -322,7 +322,6 @@ export default class DisplayClaimsTemplate extends BaseView<
             <Text
               style={[
                 styles.claimNumberText,
-                {color: botMsgColor},
                 fontFamily ? {fontFamily} : null,
               ]}>
               {displayClaimNum}
@@ -656,7 +655,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 16,
-    color: '#282828',
+    color: '#666666',
   },
   providerName: {
     marginBottom: 8,
@@ -690,7 +689,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 16,
-    color: '#6B7280',
+    color: '#666666',
     marginBottom: 2,
   },
   gridValueMedium: {

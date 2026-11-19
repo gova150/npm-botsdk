@@ -11,6 +11,11 @@ declare const attach_menu_buttons: {
     id: number;
     title: string;
 }[];
+declare const CONNECTION_STATE: {
+    CONNECTING: number;
+    CONNECTED: number;
+    DISCONNECTED: number;
+};
 declare const HeaderIconsId: {
     BACK: string;
     HELP: string;
@@ -713,11 +718,12 @@ declare class CustomTemplate<T extends CustomViewProps, S extends CustomViewStat
 }
 
 /**
- * Bot configuration model for Kore.ai Bot SDK.
+ * Bot configuration model for Kore.ai Bot SDK (React Native).
  * Supports:
  * 1. Pre-fetched static JWT token (`jwtToken`)
  * 2. Enterprise dynamic token callback for expiry & reconnects (`getJwtToken`)
- * 3. Legacy STS credentials (`clientId`, `clientSecret`, `identity`, `value_aud`)
+ * 3. Custom data object (`customData`)
+ * 4. Legacy STS credentials (`clientId`, `clientSecret`, `identity`, `value_aud`)
  */
 interface BotConfigModel {
     botName: string;
@@ -725,9 +731,11 @@ interface BotConfigModel {
     botUrl: string;
     jwtToken?: string;
     getJwtToken?: () => Promise<string> | string;
+    customData?: Record<string, any>;
     clientId?: string;
     clientSecret?: string;
     identity?: string;
+    userName?: string;
     jwtServerUrl?: string;
     value_aud?: string;
     isWebHook?: boolean;
@@ -960,6 +968,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     private saveThemeData;
     private getThemeData;
     static append(currentMessages: any, messages: any): any;
+    minimizeChat: () => void;
     private handleBackPress;
     private handleDialogCancel;
     private handleDialogClose;
@@ -1056,9 +1065,10 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
  * Patches KoreBotClient prototype to properly support:
  * 1. Enterprise dynamic JWT token callback (`getJwtToken`)
  * 2. Pre-fetched static JWT token (`jwtToken`)
- * 3. Guarantees `botInfo` is ALWAYS initialized on the client instance so
+ * 3. Custom data object (`customData`)
+ * 4. Guarantees `botInfo` is ALWAYS initialized on the client instance so
  *    Kore.ai's `/api/oAuth/token/jwtgrant`, `/api/rtm/start`, and message endpoints
- *    receive valid bot credentials without requiring fake `clientId`/`clientSecret`.
+ *    receive valid bot credentials and custom data without requiring fake `clientId`/`clientSecret`.
  */
 declare function applyKoreBotClientPatches(): void;
 
@@ -1634,4 +1644,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };

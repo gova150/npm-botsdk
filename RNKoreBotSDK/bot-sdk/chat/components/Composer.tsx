@@ -9,11 +9,9 @@ import {
   TextInputContentSizeChangeEventData,
   View,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Animated,
   Easing,
   Platform,
-  Keyboard,
 } from 'react-native';
 import {
   MIN_COMPOSER_HEIGHT,
@@ -86,21 +84,13 @@ export function Composer({
     setTTS(isTTSenable);
   }, [isTTSenable]);
 
-  // Remove focus and reset border when keyboard is dismissed/hidden
+  // Sync focus if textInputAutoFocus is enabled
   useEffect(() => {
-    const onHide = () => {
-      textInputRef.current?.blur();
-      setIsFocused(false);
-    };
+    if (textInputAutoFocus) {
+      setIsFocused(true);
+    }
+  }, [textInputAutoFocus]);
 
-    const willHideSub = Keyboard.addListener('keyboardWillHide', onHide);
-    const didHideSub = Keyboard.addListener('keyboardDidHide', onHide);
-
-    return () => {
-      willHideSub.remove();
-      didHideSub.remove();
-    };
-  }, []);
 
   const determineInputSizeChange = useCallback(
     (dimensions: {width: number; height: number}) => {
@@ -181,6 +171,7 @@ export function Composer({
     inputTextRef.current = currentVal;
     setInputText(currentVal);
     if (!currentVal || currentVal.trim().length === 0) {
+      textInputRef.current?.clear?.();
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
       }
@@ -235,6 +226,9 @@ export function Composer({
   const handleChangeText = (newText: string) => {
     inputTextRef.current = newText;
     setInputText(newText);
+    if (!isFocused) {
+      setIsFocused(true);
+    }
     if (!newText || newText.trim().length === 0) {
       if (lineCountRef.current !== 1) {
         updateLineCountAndHeight(1);
@@ -248,15 +242,20 @@ export function Composer({
     onTextChanged(newText);
   };
 
-  const bgColor = theme?.v3?.footer?.compose_bar?.bg_color || '#F3F4F6';
-  const sendButtonColor =
+  const inputBoxBgColor = theme?.v3?.footer?.compose_bar?.bg_color || '#F3F4F6';
+  const buttonBgColor =
     sendButtonBgColor ||
-    theme?.v3?.body?.user_message?.bg_color ||
+    (theme?.v3?.body as any)?.buttons?.bg_color ||
+    (theme?.v3?.body as any)?.button?.bg_color ||
+    (theme?.v3?.footer?.buttons as any)?.send?.bg_color ||
+    (theme?.v3?.general as any)?.buttons?.bg_color ||
     theme?.v3?.general?.colors?.primary ||
+    theme?.v3?.general?.primaryColor ||
+    theme?.v3?.body?.user_message?.bg_color ||
     '#1B365D';
-  const outLineColor = isFocused ? sendButtonColor : bgColor;
-  const currentBorderWidth = isFocused ? 2 : 1;
-  const textColor = invertColor(bgColor, true);
+  const outLineColor = isFocused ? buttonBgColor : inputBoxBgColor;
+  const currentBorderWidth = 2;
+  const textColor = invertColor(inputBoxBgColor, true);
 
   return (
     <View
@@ -265,33 +264,34 @@ export function Composer({
         backgroundColor: Color.transparent,
         flex: 1,
       }}>
-      <TouchableWithoutFeedback
-        onPress={() => textInputRef.current?.focus()}
-        accessible={false}>
-        <Animated.View
-          onLayout={(e) => {
-            const w = e.nativeEvent.layout.width;
-            if (w > 0 && Math.abs(w - containerWidth) > 5) {
-              setContainerWidth(w);
-            }
-          }}
-          style={{
-            height: animatedHeight,
-            justifyContent: 'center',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            flex: 1,
-            borderWidth: currentBorderWidth,
-            borderColor: outLineColor,
-            borderStyle: 'solid',
-            borderRadius: 8,
-            backgroundColor: bgColor,
-            minHeight: MIN_HEIGHT,
-            maxHeight: MAX_HEIGHT,
-            overflow: 'hidden',
-          }}>
+      <Animated.View
+        onLayout={(e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - containerWidth) > 5) {
+            setContainerWidth(w);
+          }
+        }}
+        onTouchStart={() => {
+          setIsFocused(true);
+          if (!textInputRef.current?.isFocused?.()) {
+            textInputRef.current?.focus?.();
+          }
+        }}
+        style={{
+          height: animatedHeight,
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          flex: 1,
+          borderWidth: currentBorderWidth,
+          borderColor: outLineColor,
+          borderStyle: 'solid',
+          borderRadius: 8,
+          backgroundColor: inputBoxBgColor,
+          minHeight: MIN_HEIGHT,
+          maxHeight: MAX_HEIGHT,
+        }}>
           <TextInput
-            ref={textInputRef}
             testID={placeholder}
             accessible
             accessibilityLabel={placeholder}
@@ -328,11 +328,19 @@ export function Composer({
               },
             ]}
             autoFocus={textInputAutoFocus}
-            value={text}
+            value={text || ''}
             enablesReturnKeyAutomatically
             underlineColorAndroid="transparent"
             keyboardAppearance={keyboardAppearance}
             {...textInputProps}
+            ref={(ref: any) => {
+              (textInputRef as any).current = ref;
+              if (typeof textInputProps?.ref === 'function') {
+                textInputProps.ref(ref);
+              } else if (textInputProps?.ref) {
+                textInputProps.ref.current = ref;
+              }
+            }}
             onFocus={(e: any) => {
               setIsFocused(true);
               textInputProps?.onFocus?.(e);
@@ -366,7 +374,6 @@ export function Composer({
             </TouchableOpacity>
           )}
         </Animated.View>
-      </TouchableWithoutFeedback>
     </View>
   );
 }

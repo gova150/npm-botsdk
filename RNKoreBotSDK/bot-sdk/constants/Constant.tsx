@@ -25,6 +25,12 @@ export const attach_menu_buttons = [
   },
 ];
 
+export const CONNECTION_STATE = {
+  CONNECTING: 0,
+  CONNECTED: 1,
+  DISCONNECTED: 2,
+};
+
 export const HeaderIconsId = {
   BACK: 'BACK',
   HELP: 'HELP',

@@ -25,6 +25,8 @@ This sample app showcases how to integrate the Kore Bot SDK with **selective dep
 - [🎨 Customization](#-customization)
   - [Custom Font Family (Host App Font Override)](#custom-font-family-host-app-font-override)
 - [📚 API Reference](#-api-reference)
+  - [BotConfigModel Interface](#botconfigmodel-interface)
+  - [📦 Custom Data (`customData`)](#-custom-data-customdata)
 - [🛠️ Advanced Configuration](#️-advanced-configuration)
 - [🔐 Permissions Setup](#-permissions-setup)
 - [📱 Examples](#-examples)
@@ -382,6 +384,9 @@ export interface BotConfigModel {
   // Authentication: Enterprise recommended dynamic token resolver
   getJwtToken?: () => Promise<string> | string; // Fresh token resolver called on connect & reconnect
 
+  // Custom session context & user parameters (Kore.ai bot context)
+  customData?: Record<string, any>; // Arbitrary custom data passed to Kore bot session context
+
   // Legacy STS fields (only needed if generating test tokens via Kore STS)
   clientId?: string;          // OAuth client ID
   clientSecret?: string;      // OAuth client secret
@@ -484,7 +489,53 @@ const botConfig: BotConfigModel = {
 
 ---
 
-## 🛠️ Advanced Configuration
+### 📦 Custom Data (`customData`)
+
+You can pass custom parameters, user attributes, or enterprise session metadata to the Kore.ai bot using the `customData` property in `botConfig`. 
+
+#### 1. Configuration in `botConfig` (React Native Style)
+```tsx
+import React from 'react';
+import { View } from 'react-native';
+import KoreChat, { BotConfigModel } from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+const botConfig: BotConfigModel = {
+  botName: 'Digital Advocate',
+  botId: 'st-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  botUrl: 'https://bots.kore.ai',
+  getJwtToken: async () => 'YOUR_JWT_TOKEN',
+
+  // Custom data passed to Kore.ai bot session context
+  customData: {
+    planType: 'Commercial',
+  },
+};
+
+const App = () => (
+  <View style={{ flex: 1 }}>
+    <KoreChat botConfig={botConfig} />
+  </View>
+);
+
+export default App;
+```
+
+#### 2. Dynamic Runtime Updates with `setCustomData`
+If your host application needs to update or add custom data dynamically after initialization (e.g., after a user logs in, switches accounts, or selects a claim):
+
+```tsx
+import { KoreBotClient } from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+// Dynamically merge new custom data into the active bot session
+KoreBotClient.getInstance().setCustomData({
+  detals: 'any info',
+  userTier: 'general',
+});
+
+// Retrieve currently active custom data
+const currentCustomData = KoreBotClient.getInstance().getCustomData();
+console.log('Active customData:', currentCustomData);
+```
 
 ### Conditional Native Module Loading
 

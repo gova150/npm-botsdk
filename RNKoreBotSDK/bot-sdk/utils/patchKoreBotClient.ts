@@ -9,9 +9,10 @@ import KoreBotClient, {
  * Patches KoreBotClient prototype to properly support:
  * 1. Enterprise dynamic JWT token callback (`getJwtToken`)
  * 2. Pre-fetched static JWT token (`jwtToken`)
- * 3. Guarantees `botInfo` is ALWAYS initialized on the client instance so
+ * 3. Custom data object (`customData`)
+ * 4. Guarantees `botInfo` is ALWAYS initialized on the client instance so
  *    Kore.ai's `/api/oAuth/token/jwtgrant`, `/api/rtm/start`, and message endpoints
- *    receive valid bot credentials without requiring fake `clientId`/`clientSecret`.
+ *    receive valid bot credentials and custom data without requiring fake `clientId`/`clientSecret`.
  */
 export function applyKoreBotClientPatches() {
   try {
@@ -29,20 +30,37 @@ export function applyKoreBotClientPatches() {
 
       const botName = cfg.botName || '';
       const botId = cfg.botId || '';
-      const identity = cfg.identity || '';
+      const identity = cfg.identity || client.userInfo?.identity || '';
       const userName = cfg.userName || '';
+
+      // Extract customData (React Native style)
+      const userCustomData =
+        cfg.customData ||
+        cfg.botCustomData ||
+        client.customData ||
+        {};
+
+      const mergedCustomData: Record<string, any> = {
+        ...(typeof userCustomData === 'object' && !Array.isArray(userCustomData)
+          ? userCustomData
+          : {}),
+        ...(identity ? { identity } : {}),
+        ...(userName ? { userName } : {}),
+      };
 
       if (!client.botCustomData) {
         client.botCustomData = new Map();
       }
       if (client.botCustomData?.set) {
-        client.botCustomData.set('identity', identity);
-        client.botCustomData.set('username', userName);
+        for (const [key, value] of Object.entries(mergedCustomData)) {
+          client.botCustomData.set(key, value);
+        }
       }
 
+      client.customData = mergedCustomData;
       client.botUrl = cfg.botUrl || client.botUrl || '';
 
-      // Set botInfo with all naming conventions expected across Kore.ai backends
+      // Set internal botInfo required by Kore.ai backend
       client.botInfo = {
         chatBot: botName,
         taskBotId: botId,
@@ -50,10 +68,7 @@ export function applyKoreBotClientPatches() {
         botId: botId,
         name: botName,
         _id: botId,
-        customData: {
-          identity: identity,
-          userName: userName,
-        },
+        customData: mergedCustomData,
         channelClient: Platform.OS,
       };
 
@@ -68,6 +83,9 @@ export function applyKoreBotClientPatches() {
         throw new Error('BotConfigModel object cannot be null');
       }
 
+      const botName = config.botName;
+      const botId = config.botId;
+
       const hasDynamicToken =
         typeof config.getJwtToken === 'function' ||
         (config.getJwtToken && typeof config.getJwtToken.then === 'function');
@@ -76,7 +94,7 @@ export function applyKoreBotClientPatches() {
         (typeof config.getJwtToken === 'string' && config.getJwtToken.length > 0);
 
       if (hasDynamicToken || hasStaticToken) {
-        if (!config.botId || !config.botUrl || !config.botName) {
+        if (!botId || !config.botUrl || !botName) {
           throw new Error(
             'BotConfigModel requires botName, botId, and botUrl when jwtToken or getJwtToken is provided',
           );
@@ -84,7 +102,7 @@ export function applyKoreBotClientPatches() {
       } else {
         // Legacy STS validation (only needed if generating test tokens via Kore STS endpoint)
         if (
-          !config.botId ||
+          !botId ||
           !config.clientId ||
           !config.clientSecret ||
           !config.botUrl ||
@@ -194,11 +212,64 @@ export function applyKoreBotClientPatches() {
       return true;
     };
 
-    // 4. Log all outgoing and incoming WebSocket messages for complete debugging visibility
+    // 4. Runtime helpers to dynamically update or get customData on the client instance
+    proto.setCustomData = function (customData: any) {
+      if (!customData || typeof customData !== 'object') return;
+      const existing = this.botInfo?.customData || this.customData || {};
+      const updated = { ...existing, ...customData };
+      this.customData = updated;
+      if (!this.botInfo) {
+        this.botInfo = {};
+      }
+      this.botInfo.customData = updated;
+      if (!this.botCustomData) {
+        this.botCustomData = new Map();
+      }
+      if (this.botCustomData?.set) {
+        for (const [k, v] of Object.entries(updated)) {
+          this.botCustomData.set(k, v);
+        }
+      }
+    };
+
+    proto.getCustomData = function () {
+      return this.botInfo?.customData || this.customData || {};
+    };
+
+    // 5. Log all outgoing and incoming WebSocket messages and ensure customData is attached to messages
     const originalSend = proto.send;
     proto.send = function (message: any) {
-      if (message && message.type !== 'ping') {
-        console.log('📤 [WebSocket Sent]:', JSON.stringify(message, null, 2));
+      if (message) {
+        // Ensure customData is synchronized onto outgoing message payload and botInfo
+        const customData =
+          this.botInfo?.customData ||
+          this.customData ||
+          this.botConfig?.customData;
+
+        if (customData && typeof customData === 'object') {
+          if (this.botInfo) {
+            this.botInfo.customData = {
+              ...(this.botInfo.customData || {}),
+              ...customData,
+            };
+          }
+          if (message.botInfo) {
+            message.botInfo.customData = {
+              ...(message.botInfo.customData || {}),
+              ...customData,
+            };
+          }
+          if (message.message) {
+            message.message.customData = {
+              ...(message.message.customData || {}),
+              ...customData,
+            };
+          }
+        }
+
+        if (message.type !== 'ping') {
+          console.log('📤 [WebSocket Sent]:', JSON.stringify(message, null, 2));
+        }
       }
       return originalSend.call(this, message);
     };
@@ -213,6 +284,30 @@ export function applyKoreBotClientPatches() {
       } catch (e) {}
       return originalOnMessage.call(this, messageData, isJsonObj);
     };
+
+    // Chat session caching & minimize state helpers
+    let cachedMessagesList: any[] = [];
+    let isClientMinimized = false;
+
+    proto.setCachedMessages = function (messages: any[]) {
+      cachedMessagesList = Array.isArray(messages) ? [...messages] : [];
+    };
+
+    proto.getCachedMessages = function () {
+      return cachedMessagesList;
+    };
+
+    proto.clearCachedMessages = function () {
+      cachedMessagesList = [];
+    };
+
+    proto.setMinimized = function (minimized: boolean) {
+      isClientMinimized = !!minimized;
+    };
+
+    proto.isMinimized = function () {
+      return isClientMinimized;
+    };
   } catch (e) {
     // Fail-safe
   }
@@ -220,4 +315,3 @@ export function applyKoreBotClientPatches() {
 
 // Automatically apply patches upon module load
 applyKoreBotClientPatches();
-
