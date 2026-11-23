@@ -736,6 +736,7 @@ __export(src_exports, {
   formatCamelCaseToLabel: () => formatCamelCaseToLabel,
   getBrandingButtonColor: () => getBrandingButtonColor,
   hidePdfDownloadLoader: () => hidePdfDownloadLoader,
+  parseInternalAppNavigationText: () => parseInternalAppNavigationText,
   showPdfDownloadLoader: () => showPdfDownloadLoader,
   useLazyCommunications: () => useLazyCommunications,
   useLazySound: () => useLazySound
@@ -1695,6 +1696,79 @@ function isBlackStatusBar(color) {
   }
   return false;
 }
+function parseInternalAppNavigationText(text) {
+  if (typeof text !== "string") {
+    return null;
+  }
+  if (!text.includes("$navigationStart$") || !text.includes("$navigationEnd$")) {
+    return null;
+  }
+  const navRegex = /\$navigationStart\$(.*?)\$navigationEnd\$/gis;
+  const buttons = [];
+  let match;
+  while ((match = navRegex.exec(text)) !== null) {
+    const content = (match[1] || "").trim();
+    if (!content)
+      continue;
+    const buttonChunks = content.split(/;+/).map((c) => c.trim()).filter(Boolean);
+    for (const chunk of buttonChunks) {
+      const btn = {
+        type: "postback",
+        title: "",
+        navigationUrl: ""
+      };
+      const pairs = chunk.split(",");
+      for (const pair of pairs) {
+        const colonIdx = pair.indexOf(":");
+        if (colonIdx > -1) {
+          const rawKey = pair.slice(0, colonIdx).trim();
+          const key = rawKey.toLowerCase();
+          const value = pair.slice(colonIdx + 1).trim();
+          if (key === "title") {
+            btn.title = value;
+          } else if (key === "linkurl" || key === "link_url" || key === "link" || key === "navigationurl" || key === "url") {
+            btn.navigationUrl = value;
+          } else if (key === "type") {
+            btn.type = value;
+          } else {
+            btn[rawKey] = value;
+          }
+        }
+      }
+      Object.defineProperty(btn, "linkurl", {
+        get() {
+          return this.navigationUrl;
+        },
+        set(v) {
+          this.navigationUrl = v;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(btn, "linkUrl", {
+        get() {
+          return this.navigationUrl;
+        },
+        set(v) {
+          this.navigationUrl = v;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      if (btn.title || btn.navigationUrl) {
+        buttons.push(btn);
+      }
+    }
+  }
+  const cleanTitle = text.replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, "").trim();
+  return {
+    template_type: TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
+    title: cleanTitle,
+    text: cleanTitle,
+    heading: cleanTitle,
+    buttons
+  };
+}
 function getTemplateType(message) {
   const msg = Array.isArray(message) ? message[0] : message;
   let compPayload = msg?.component?.payload;
@@ -1703,6 +1777,10 @@ function getTemplateType(message) {
       compPayload = JSON.parse(compPayload);
     } catch (e) {
     }
+  }
+  const navTextCandidate = msg?.component?.payload?.text || compPayload?.text || compPayload?.payload?.text || (typeof compPayload === "string" ? compPayload : null) || msg?.cInfo?.body || msg?.text;
+  if (typeof navTextCandidate === "string" && navTextCandidate.includes("$navigationStart$") && navTextCandidate.includes("$navigationEnd$")) {
+    return TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE;
   }
   const detectedCustomType = compPayload?.payload?.template_type || compPayload?.template_type || compPayload?.type || msg?.component?.template_type || msg?.template_type;
   if (detectedCustomType === TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS || detectedCustomType === "customTemplate_displayClaims") {
@@ -18230,7 +18308,16 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
   constructor(props) {
     super(props);
     const initialDisabled = /* @__PURE__ */ new Set();
-    const buttons = props?.payload?.buttons || [];
+    let buttons = props?.payload?.buttons || [];
+    if (!buttons || buttons.length === 0) {
+      const textToParse = props?.payload?.title || props?.payload?.text || props?.payload?.heading || (typeof props?.payload === "string" ? props.payload : null);
+      if (typeof textToParse === "string" && textToParse.includes("$navigationStart$") && textToParse.includes("$navigationEnd$")) {
+        const parsed = parseInternalAppNavigationText(textToParse);
+        if (parsed?.buttons) {
+          buttons = parsed.buttons;
+        }
+      }
+    }
     buttons.forEach((btn, idx) => {
       if (btn?.disabled || btn?.isDownloaded) {
         initialDisabled.add(idx);
@@ -18241,12 +18328,13 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
       clickedIndices: /* @__PURE__ */ new Set()
     };
   }
+  isViewDisable = () => {
+    return false;
+  };
   renderButton = (btn, index, totalButtons, buttonBgColor, buttonBorderColor, buttonTextColor, isTextInverted, fontFamily, fontSizeStyle, templateType) => {
     const isLastButton = index === totalButtons - 1;
     const buttonTitle = btn?.title || "";
-    const isPermanentlyDisabled = btn?.disabled === true || btn?.isDownloaded === true || this.state.disabledIndices?.has(index);
-    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
-    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
+    const isButtonDisabled = btn?.disabled === true || btn?.isDownloaded === true || this.state.disabledIndices?.has(index);
     const currentBgColor = isButtonDisabled ? "#DDDDDD" : buttonBgColor;
     const currentBorderColor = isButtonDisabled ? "#DDDDDD" : buttonBorderColor;
     const currentTextColor = isButtonDisabled ? "#7D7D7D" : buttonTextColor;
@@ -18276,21 +18364,9 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
             if (isButtonDisabled) {
               return;
             }
-            this.setState((prevState) => {
-              const nextClicked = new Set(prevState.clickedIndices);
-              nextClicked.add(index);
-              const nextDisabled = new Set(prevState.disabledIndices);
-              nextDisabled.add(index);
-              if (btn) {
-                btn.disabled = true;
-              }
-              return {
-                clickedIndices: nextClicked,
-                disabledIndices: nextDisabled
-              };
-            });
-            if (this.props.onListItemClick) {
-              this.props.onListItemClick(
+            const clickHandler = this.props.onListItemClick || this.props.payload?.onListItemClick;
+            if (clickHandler) {
+              clickHandler(
                 templateType || TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
                 btn
               );
@@ -18304,9 +18380,9 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
               styles64.buttonText,
               {
                 color: currentTextColor,
-                fontFamily
-              },
-              fontSizeStyle
+                fontFamily,
+                fontSize: 14
+              }
             ]
           },
           buttonTitle
@@ -18320,17 +18396,23 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
       return null;
     }
     const payload = rawPayload?.payload && typeof rawPayload.payload === "object" && !rawPayload.buttons ? rawPayload.payload : rawPayload;
-    const title = payload?.title || payload?.text || payload?.heading || "";
-    const buttons = payload?.buttons || [];
-    const btheme = getButtonTheme(this.props?.theme);
-    const bbtheme = getBubbleTheme(this.props?.theme);
-    const fontFamily = this.props?.theme?.v3?.body?.font?.family || TEMPLATE_STYLE_VALUES.FONT_FAMILY || "Inter";
-    const fontSizeStyle = botStyles[this.props?.theme?.v3?.body?.font?.size || "medium"]?.size || botStyles.medium.size;
-    const botMsgBg = this.props?.theme?.v3?.body?.bot_message?.bg_color;
-    const cardBgColor = botMsgBg && botMsgBg !== "#3F51B5" ? botMsgBg : bbtheme?.BUBBLE_LEFT_BG_COLOR || "#EFF1F5";
-    const botMsgColor = this.props?.theme?.v3?.body?.bot_message?.color;
-    const textColor = botMsgColor && botMsgColor !== "#FFFFFF" ? botMsgColor : bbtheme?.BUBBLE_LEFT_TEXT_COLOR || TEMPLATE_STYLE_VALUES.TEXT_COLOR || "#1D2939";
-    const bodyBtn = this.props?.theme?.v3?.body?.buttons || this.props?.theme?.v3?.body?.button;
+    let title = payload?.title || payload?.text || payload?.heading || "";
+    let buttons = payload?.buttons || [];
+    if ((!buttons || buttons.length === 0) && typeof title === "string" && title.includes("$navigationStart$") && title.includes("$navigationEnd$")) {
+      const parsed = parseInternalAppNavigationText(title);
+      if (parsed) {
+        title = parsed.title;
+        buttons = parsed.buttons;
+      }
+    }
+    const theme = this.props?.theme || this.context;
+    const btheme = getButtonTheme(theme);
+    const bbtheme = getBubbleTheme(theme);
+    const fontFamily = theme?.v3?.body?.font?.family || TEMPLATE_STYLE_VALUES.FONT_FAMILY || "Inter";
+    const fontSizeStyle = botStyles[theme?.v3?.body?.font?.size || "medium"]?.size || botStyles.medium.size;
+    const cardBgColor = bbtheme?.BUBBLE_LEFT_BG_COLOR;
+    const textColor = bbtheme?.BUBBLE_LEFT_TEXT_COLOR;
+    const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
     const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
     const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
     const isBackgroundInverted = payload?.variation === "backgroundInverted";
@@ -18349,12 +18431,16 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
     }
     const templateType = rawPayload?.template_type || payload?.template_type || TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE;
     const cardWidth = Math.min(getWindowWidth() * 0.82, 380);
+    const bubbleRadiusStyle = leftBubbleStyles[theme?.v3?.body?.bubble_style || "balloon"]?.bubble_style || {
+      borderRadius: 8
+    };
     return /* @__PURE__ */ React83.createElement(
       import_react_native77.View,
       {
-        pointerEvents: this.isViewDisable() ? "none" : "auto",
+        pointerEvents: "auto",
         style: [
           styles64.mainContainer,
+          bubbleRadiusStyle,
           {
             width: cardWidth,
             backgroundColor: cardBgColor
@@ -18368,12 +18454,16 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
             styles64.titleText,
             {
               color: textColor,
-              fontFamily
-            },
-            fontSizeStyle
+              fontFamily,
+              fontSize: 14,
+              fontWeight: "400",
+              fontStyle: "normal",
+              lineHeight: 20,
+              marginBottom: buttons.length > 0 ? 16 : 0
+            }
           ]
         },
-        title
+        typeof title === "string" ? title.replace(/<br\s*\/?>/gi, "\n").trim() : title
       ) : null,
       buttons.length > 0 ? /* @__PURE__ */ React83.createElement(import_react_native77.View, { style: styles64.buttonsContainer }, buttons.map(
         (btn, index) => this.renderButton(
@@ -18394,7 +18484,6 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
 };
 var styles64 = import_react_native77.StyleSheet.create({
   mainContainer: {
-    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginVertical: 4,
@@ -18402,10 +18491,14 @@ var styles64 = import_react_native77.StyleSheet.create({
     marginRight: 0
   },
   titleText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    fontSize: 14,
+    fontStyle: "normal",
+    fontWeight: "400",
     lineHeight: 20,
-    paddingBottom: 12
+    marginTop: 0,
+    marginBottom: 16,
+    marginLeft: 0,
+    marginRight: 0
   },
   buttonsContainer: {
     width: "100%",
@@ -18421,12 +18514,12 @@ var styles64 = import_react_native77.StyleSheet.create({
     width: "100%",
     borderRadius: 24,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center"
   },
   buttonText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontSize: 14,
     fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
     fontWeight: "600",
     textAlign: "center"
@@ -19844,10 +19937,23 @@ var BotTemplate = class extends React87.Component {
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
         return /* @__PURE__ */ React87.createElement(PdfDownloadTemplate, { payload, theme, onListItemClick: this.props.onListItemClick });
       case TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE:
+        let navPayload = payload;
+        if (!navPayload?.buttons || navPayload.buttons.length === 0) {
+          const rawText = navPayload?.title || navPayload?.text || navPayload?.heading || (typeof navPayload === "string" ? navPayload : null);
+          if (typeof rawText === "string" && rawText.includes("$navigationStart$") && rawText.includes("$navigationEnd$")) {
+            const parsed = parseInternalAppNavigationText(rawText);
+            if (parsed) {
+              navPayload = { ...navPayload, ...parsed };
+            }
+          }
+        }
         return /* @__PURE__ */ React87.createElement(
           InternalAppNavigationTemplate,
           {
-            payload,
+            payload: {
+              ...typeof navPayload === "object" ? navPayload : {},
+              onListItemClick: this.props.onListItemClick
+            },
             theme,
             currentMessage: this.props.currentMessage,
             onListItemClick: this.props.onListItemClick
@@ -19912,6 +20018,26 @@ var BotTemplate = class extends React87.Component {
   };
   renderMessageText = (payload, theme, template_type) => {
     if (payload) {
+      const text = payload?.text || payload?.payload?.text || (typeof payload === "string" ? payload : null);
+      if (typeof text === "string" && text.includes("$navigationStart$") && text.includes("$navigationEnd$")) {
+        const parsed = parseInternalAppNavigationText(text);
+        if (parsed) {
+          const navPayload = {
+            ...typeof payload === "object" ? payload : {},
+            ...parsed,
+            onListItemClick: this.props.onListItemClick
+          };
+          return /* @__PURE__ */ React87.createElement(
+            InternalAppNavigationTemplate,
+            {
+              payload: navPayload,
+              theme,
+              currentMessage: this.props.currentMessage,
+              onListItemClick: this.props.onListItemClick
+            }
+          );
+        }
+      }
       const { ...messageTextProps } = this.props;
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps);
@@ -22376,6 +22502,18 @@ var Bubble = class extends React96.Component {
     if (!payloadProps || typeof payloadProps !== "object") {
       payloadProps = {};
     }
+    if (type === TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE || typeof payloadProps?.text === "string" && payloadProps.text.includes("$navigationStart$")) {
+      const textToParse = payloadProps?.text || payloadProps?.title || payloadProps?.heading || msg?.component?.payload?.text || msg?.cInfo?.body;
+      if (typeof textToParse === "string" && textToParse.includes("$navigationStart$") && textToParse.includes("$navigationEnd$")) {
+        const parsed = parseInternalAppNavigationText(textToParse);
+        if (parsed) {
+          payloadProps = {
+            ...payloadProps,
+            ...parsed
+          };
+        }
+      }
+    }
     return {
       ...payloadProps,
       onListItemClick: this.props.onListItemClick,
@@ -23708,7 +23846,7 @@ var TypingIndicator = class extends import_react41.Component {
   constructor(props) {
     super(props);
     this.state = {
-      indicatorText: "Typing"
+      indicatorText: "Please wait"
     };
   }
   componentDidMount() {
@@ -23734,20 +23872,15 @@ var TypingIndicator = class extends import_react41.Component {
   startTypingFlow = () => {
     this.clearTimer();
     if (this._isMounted) {
-      this.setState({ indicatorText: "Typing" });
+      this.setState({ indicatorText: "Please wait" });
     }
-    this.typingTimer = setTimeout(() => {
-      if (this._isMounted && this.props.isTypingIndicator) {
-        this.setState({ indicatorText: "Please wait" });
-      }
-    }, 1500);
     this.startAnimation();
   };
   stopTypingFlow = () => {
     this.clearTimer();
     this.stopAnimation();
     if (this._isMounted) {
-      this.setState({ indicatorText: "Typing" });
+      this.setState({ indicatorText: "Please wait" });
     }
   };
   clearTimer = () => {
@@ -23848,7 +23981,7 @@ var styles79 = import_react_native96.StyleSheet.create({
     position: "absolute"
   },
   box1: {
-    top: -normalize(25),
+    top: -normalize(18),
     left: normalize(16),
     zIndex: 1
   },
@@ -27195,7 +27328,12 @@ var KoreChat = class _KoreChat extends React115.Component {
         }
       }
       if (message) {
-        this.speakMessage(message);
+        if (typeof message === "string" && message.includes("$navigationStart$")) {
+          message = message.replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, "").trim();
+        }
+        if (message) {
+          this.speakMessage(message);
+        }
       }
     }
   };
@@ -27295,7 +27433,7 @@ var KoreChat = class _KoreChat extends React115.Component {
         invertibleScrollViewProps: this.invertibleScrollViewProps,
         messages: this.getMessages(),
         forwardRef: this._messageContainerRef,
-        isTyping: this.props.isTyping,
+        isTyping: this.props.isTyping || this.state.isBotResponseLoading,
         onDragList: this.props.onDragList,
         onHistoryLoaded: this.onHistoryLoaded
       }
@@ -27502,21 +27640,25 @@ var KoreChat = class _KoreChat extends React115.Component {
     if (!url) {
       return "";
     }
-    if (url.includes("://")) {
-      const parts = url.split("://");
-      const path = parts[1] || "";
-      return path.split("?")[0].replace(/^\/+|\/+$/g, "");
+    let target = url;
+    if (target.includes("://")) {
+      const parts = target.split("://");
+      target = (parts[1] || "").split("?")[0].replace(/^\/+|\/+$/g, "");
+    } else if (target.startsWith("/")) {
+      target = target.slice(1).split("?")[0];
     }
-    if (url.startsWith("/")) {
-      return url.slice(1).split("?")[0];
-    }
-    return url;
+    return target;
   };
   handleInternalAppNavigation = (item = {}, template_type = "") => {
-    const navUrl = item?.navigationUrl || item?.url || item?.route || item?.actionUrl || item?.LinkUrl || item?.linkUrl || item?.routeName || "";
+    const navUrl = item?.navigationUrl || item?.url || item?.route || item?.actionUrl || item?.LinkUrl || item?.linkUrl || item?.linkurl || item?.routeName || "";
+    this.allowNavigation = true;
     this.minimizeChat();
     if (this.props.onAppNavigation) {
-      this.props.onAppNavigation(navUrl, item);
+      try {
+        this.props.onAppNavigation(navUrl, item);
+      } catch (err) {
+        console.warn("onAppNavigation callback error:", err);
+      }
       return;
     }
     if (!navUrl) {
@@ -27531,6 +27673,7 @@ var KoreChat = class _KoreChat extends React115.Component {
             if (this.props.navigation?.navigate) {
               const routeName = this.resolveRouteNameFromUrl(navUrl);
               try {
+                this.allowNavigation = true;
                 this.props.navigation.navigate(routeName, {
                   data: item,
                   navigationUrl: navUrl
@@ -27542,6 +27685,7 @@ var KoreChat = class _KoreChat extends React115.Component {
           });
         } else if (this.props.navigation?.navigate) {
           const routeName = this.resolveRouteNameFromUrl(navUrl);
+          this.allowNavigation = true;
           this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
         }
       }).catch((err) => {
@@ -27549,6 +27693,7 @@ var KoreChat = class _KoreChat extends React115.Component {
         if (this.props.navigation?.navigate) {
           const routeName = this.resolveRouteNameFromUrl(navUrl);
           try {
+            this.allowNavigation = true;
             this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
           } catch (e) {
             console.warn("Fallback navigation failed:", e);
@@ -27561,6 +27706,7 @@ var KoreChat = class _KoreChat extends React115.Component {
       const routeName = this.resolveRouteNameFromUrl(navUrl);
       if (routeName) {
         try {
+          this.allowNavigation = true;
           this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
           return;
         } catch (e) {
@@ -29543,6 +29689,7 @@ var src_default = KoreChat;
   formatCamelCaseToLabel,
   getBrandingButtonColor,
   hidePdfDownloadLoader,
+  parseInternalAppNavigationText,
   showPdfDownloadLoader,
   useLazyCommunications,
   useLazySound

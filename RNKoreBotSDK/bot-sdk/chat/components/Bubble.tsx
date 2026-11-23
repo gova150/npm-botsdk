@@ -22,6 +22,7 @@ import {
   isSameUser,
   isSameDay,
   getTemplateType,
+  parseInternalAppNavigationText,
 } from '../../utils/helpers';
 import {BotChatContext} from '../BotChatContext';
 import {TEMPLATE_TYPES} from '../../constants/Constant';
@@ -465,6 +466,33 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
     if (!payloadProps || typeof payloadProps !== 'object') {
       payloadProps = {};
     }
+
+    if (
+      type === TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE ||
+      (typeof payloadProps?.text === 'string' &&
+        payloadProps.text.includes('$navigationStart$'))
+    ) {
+      const textToParse =
+        payloadProps?.text ||
+        payloadProps?.title ||
+        payloadProps?.heading ||
+        msg?.component?.payload?.text ||
+        msg?.cInfo?.body;
+      if (
+        typeof textToParse === 'string' &&
+        textToParse.includes('$navigationStart$') &&
+        textToParse.includes('$navigationEnd$')
+      ) {
+        const parsed = parseInternalAppNavigationText(textToParse);
+        if (parsed) {
+          payloadProps = {
+            ...payloadProps,
+            ...parsed,
+          };
+        }
+      }
+    }
+
     return {
       ...payloadProps,
       onListItemClick: this.props.onListItemClick,

@@ -7,15 +7,18 @@ import {
   View,
 } from 'react-native';
 import Color from '../theme/Color';
-import {botStyles, TEMPLATE_STYLE_VALUES} from '../theme/styles';
+import {botStyles, TEMPLATE_STYLE_VALUES, leftBubbleStyles} from '../theme/styles';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {TEMPLATE_TYPES, BubbleTheme, ButtonTheme} from '../constants/Constant';
 import {getWindowWidth} from '../charts';
+import {parseInternalAppNavigationText} from '../utils/helpers';
 
 export interface InternalAppNavigationButtonItem {
   type?: string;
   title?: string;
   navigationUrl?: string;
+  linkurl?: string;
+  linkUrl?: string;
   [key: string]: any;
 }
 
@@ -49,7 +52,27 @@ export default class InternalAppNavigationTemplate extends BaseView<
   constructor(props: InternalAppNavigationTemplateProps) {
     super(props);
     const initialDisabled = new Set<number>();
-    const buttons = props?.payload?.buttons || [];
+    let buttons = props?.payload?.buttons || [];
+
+    // Parse buttons if text with $navigationStart$...$navigationEnd$ was passed
+    if (!buttons || buttons.length === 0) {
+      const textToParse =
+        props?.payload?.title ||
+        props?.payload?.text ||
+        props?.payload?.heading ||
+        (typeof props?.payload === 'string' ? props.payload : null);
+      if (
+        typeof textToParse === 'string' &&
+        textToParse.includes('$navigationStart$') &&
+        textToParse.includes('$navigationEnd$')
+      ) {
+        const parsed = parseInternalAppNavigationText(textToParse);
+        if (parsed?.buttons) {
+          buttons = parsed.buttons;
+        }
+      }
+    }
+
     buttons.forEach((btn: any, idx: number) => {
       if (btn?.disabled || btn?.isDownloaded) {
         initialDisabled.add(idx);
@@ -60,6 +83,10 @@ export default class InternalAppNavigationTemplate extends BaseView<
       clickedIndices: new Set<number>(),
     };
   }
+
+  protected isViewDisable = (): boolean => {
+    return false;
+  };
 
   private renderButton = (
     btn: InternalAppNavigationButtonItem,
@@ -75,12 +102,10 @@ export default class InternalAppNavigationTemplate extends BaseView<
   ) => {
     const isLastButton = index === totalButtons - 1;
     const buttonTitle = btn?.title || '';
-    const isPermanentlyDisabled =
+    const isButtonDisabled =
       btn?.disabled === true ||
       btn?.isDownloaded === true ||
       this.state.disabledIndices?.has(index);
-    const isCurrentlyClicked = this.state.clickedIndices?.has(index);
-    const isButtonDisabled = isPermanentlyDisabled || isCurrentlyClicked;
 
     const currentBgColor = isButtonDisabled ? '#DDDDDD' : buttonBgColor;
     const currentBorderColor = isButtonDisabled ? '#DDDDDD' : buttonBorderColor;
@@ -108,21 +133,11 @@ export default class InternalAppNavigationTemplate extends BaseView<
             if (isButtonDisabled) {
               return;
             }
-            this.setState(prevState => {
-              const nextClicked = new Set(prevState.clickedIndices);
-              nextClicked.add(index);
-              const nextDisabled = new Set(prevState.disabledIndices);
-              nextDisabled.add(index);
-              if (btn) {
-                btn.disabled = true;
-              }
-              return {
-                clickedIndices: nextClicked,
-                disabledIndices: nextDisabled,
-              };
-            });
-            if (this.props.onListItemClick) {
-              this.props.onListItemClick(
+            const clickHandler =
+              this.props.onListItemClick ||
+              this.props.payload?.onListItemClick;
+            if (clickHandler) {
+              clickHandler(
                 templateType || TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
                 btn,
               );
@@ -134,8 +149,8 @@ export default class InternalAppNavigationTemplate extends BaseView<
               {
                 color: currentTextColor,
                 fontFamily,
+                fontSize: 14,
               },
-              fontSizeStyle,
             ]}>
             {buttonTitle}
           </Text>
@@ -156,41 +171,46 @@ export default class InternalAppNavigationTemplate extends BaseView<
         ? rawPayload.payload
         : rawPayload;
 
-    const title = payload?.title || payload?.text || payload?.heading || '';
-    const buttons: InternalAppNavigationButtonItem[] = payload?.buttons || [];
+    let title = payload?.title || payload?.text || payload?.heading || '';
+    let buttons: InternalAppNavigationButtonItem[] = payload?.buttons || [];
+
+    // Parse formatted text ($navigationStart$...$navigationEnd$) if buttons are not pre-parsed
+    if (
+      (!buttons || buttons.length === 0) &&
+      typeof title === 'string' &&
+      title.includes('$navigationStart$') &&
+      title.includes('$navigationEnd$')
+    ) {
+      const parsed = parseInternalAppNavigationText(title);
+      if (parsed) {
+        title = parsed.title;
+        buttons = parsed.buttons;
+      }
+    }
+
+    const theme = (this.props?.theme || this.context) as any;
 
     // Theme resolution matching SDK templates
-    const btheme: ButtonTheme = getButtonTheme(this.props?.theme);
-    const bbtheme: BubbleTheme = getBubbleTheme(this.props?.theme);
+    const btheme: ButtonTheme = getButtonTheme(theme);
+    const bbtheme: BubbleTheme = getBubbleTheme(theme);
 
-    // Font styling
+    // Font styling matching default bot response
     const fontFamily =
-      this.props?.theme?.v3?.body?.font?.family ||
+      theme?.v3?.body?.font?.family ||
       TEMPLATE_STYLE_VALUES.FONT_FAMILY ||
       'Inter';
     const fontSizeStyle =
-      botStyles[this.props?.theme?.v3?.body?.font?.size || 'medium']?.size ||
+      botStyles[theme?.v3?.body?.font?.size || 'medium']?.size ||
       botStyles.medium.size;
 
-    // Card/bubble background & text colors
-    const botMsgBg = this.props?.theme?.v3?.body?.bot_message?.bg_color;
-    const cardBgColor =
-      botMsgBg && botMsgBg !== '#3F51B5'
-        ? botMsgBg
-        : bbtheme?.BUBBLE_LEFT_BG_COLOR || '#EFF1F5';
-
-    const botMsgColor = this.props?.theme?.v3?.body?.bot_message?.color;
-    const textColor =
-      botMsgColor && botMsgColor !== '#FFFFFF'
-        ? botMsgColor
-        : bbtheme?.BUBBLE_LEFT_TEXT_COLOR ||
-          TEMPLATE_STYLE_VALUES.TEXT_COLOR ||
-          '#1D2939';
+    // Default bot_response bubble background & text color
+    const cardBgColor = bbtheme?.BUBBLE_LEFT_BG_COLOR;
+    const textColor = bbtheme?.BUBBLE_LEFT_TEXT_COLOR;
 
     // Button colors from theme
     const bodyBtn =
-      (this.props?.theme?.v3?.body as any)?.buttons ||
-      (this.props?.theme?.v3?.body as any)?.button;
+      (theme?.v3?.body as any)?.buttons ||
+      (theme?.v3?.body as any)?.button;
     const bodyBtnBg =
       bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
     const bodyBtnColor =
@@ -219,12 +239,17 @@ export default class InternalAppNavigationTemplate extends BaseView<
       TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE;
 
     const cardWidth = Math.min(getWindowWidth() * 0.82, 380);
+    const bubbleRadiusStyle =
+      leftBubbleStyles[theme?.v3?.body?.bubble_style || 'balloon']?.bubble_style || {
+        borderRadius: 8,
+      };
 
     return (
       <View
-        pointerEvents={this.isViewDisable() ? 'none' : 'auto'}
+        pointerEvents="auto"
         style={[
           styles.mainContainer,
+          bubbleRadiusStyle,
           {
             width: cardWidth,
             backgroundColor: cardBgColor,
@@ -237,10 +262,16 @@ export default class InternalAppNavigationTemplate extends BaseView<
               {
                 color: textColor,
                 fontFamily,
+                fontSize: 14,
+                fontWeight: '400',
+                fontStyle: 'normal',
+                lineHeight: 20,
+                marginBottom: buttons.length > 0 ? 16 : 0,
               },
-              fontSizeStyle,
             ]}>
-            {title}
+            {typeof title === 'string'
+              ? title.replace(/<br\s*\/?>/gi, '\n').trim()
+              : title}
           </Text>
         ) : null}
 
@@ -269,7 +300,6 @@ export default class InternalAppNavigationTemplate extends BaseView<
 
 const styles = StyleSheet.create({
   mainContainer: {
-    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginVertical: 4,
@@ -277,10 +307,14 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   titleText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
-    fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
+    fontSize: 14,
+    fontStyle: 'normal',
+    fontWeight: '400',
     lineHeight: 20,
-    paddingBottom: 12,
+    marginTop: 0,
+    marginBottom: 16,
+    marginLeft: 0,
+    marginRight: 0,
   },
   buttonsContainer: {
     width: '100%',
@@ -296,12 +330,12 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 24,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonText: {
-    fontSize: TEMPLATE_STYLE_VALUES.TEXT_SIZE,
+    fontSize: 14,
     fontFamily: TEMPLATE_STYLE_VALUES.FONT_FAMILY,
     fontWeight: '600',
     textAlign: 'center',

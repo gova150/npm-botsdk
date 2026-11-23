@@ -283,6 +283,120 @@ export function isBlackStatusBar(color: any): boolean {
   return false;
 }
 
+export interface ParsedInternalAppNavigation {
+  template_type: string;
+  title: string;
+  text: string;
+  heading: string;
+  buttons: Array<{
+    type: string;
+    title: string;
+    navigationUrl: string;
+    linkurl?: string;
+    linkUrl?: string;
+    [key: string]: any;
+  }>;
+}
+
+export function parseInternalAppNavigationText(text: any): ParsedInternalAppNavigation | null {
+  if (typeof text !== 'string') {
+    return null;
+  }
+  if (!text.includes('$navigationStart$') || !text.includes('$navigationEnd$')) {
+    return null;
+  }
+
+  const navRegex = /\$navigationStart\$(.*?)\$navigationEnd\$/gis;
+  const buttons: Array<{
+    type: string;
+    title: string;
+    navigationUrl: string;
+    linkurl?: string;
+    linkUrl?: string;
+    [key: string]: any;
+  }> = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = navRegex.exec(text)) !== null) {
+    const content = (match[1] || '').trim();
+    if (!content) continue;
+
+    // Check if multiple button definitions are in one block (e.g. separated by semicolons)
+    const buttonChunks = content.split(/;+/).map(c => c.trim()).filter(Boolean);
+    for (const chunk of buttonChunks) {
+      const btn: Record<string, any> = {
+        type: 'postback',
+        title: '',
+        navigationUrl: '',
+      };
+
+      // Key-value pairs separated by commas
+      const pairs = chunk.split(',');
+      for (const pair of pairs) {
+        const colonIdx = pair.indexOf(':');
+        if (colonIdx > -1) {
+          const rawKey = pair.slice(0, colonIdx).trim();
+          const key = rawKey.toLowerCase();
+          const value = pair.slice(colonIdx + 1).trim();
+
+          if (key === 'title') {
+            btn.title = value;
+          } else if (
+            key === 'linkurl' ||
+            key === 'link_url' ||
+            key === 'link' ||
+            key === 'navigationurl' ||
+            key === 'url'
+          ) {
+            btn.navigationUrl = value;
+          } else if (key === 'type') {
+            btn.type = value;
+          } else {
+            btn[rawKey] = value;
+          }
+        }
+      }
+
+      // Also support linkurl/linkUrl as fallback accessors without duplicating keys in JSON
+      Object.defineProperty(btn, 'linkurl', {
+        get() {
+          return this.navigationUrl;
+        },
+        set(v: string) {
+          this.navigationUrl = v;
+        },
+        enumerable: false,
+        configurable: true,
+      });
+      Object.defineProperty(btn, 'linkUrl', {
+        get() {
+          return this.navigationUrl;
+        },
+        set(v: string) {
+          this.navigationUrl = v;
+        },
+        enumerable: false,
+        configurable: true,
+      });
+
+      if (btn.title || btn.navigationUrl) {
+        buttons.push(btn as any);
+      }
+    }
+  }
+
+  // Remove the $navigationStart$...$navigationEnd$ markers from title text
+  const cleanTitle = text.replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, '').trim();
+
+  return {
+    template_type: TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE,
+    title: cleanTitle,
+    text: cleanTitle,
+    heading: cleanTitle,
+    buttons,
+  };
+}
+
 export function getTemplateType(message: any) {
   const msg = Array.isArray(message) ? message[0] : message;
 
@@ -291,6 +405,23 @@ export function getTemplateType(message: any) {
     try {
       compPayload = JSON.parse(compPayload);
     } catch (e) {}
+  }
+
+  // Check if message text contains internal app navigation format ($navigationStart$...$navigationEnd$)
+  const navTextCandidate =
+    msg?.component?.payload?.text ||
+    compPayload?.text ||
+    compPayload?.payload?.text ||
+    (typeof compPayload === 'string' ? compPayload : null) ||
+    msg?.cInfo?.body ||
+    msg?.text;
+
+  if (
+    typeof navTextCandidate === 'string' &&
+    navTextCandidate.includes('$navigationStart$') &&
+    navTextCandidate.includes('$navigationEnd$')
+  ) {
+    return TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE;
   }
 
   // Direct check for customTemplate_displayClaims regardless of nesting

@@ -42,6 +42,7 @@ import PdfDataResponseTemplate from './PdfDataResponseTemplate';
 import InternalAppNavigationTemplate from './InternalAppNavigationTemplate';
 import DisplayClaimsTemplate from './DisplayClaimsTemplate';
 import ClaimMoreDetailsTemplate from './ClaimMoreDetailsTemplate';
+import {parseInternalAppNavigationText} from '../utils/helpers';
 export interface BotTemplateProps {
   templateType: string;
   textContainerStyle?: any;
@@ -216,9 +217,30 @@ export default class BotTemplate extends React.Component<
       case TEMPLATE_TYPES.PDF_DOWNLOAD_TEMPLATE:
           return <PdfDownloadTemplate payload={payload} theme={theme} onListItemClick={this.props.onListItemClick} />;
       case TEMPLATE_TYPES.INTERNAL_APP_NAVIGATION_TEMPLATE:
+          let navPayload = payload;
+          if (!navPayload?.buttons || navPayload.buttons.length === 0) {
+            const rawText =
+              navPayload?.title ||
+              navPayload?.text ||
+              navPayload?.heading ||
+              (typeof navPayload === 'string' ? navPayload : null);
+            if (
+              typeof rawText === 'string' &&
+              rawText.includes('$navigationStart$') &&
+              rawText.includes('$navigationEnd$')
+            ) {
+              const parsed = parseInternalAppNavigationText(rawText);
+              if (parsed) {
+                navPayload = { ...navPayload, ...parsed };
+              }
+            }
+          }
           return (
             <InternalAppNavigationTemplate
-              payload={payload}
+              payload={{
+                ...(typeof navPayload === 'object' ? navPayload : {}),
+                onListItemClick: this.props.onListItemClick,
+              }}
               theme={theme}
               currentMessage={this.props.currentMessage}
               onListItemClick={this.props.onListItemClick}
@@ -300,6 +322,34 @@ export default class BotTemplate extends React.Component<
     template_type?: any,
   ) => {
     if (payload) {
+      const text =
+        payload?.text ||
+        payload?.payload?.text ||
+        (typeof payload === 'string' ? payload : null);
+
+      if (
+        typeof text === 'string' &&
+        text.includes('$navigationStart$') &&
+        text.includes('$navigationEnd$')
+      ) {
+        const parsed = parseInternalAppNavigationText(text);
+        if (parsed) {
+          const navPayload = {
+            ...(typeof payload === 'object' ? payload : {}),
+            ...parsed,
+            onListItemClick: this.props.onListItemClick,
+          };
+          return (
+            <InternalAppNavigationTemplate
+              payload={navPayload}
+              theme={theme}
+              currentMessage={this.props.currentMessage}
+              onListItemClick={this.props.onListItemClick}
+            />
+          );
+        }
+      }
+
       const {...messageTextProps} = this.props;
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps);

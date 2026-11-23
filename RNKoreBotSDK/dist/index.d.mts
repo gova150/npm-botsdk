@@ -1133,6 +1133,8 @@ interface InternalAppNavigationButtonItem {
     type?: string;
     title?: string;
     navigationUrl?: string;
+    linkurl?: string;
+    linkUrl?: string;
     [key: string]: any;
 }
 interface InternalAppNavigationPayloadData {
@@ -1157,9 +1159,26 @@ interface InternalAppNavigationTemplateState extends BaseViewState {
 }
 declare class InternalAppNavigationTemplate extends BaseView<InternalAppNavigationTemplateProps, InternalAppNavigationTemplateState> {
     constructor(props: InternalAppNavigationTemplateProps);
+    protected isViewDisable: () => boolean;
     private renderButton;
     render(): React.JSX.Element;
 }
+
+interface ParsedInternalAppNavigation {
+    template_type: string;
+    title: string;
+    text: string;
+    heading: string;
+    buttons: Array<{
+        type: string;
+        title: string;
+        navigationUrl: string;
+        linkurl?: string;
+        linkUrl?: string;
+        [key: string]: any;
+    }>;
+}
+declare function parseInternalAppNavigationText(text: any): ParsedInternalAppNavigation | null;
 
 interface DisplayClaimsItem {
     claimNumber?: string;
@@ -1644,4 +1663,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, ParsedInternalAppNavigation, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, parseInternalAppNavigationText, showPdfDownloadLoader, useLazyCommunications, useLazySound };

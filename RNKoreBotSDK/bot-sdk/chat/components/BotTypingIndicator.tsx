@@ -26,7 +26,7 @@ export default class TypingIndicator extends Component<
   constructor(props: TypingProps) {
     super(props);
     this.state = {
-      indicatorText: 'Typing',
+      indicatorText: 'Please wait',
     };
   }
 
@@ -56,15 +56,8 @@ export default class TypingIndicator extends Component<
   private startTypingFlow = () => {
     this.clearTimer();
     if (this._isMounted) {
-      this.setState({indicatorText: 'Typing'});
+      this.setState({indicatorText: 'Please wait'});
     }
-
-    this.typingTimer = setTimeout(() => {
-      if (this._isMounted && this.props.isTypingIndicator) {
-        this.setState({indicatorText: 'Please wait'});
-      }
-    }, 1500);
-
     this.startAnimation();
   };
 
@@ -72,7 +65,7 @@ export default class TypingIndicator extends Component<
     this.clearTimer();
     this.stopAnimation();
     if (this._isMounted) {
-      this.setState({indicatorText: 'Typing'});
+      this.setState({indicatorText: 'Please wait'});
     }
   };
 
@@ -189,7 +182,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   box1: {
-    top: -normalize(25),
+    top: -normalize(18),
     left: normalize(16),
     zIndex: 1,
   },

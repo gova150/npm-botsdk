@@ -1244,7 +1244,17 @@ export default class KoreChat extends React.Component<
       }
 
       if (message) {
-        this.speakMessage(message);
+        if (
+          typeof message === 'string' &&
+          message.includes('$navigationStart$')
+        ) {
+          message = message
+            .replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, '')
+            .trim();
+        }
+        if (message) {
+          this.speakMessage(message);
+        }
       }
     }
   };
@@ -1366,7 +1376,7 @@ export default class KoreChat extends React.Component<
           invertibleScrollViewProps={this.invertibleScrollViewProps}
           messages={this.getMessages()}
           forwardRef={this._messageContainerRef}
-          isTyping={this.props.isTyping}
+          isTyping={this.props.isTyping || this.state.isBotResponseLoading}
           onDragList={this.props.onDragList}
           onHistoryLoaded={this.onHistoryLoaded}
         />
@@ -1620,18 +1630,16 @@ export default class KoreChat extends React.Component<
     if (!url) {
       return '';
     }
+    let target = url;
     // Deep link scheme: e.g. "myapp://profile" -> "profile"
-    if (url.includes('://')) {
-      const parts = url.split('://');
-      const path = parts[1] || '';
-      return path.split('?')[0].replace(/^\/+|\/+$/g, '');
+    if (target.includes('://')) {
+      const parts = target.split('://');
+      target = (parts[1] || '').split('?')[0].replace(/^\/+|\/+$/g, '');
+    } else if (target.startsWith('/')) {
+      // Path: e.g. "/profile" -> "profile"
+      target = target.slice(1).split('?')[0];
     }
-    // Path: e.g. "/profile" -> "profile"
-    if (url.startsWith('/')) {
-      return url.slice(1).split('?')[0];
-    }
-    // Direct route name: "ProfileScreen"
-    return url;
+    return target;
   };
 
   private handleInternalAppNavigation = (item: any = {}, template_type = '') => {
@@ -1642,16 +1650,22 @@ export default class KoreChat extends React.Component<
       item?.actionUrl ||
       item?.LinkUrl ||
       item?.linkUrl ||
+      item?.linkurl ||
       item?.routeName ||
       '';
 
+    this.allowNavigation = true;
     // Trigger minimize button functionality instead of closing:
     // Keeps WebSocket connected and retains messages for when the user returns
     this.minimizeChat();
 
     // 1. If host provided an onAppNavigation callback, invoke it:
     if (this.props.onAppNavigation) {
-      this.props.onAppNavigation(navUrl, item);
+      try {
+        this.props.onAppNavigation(navUrl, item);
+      } catch (err) {
+        console.warn('onAppNavigation callback error:', err);
+      }
       return;
     }
 
@@ -1670,6 +1684,7 @@ export default class KoreChat extends React.Component<
               if (this.props.navigation?.navigate) {
                 const routeName = this.resolveRouteNameFromUrl(navUrl);
                 try {
+                  this.allowNavigation = true;
                   this.props.navigation.navigate(routeName, {
                     data: item,
                     navigationUrl: navUrl,
@@ -1681,6 +1696,7 @@ export default class KoreChat extends React.Component<
             });
           } else if (this.props.navigation?.navigate) {
             const routeName = this.resolveRouteNameFromUrl(navUrl);
+            this.allowNavigation = true;
             this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
           }
         })
@@ -1689,6 +1705,7 @@ export default class KoreChat extends React.Component<
           if (this.props.navigation?.navigate) {
             const routeName = this.resolveRouteNameFromUrl(navUrl);
             try {
+              this.allowNavigation = true;
               this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
             } catch (e) {
               console.warn('Fallback navigation failed:', e);
@@ -1703,6 +1720,7 @@ export default class KoreChat extends React.Component<
       const routeName = this.resolveRouteNameFromUrl(navUrl);
       if (routeName) {
         try {
+          this.allowNavigation = true;
           this.props.navigation.navigate(routeName, { data: item, navigationUrl: navUrl });
           return;
         } catch (e) {
