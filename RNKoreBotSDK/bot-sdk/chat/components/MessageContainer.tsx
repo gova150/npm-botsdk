@@ -20,6 +20,7 @@ import KoreBotClient, { ApiService } from 'rn-kore-bot-socket-lib-v79';
 import { BotConfigModel } from '../../models/BotConfigModel';
 import { getWindowWidth } from '../../charts';
 import { LocalizationManager } from '../../constants/Localization';
+import { extractLiveAgentInfo } from '../../utils/helpers';
 
 interface MessageContainerProps {
   //extends MessageProps {
@@ -247,8 +248,9 @@ export default class MessageContainer extends PureComponent<
       let position = this.props.position;
       let isDisplayTime = true;
       switch (item.type) {
-        case 'bot_response':
-          position = 'left';
+        case 'bot_response': {
+          const liveAgentInfo = extractLiveAgentInfo(item);
+          position = liveAgentInfo?.senderType === 'system' ? 'center' : 'left';
 
           if (
             item.message &&
@@ -280,12 +282,20 @@ export default class MessageContainer extends PureComponent<
           }
 
           break;
+        }
         case 'user_message':
           position = 'right';
           break;
 
-        default:
+        default: {
+          const liveAgentInfo = extractLiveAgentInfo(item);
+          if (liveAgentInfo?.senderType === 'system') {
+            position = 'center';
+          } else if (liveAgentInfo?.senderType === 'user') {
+            position = 'left';
+          }
           break;
+        }
       }
       let totalLength = messages ? messages.length : 0;
       item = {

@@ -31,6 +31,7 @@ interface TimeProps extends BaseViewProps {
     right?: any;
     center?: any;
   };
+  textColor?: string;
 }
 interface TimeState extends BaseViewState {}
 
@@ -146,7 +147,9 @@ export default class Time extends BaseView<TimeProps, TimeState> {
                 fontWeight: '400',
                 lineHeight: 19.5,
                 color:
-                  this.props?.theme?.v3?.body?.time_stamp?.color || '#6B7280',
+                  this.props?.textColor ||
+                  this.props?.theme?.v3?.body?.time_stamp?.color ||
+                  '#6B7280',
                 fontFamily:
                   this.props?.theme?.v3?.body?.font?.family || 'Inter',
               },

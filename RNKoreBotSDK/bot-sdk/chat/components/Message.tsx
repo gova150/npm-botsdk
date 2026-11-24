@@ -232,6 +232,7 @@ export default class Message extends React.Component<MessageProps> {
     const { currentMessage, theme, position } = this.props;
 
     if (
+      position === 'center' ||
       currentMessage?.type !== 'bot_response' ||
       !theme?.v3?.body?.icon?.show
     ) {

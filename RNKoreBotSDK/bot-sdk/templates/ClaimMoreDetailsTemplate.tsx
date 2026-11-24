@@ -1,7 +1,6 @@
 import * as React from 'react';
 import BaseView, {BaseViewProps, BaseViewState} from './BaseView';
 import {
-  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import {getWindowWidth} from '../charts';
 import KoreBotClient from 'rn-kore-bot-socket-lib-v79';
 import Time from '../chat/components/Time';
 import {getBrandingButtonColor} from './DisplayClaimsTemplate';
+import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
 
 export interface ClaimHeaderItem {
   title?: string;
@@ -182,9 +182,10 @@ export default class ClaimMoreDetailsTemplate extends BaseView<
         title: linkTitle,
       });
     } else if (linkUrl.startsWith('http://') || linkUrl.startsWith('https://')) {
-      Linking.openURL(linkUrl).catch(e =>
-        console.warn('Could not open URL:', e),
-      );
+      handleExternalLinkPress(linkUrl, {
+        title: linkTitle,
+        source: 'claim_more_details',
+      });
     }
   };
 

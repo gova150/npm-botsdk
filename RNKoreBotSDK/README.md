@@ -558,15 +558,51 @@ export default function ChatScreen({ navigation }) {
 
 ---
 
-## 🔗 External Links & Browser Opening
+## 🔗 External Links & Custom URL Handling
 
-The SDK automatically detects and renders both formatted markdown links (e.g., `[Google](https://www.google.com)`) and direct plain URLs (e.g., `https://kore.ai`, `www.google.com`). Tapping a link opens the destination in the device's default web browser.
+The SDK automatically detects and renders formatted markdown links (e.g., `[Google](https://www.google.com)`), plain URLs (e.g., `https://kore.ai`, `www.google.com`), and URL action buttons across chat templates.
 
-### 💡 What to Ask the Root App Developers (Optional Recommendation)
+By default, tapping an external link opens the destination in the device's default browser (`Linking.openURL`). To intercept external link clicks and handle them in your root host application instead (e.g., opening an in-app WebView, enforcing domain allowlists, or routing conditionally), pass the **`onExternalLinkClick`** callback prop to `<KoreChat />`:
 
-While the SDK includes built-in fallbacks to launch URLs directly, Android 11+ (API Level 30+) enforces **Package Visibility** restrictions that can prevent `Linking.canOpenURL` from querying installed web browsers.
+* **When `onExternalLinkClick` is NOT provided:** The SDK uses its default behavior (`Linking.openURL`) to open the link in the browser.
+* **When `onExternalLinkClick` IS provided:** Default SDK URL opening stops completely, and your callback receives the normalized full URL and metadata so your root app decides what to do with it.
 
-For optimal OS-level intent resolution and standard Android compatibility, recommend that the root app developers add the following intent filter to their `android/app/src/main/AndroidManifest.xml` (inside the `<manifest>` tag, alongside any existing queries):
+### 🛠️ Callback Integration Example
+
+```tsx
+import React from 'react';
+import { Linking } from 'react-native';
+import KoreChat from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+export default function ChatScreen({ navigation }) {
+  const handleExternalLinkClick = (url: string, item?: any) => {
+    // Full normalized URL is provided (e.g., "https://www.google.com")
+    console.log('External link clicked:', url, item);
+
+    if (url.includes('yourdomain.com')) {
+      // Example: open trusted domains in an in-app WebView screen
+      navigation.navigate('InAppWebView', { url, title: item?.title });
+    } else {
+      // Or launch external browser from the root app
+      Linking.openURL(url).catch(err =>
+        console.warn('Could not open web URL:', url, err),
+      );
+    }
+  };
+
+  return (
+    <KoreChat
+      botConfig={botConfig}
+      navigation={navigation}
+      onExternalLinkClick={handleExternalLinkClick}
+    />
+  );
+}
+```
+
+### 💡 Android 11+ Package Visibility (If Opening Browser from Host App)
+
+If your host app (or default SDK fallback) uses `Linking.openURL` / `Linking.canOpenURL` for `https://` / `http://` links on Android 11+ (API Level 30+), add `<queries>` to your `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -588,7 +624,42 @@ For optimal OS-level intent resolution and standard Android compatibility, recom
 
 > [!NOTE]
 > * **Cleartext Traffic**: Android 9+ (API 28+) blocks unencrypted HTTP (`http://`) traffic in release builds by default. Ensure all URLs provided by the bot use secure `https://`.
-> * **Fallback Handling**: If `<queries>` is not declared in the root app, the SDK automatically falls back to `Linking.openURL` so links will still launch in the default browser.
+> * **Fallback Handling**: When `onExternalLinkClick` is omitted, the SDK automatically falls back to `Linking.openURL` even if `<queries>` is not declared in AndroidManifest.
+
+---
+
+## 🔄 Session Management & Host App Logout (`resetSession`)
+
+When the user navigates away or minimizes the chatbot, the SDK preserves chat history and keeps the WebSocket open for seamless resumption. 
+
+However, when a user **logs out** of your root application (especially while chat is minimized in the background), you should call `resetSession()` so the next logged-in user does not inherit the previous user's WebSocket connection or cached conversation history.
+
+Calling `resetSession()`:
+1. Clears the minimized state flag and cached chat messages.
+2. Disconnects the active WebSocket connection and clears stored JWT / auth / custom data.
+3. Clears any cached branding theme state so the next login starts completely fresh.
+
+### 🛠️ Usage on Logout
+
+You can invoke `resetSession()` from anywhere in your host app—even when `<KoreChat />` is currently unmounted:
+
+```tsx
+import KoreChat, { resetSession, KoreBotClient } from '@govardhanboli/rn-kore-bot-sdk-v79';
+
+const handleUserLogout = async () => {
+  // Recommended: top-level helper
+  resetSession();
+
+  // Equivalent alternatives:
+  // KoreChat.resetSession();
+  // KoreBotClient.getInstance().resetSession();
+
+  navigation.reset({
+    index: 0,
+    routes: [{ name: 'LoginScreen' }],
+  });
+};
+```
 
 ---
 
@@ -601,6 +672,7 @@ For optimal OS-level intent resolution and standard Android compatibility, recom
 | `botConfig` | `BotConfigModel` | ✅ | Bot configuration object |
 | `navigation` | `any` | ❌ | React Navigation object for goBack() and root screen navigation |
 | `onAppNavigation` | `(navigationUrl: string, item: any) => void` | ❌ | Callback for internal app navigation actions |
+| `onExternalLinkClick` | `(url: string, item?: any) => void` | ❌ | Callback invoked with full URL when an external link is clicked; disables default SDK browser opening when provided |
 | `onListItemClick` | `(item: any) => void` | ❌ | Callback for list item interactions |
 | `onHeaderActionsClick` | `(action: any) => void` | ❌ | Callback for header action buttons |
 | `templateInjection` | `Map<string, CustomTemplate>` | ❌ | Custom template injection map |

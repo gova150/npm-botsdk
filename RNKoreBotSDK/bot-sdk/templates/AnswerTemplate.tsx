@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Dimensions,
   Image,
-  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {normalize} from '../utils/helpers';
 import Color from '../theme/Color';
 import { LocalizationManager } from '../constants/Localization';
 import {images} from '../assets';
+import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
 interface AnswerProps extends BaseViewProps {}
 interface AnswerState extends BaseViewState {}
 const windowWidth = Dimensions.get('window').width;
@@ -58,9 +58,13 @@ export default class AnswerTemplate extends BaseView<AnswerProps, AnswerState> {
                 <View style={styles.main_container}>
                     <Text style={styles.title}>{payload.answer}</Text>
                     {[...sourceLinks.entries()].map(([key, value], index) => {
-                        return <TouchableOpacity style={styles.item_container} onPress={() => {
-                            console.log('pressed url.....', value);
-                            Linking.openURL(value); 
+                        return <TouchableOpacity key={index} style={styles.item_container} onPress={() => {
+                            if (value) {
+                                handleExternalLinkPress(value, {
+                                    title: key,
+                                    source: 'answer_template',
+                                });
+                            }
                         }}>
                             <Text style={styles.source_item}>
                                 {(index + 1)+'. '+key}

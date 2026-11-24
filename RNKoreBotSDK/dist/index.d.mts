@@ -803,6 +803,8 @@ interface KoraChatProps {
     route?: any;
     statusBarColor?: (colorCode: any) => void;
     onAppNavigation?: (navigationUrl: string, item: any) => void;
+    /** Optional callback invoked with the full URL when an external link is clicked inside chat. Stops default browser opening when provided. */
+    onExternalLinkClick?: (url: string, item?: any) => void;
     leaveChatTitle?: string;
     leaveChatTitleColor?: string;
     leaveChatDescription?: string;
@@ -862,6 +864,12 @@ interface KoraChatState {
     androidKeyboardPadding?: number;
 }
 declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
+    /**
+     * Resets the active Kore chatbot session, clearing any minimized/cached
+     * message history, disconnecting the WebSocket, and wiping stored credentials.
+     * Call this from the host app on user logout.
+     */
+    static resetSession: () => void;
     _messageContainerRef: RefObject<any>;
     private ttsModule;
     private isTTSAvailable;
@@ -871,6 +879,7 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     _locale: string;
     invertibleScrollViewProps: {};
     _unsubscribeConn: any;
+    _unsubscribeSessionReset?: () => void;
     backHandler: any;
     unsubscribeNavigation: any;
     allowNavigation: boolean;
@@ -973,6 +982,9 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
     private handleDialogCancel;
     private handleDialogClose;
     private handleDialogMinimize;
+    private externalLinkHandler;
+    private syncExternalLinkHandler;
+    private handleInstanceSessionReset;
     componentDidMount(): void;
     private clickedQuickReply;
     componentWillUnmount(): void;
@@ -1071,6 +1083,12 @@ declare class KoreChat extends React.Component<KoraChatProps, KoraChatState> {
  *    receive valid bot credentials and custom data without requiring fake `clientId`/`clientSecret`.
  */
 declare function applyKoreBotClientPatches(): void;
+/**
+ * Resets the active Kore chatbot session, clearing minimized/cached
+ * message state, disconnecting the WebSocket, and clearing stored user/auth context.
+ * Call this when a user logs out of the host application.
+ */
+declare function resetSession(): void;
 
 interface QuickProps extends BaseViewProps {
     quick_replies: any;
@@ -1164,6 +1182,20 @@ declare class InternalAppNavigationTemplate extends BaseView<InternalAppNavigati
     render(): React.JSX.Element;
 }
 
+interface LiveAgentTemplateProps extends BaseViewProps {
+    payload?: any;
+    theme?: any;
+    currentMessage?: any;
+}
+interface LiveAgentTemplateState extends BaseViewState {
+}
+declare class LiveAgentTemplate extends BaseView<LiveAgentTemplateProps, LiveAgentTemplateState> {
+    static contextType: React.Context<ThemeType>;
+    render(): React.JSX.Element;
+}
+
+type ExternalLinkClickHandler = (url: string, item?: any) => void;
+
 interface ParsedInternalAppNavigation {
     template_type: string;
     title: string;
@@ -1179,6 +1211,28 @@ interface ParsedInternalAppNavigation {
     }>;
 }
 declare function parseInternalAppNavigationText(text: any): ParsedInternalAppNavigation | null;
+interface LiveAgentSenderUser {
+    name?: string;
+    screenName?: string;
+    [key: string]: any;
+}
+interface LiveAgentSender {
+    type?: 'system' | 'user' | string;
+    user?: LiveAgentSenderUser;
+    [key: string]: any;
+}
+interface LiveAgentMessageInfo {
+    templateType: string;
+    text: string;
+    sender?: LiveAgentSender;
+    senderType: 'system' | 'user';
+    screenName?: string;
+}
+/**
+ * Extracts `live_agent` / `SYSTEM` message metadata, normalizing payload nesting
+ * across real-time socket messages, bot history responses, and template payloads.
+ */
+declare function extractLiveAgentInfo(input: any): LiveAgentMessageInfo | null;
 
 interface DisplayClaimsItem {
     claimNumber?: string;
@@ -1663,4 +1717,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, ParsedInternalAppNavigation, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, parseInternalAppNavigationText, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, ExternalLinkClickHandler, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, LiveAgentMessageInfo, LiveAgentSender, LiveAgentSenderUser, LiveAgentTemplate, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, ParsedInternalAppNavigation, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractLiveAgentInfo, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, parseInternalAppNavigationText, resetSession, showPdfDownloadLoader, useLazyCommunications, useLazySound };

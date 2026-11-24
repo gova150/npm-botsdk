@@ -3,7 +3,7 @@ import React from 'react';
 import {Alert, Linking, StyleSheet, Text, View} from 'react-native';
 import { FallbackCommunicationsAPI } from '../components/LazyCommunications';
 import {getButtonTheme} from '../theme/themeHelper';
-const WWW_URL_PATTERN = /^www\./i;
+import {handleExternalLinkPress} from './ExternalLinkHelper';
 
 const emojiMap = {
   ':)': '😀',
@@ -105,7 +105,7 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
   const renderLink = (matchingString: string, matches: string[]) => (
     <Text
       style={[styles1.link, {color: linkColor, textDecorationLine: 'underline'}]}
-      onPress={() => onUrlPress(matches[2] || matchingString)}>
+      onPress={() => onUrlPress(matches[2] || matchingString, matches[1])}>
       {matches[1]}
     </Text>
   );
@@ -300,7 +300,7 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
     <Text
       key={matchingString}
       style={[styles1.link, {color: linkColor, textDecorationLine: 'underline'}]}
-      onPress={() => onUrlPress(matches[2] || matchingString)}>
+      onPress={() => onUrlPress(matches[2] || matchingString, matches[1])}>
       {matches[1]}
     </Text>
   );
@@ -318,53 +318,14 @@ export function getParseList(theme?: any, customLinkColor?: string): any[] {
     return emojiMap[match] || match; // Use the emoji from the map or return the original match
   };
 
-  const onUrlPress = (url: string) => {
+  const onUrlPress = (url: string, title?: string) => {
     if (!url || typeof url !== 'string') {
       return;
     }
-    let targetUrl = url.trim();
-
-    // If it's a markdown link [label](url), extract the target URL
-    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (markdownMatch && markdownMatch[2]) {
-      targetUrl = markdownMatch[2].trim();
-    }
-
-    // Handle www. or missing scheme
-    if (WWW_URL_PATTERN.test(targetUrl)) {
-      targetUrl = `https://${targetUrl}`;
-    } else if (
-      !targetUrl.startsWith('http://') &&
-      !targetUrl.startsWith('https://') &&
-      !targetUrl.includes('://') &&
-      !targetUrl.startsWith('mailto:') &&
-      !targetUrl.startsWith('tel:')
-    ) {
-      targetUrl = `https://${targetUrl}`;
-    }
-
-    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
-
-    Linking.canOpenURL(targetUrl)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL:', targetUrl, err);
-          });
-        } else {
-          // On Android 11+ (API 30+), canOpenURL may return false if <queries>
-          // is not declared in AndroidManifest.xml, but openURL still opens the default browser.
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL via fallback:', targetUrl, err);
-          });
-        }
-      })
-      .catch(err => {
-        // Fallback: directly attempt openURL
-        Linking.openURL(targetUrl).catch(openErr => {
-          console.warn('Cannot open URL:', targetUrl, openErr);
-        });
-      });
+    handleExternalLinkPress(url, {
+      ...(title ? { title } : {}),
+      source: 'message_text',
+    });
   };
 
   const onPhonePress = async (phone: string) => {

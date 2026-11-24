@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Linking, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import { FallbackCommunicationsAPI } from '../components/LazyCommunications';
 
 import {TEMPLATE_STYLE_VALUES, leftBubbleStyles} from '../theme/styles';
@@ -10,8 +10,7 @@ import {botStyles} from '../theme/styles';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import ParsedText from 'react-native-parsed-text';
 import {getParseList} from '../utils/ParseList';
-
-const WWW_URL_PATTERN = /^www\./i;
+import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
 
 //const DEFAULT_OPTION_TITLES = ['Call', 'Text', 'Cancel'];
 
@@ -59,43 +58,7 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
     if (!url || typeof url !== 'string') {
       return false;
     }
-    let targetUrl = url.trim();
-    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (markdownMatch && markdownMatch[2]) {
-      targetUrl = markdownMatch[2].trim();
-    }
-    if (WWW_URL_PATTERN.test(targetUrl)) {
-      targetUrl = `https://${targetUrl}`;
-    } else if (
-      !targetUrl.startsWith('http://') &&
-      !targetUrl.startsWith('https://') &&
-      !targetUrl.includes('://') &&
-      !targetUrl.startsWith('mailto:') &&
-      !targetUrl.startsWith('tel:')
-    ) {
-      targetUrl = `https://${targetUrl}`;
-    }
-
-    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
-
-    Linking.canOpenURL(targetUrl)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL:', targetUrl, err);
-          });
-        } else {
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL via fallback:', targetUrl, err);
-          });
-        }
-      })
-      .catch(() => {
-        Linking.openURL(targetUrl).catch(err => {
-          console.warn('Cannot open URL:', targetUrl, err);
-        });
-      });
-    return true;
+    return handleExternalLinkPress(url, { source: 'bot_text' });
   };
 
   // private onPhonePress = (phone: string | null | undefined) => {

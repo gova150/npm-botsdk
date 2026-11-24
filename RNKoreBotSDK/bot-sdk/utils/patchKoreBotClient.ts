@@ -288,6 +288,7 @@ export function applyKoreBotClientPatches() {
     // Chat session caching & minimize state helpers
     let cachedMessagesList: any[] = [];
     let isClientMinimized = false;
+    const sessionResetListeners = new Set<() => void>();
 
     proto.setCachedMessages = function (messages: any[]) {
       cachedMessagesList = Array.isArray(messages) ? [...messages] : [];
@@ -308,8 +309,67 @@ export function applyKoreBotClientPatches() {
     proto.isMinimized = function () {
       return isClientMinimized;
     };
+
+    proto.onSessionReset = function (listener: () => void) {
+      if (typeof listener === 'function') {
+        sessionResetListeners.add(listener);
+      }
+      return () => {
+        sessionResetListeners.delete(listener);
+      };
+    };
+
+    proto.clearMinimizeState = function () {
+      cachedMessagesList = [];
+      isClientMinimized = false;
+    };
+
+    proto.resetSession = function () {
+      this.clearMinimizeState();
+
+      try {
+        sessionResetListeners.forEach(listener => {
+          try {
+            listener();
+          } catch (e) {}
+        });
+      } catch (e) {}
+
+      try {
+        if (typeof this.disconnect === 'function') {
+          this.disconnect();
+        }
+      } catch (e) {}
+
+      this.jwtToken = undefined;
+      this.userInfo = null;
+      this.authorization = null;
+      this.botConfig = undefined;
+      this.customData = undefined;
+      this.botCustomData = new Map();
+      this.botInfo = undefined;
+    };
   } catch (e) {
     // Fail-safe
+  }
+}
+
+/**
+ * Resets the active Kore chatbot session, clearing minimized/cached
+ * message state, disconnecting the WebSocket, and clearing stored user/auth context.
+ * Call this when a user logs out of the host application.
+ */
+export function resetSession(): void {
+  try {
+    applyKoreBotClientPatches();
+    const client: any = KoreBotClient.getInstance();
+    if (typeof client?.resetSession === 'function') {
+      client.resetSession();
+    } else if (typeof client?.disconnect === 'function') {
+      client.disconnect();
+    }
+  } catch (err) {
+    console.warn('Error resetting KoreBot session:', err);
   }
 }
 

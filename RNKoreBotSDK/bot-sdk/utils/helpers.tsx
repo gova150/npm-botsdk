@@ -447,6 +447,22 @@ export function getTemplateType(message: any) {
   }
 
   if (
+    detectedCustomType === TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE ||
+    (typeof detectedCustomType === 'string' &&
+      detectedCustomType.toLowerCase() === 'live_agent')
+  ) {
+    return TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE;
+  }
+
+  if (
+    detectedCustomType === TEMPLATE_TYPES.SYSTEM_TEMPLATE ||
+    (typeof detectedCustomType === 'string' &&
+      detectedCustomType.toLowerCase() === 'system')
+  ) {
+    return TEMPLATE_TYPES.SYSTEM_TEMPLATE;
+  }
+
+  if (
     (msg?.component?.type === 'template' || compPayload?.template_type || compPayload?.payload?.template_type) &&
     (compPayload?.type === 'template' ||
       compPayload?.payload?.template_type ||
@@ -623,4 +639,120 @@ export function convertToRNStyle(elementStyles: Record<string, string>) {
   }
 
   return rnStyle;
+}
+
+export interface LiveAgentSenderUser {
+  name?: string;
+  screenName?: string;
+  [key: string]: any;
+}
+
+export interface LiveAgentSender {
+  type?: 'system' | 'user' | string;
+  user?: LiveAgentSenderUser;
+  [key: string]: any;
+}
+
+export interface LiveAgentMessageInfo {
+  templateType: string;
+  text: string;
+  sender?: LiveAgentSender;
+  senderType: 'system' | 'user';
+  screenName?: string;
+}
+
+/**
+ * Extracts `live_agent` / `SYSTEM` message metadata, normalizing payload nesting
+ * across real-time socket messages, bot history responses, and template payloads.
+ */
+export function extractLiveAgentInfo(input: any): LiveAgentMessageInfo | null {
+  if (!input) {
+    return null;
+  }
+
+  const msg = Array.isArray(input?.message)
+    ? input.message[0]
+    : input?.message || input;
+
+  let compPayload = msg?.component?.payload ?? input?.payload ?? input;
+  if (typeof compPayload === 'string') {
+    try {
+      compPayload = JSON.parse(compPayload);
+    } catch (e) {}
+  }
+
+  let innerPayload = compPayload?.payload;
+  if (typeof innerPayload === 'string') {
+    try {
+      innerPayload = JSON.parse(innerPayload);
+    } catch (e) {}
+  }
+
+  const resolvedPayload =
+    innerPayload && typeof innerPayload === 'object' ? innerPayload : compPayload;
+
+  const templateType = (
+    resolvedPayload?.template_type ||
+    compPayload?.template_type ||
+    msg?.component?.template_type ||
+    msg?.template_type ||
+    input?.template_type ||
+    ''
+  )
+    .toString()
+    .trim();
+
+  if (
+    templateType !== TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE &&
+    templateType !== TEMPLATE_TYPES.SYSTEM_TEMPLATE &&
+    templateType.toLowerCase() !== 'live_agent' &&
+    templateType.toLowerCase() !== 'system'
+  ) {
+    return null;
+  }
+
+  let sender =
+    resolvedPayload?.sender ||
+    compPayload?.sender ||
+    msg?.component?.sender ||
+    msg?.sender ||
+    input?.sender;
+
+  if (typeof sender === 'string') {
+    try {
+      sender = JSON.parse(sender);
+    } catch (e) {}
+  }
+
+  const rawText =
+    resolvedPayload?.text ??
+    compPayload?.text ??
+    msg?.cInfo?.body ??
+    msg?.text ??
+    input?.text ??
+    '';
+
+  const text = typeof rawText === 'string' ? rawText : String(rawText || '');
+
+  const rawSenderType = (sender?.type || '').toString().toLowerCase().trim();
+  const screenName = sender?.user?.screenName || sender?.user?.name || undefined;
+
+  let senderType: 'system' | 'user' = 'system';
+  if (templateType === TEMPLATE_TYPES.SYSTEM_TEMPLATE) {
+    senderType = 'system';
+  } else if (rawSenderType === 'user') {
+    senderType = 'user';
+  } else if (rawSenderType === 'system') {
+    senderType = 'system';
+  } else if (screenName) {
+    senderType = 'user';
+  }
+
+  return {
+    templateType,
+    text,
+    sender,
+    senderType,
+    screenName,
+  };
 }

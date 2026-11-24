@@ -59,7 +59,7 @@ import KoreBotClient, {
   ApiService,
 } from 'rn-kore-bot-socket-lib-v79';
 import { BotConfigModel } from '../models/BotConfigModel';
-import { applyKoreBotClientPatches } from '../utils/patchKoreBotClient';
+import { applyKoreBotClientPatches, resetSession } from '../utils/patchKoreBotClient';
 
 // Runtime safeguard to ensure KoreBotClient supports direct jwtToken and dynamic getJwtToken
 applyKoreBotClientPatches();
@@ -75,6 +75,9 @@ type ExtendedKoreBotClient = ReturnType<typeof KoreBotClient.getInstance> & {
   clearCachedMessages?(): void;
   setMinimized?(minimized: boolean): void;
   isMinimized?(): boolean;
+  clearMinimizeState?(): void;
+  resetSession?(): void;
+  onSessionReset?(listener: () => void): () => void;
 };
 import {TEMPLATE_STYLE_VALUES} from '../theme/styles';
 import {
@@ -86,6 +89,11 @@ import {
   normalize,
   renderImage,
 } from '../utils/helpers';
+import {
+  handleExternalLinkPress,
+  registerExternalLinkHandler,
+  unregisterExternalLinkHandler,
+} from '../utils/ExternalLinkHelper';
 import QuickReplies from '../templates/QuickReplies';
 import Color from '../theme/Color';
 import TableTemplate from '../templates/TableTemplate';
@@ -138,6 +146,18 @@ var isAgentConnect = false;
 var isMinimizedWindow = false;
 var historyMessages = 1;
 var cachedChatMessages: any[] = [];
+
+const clearModuleSessionState = () => {
+  isAgentConnect = false;
+  isMinimizedWindow = false;
+  historyMessages = 1;
+  cachedChatMessages = [];
+  AsyncStorage.removeItem(BRANDING_RESPONSE_FILE).catch(() => {});
+};
+
+(KoreBotClient.getInstance() as ExtendedKoreBotClient)?.onSessionReset?.(
+  clearModuleSessionState,
+);
 interface KoraChatProps {
   messages?: any[];
   messagesContainerStyle?: any;
@@ -180,6 +200,8 @@ interface KoraChatProps {
   route?: any;
   statusBarColor?: (colorCode: any) => void;
   onAppNavigation?: (navigationUrl: string, item: any) => void;
+  /** Optional callback invoked with the full URL when an external link is clicked inside chat. Stops default browser opening when provided. */
+  onExternalLinkClick?: (url: string, item?: any) => void;
   leaveChatTitle?: string;
   leaveChatTitleColor?: string;
   leaveChatDescription?: string;
@@ -247,6 +269,15 @@ export default class KoreChat extends React.Component<
   KoraChatProps,
   KoraChatState
 > {
+  /**
+   * Resets the active Kore chatbot session, clearing any minimized/cached
+   * message history, disconnecting the WebSocket, and wiping stored credentials.
+   * Call this from the host app on user logout.
+   */
+  public static resetSession = () => {
+    resetSession();
+  };
+
   _messageContainerRef: RefObject<any> = React.createRef()
   private ttsModule: any = null;
   private isTTSAvailable: boolean = false;
@@ -257,6 +288,7 @@ export default class KoreChat extends React.Component<
   _locale = 'en';
   invertibleScrollViewProps = {};
   _unsubscribeConn: any;
+  _unsubscribeSessionReset?: () => void;
   backHandler: any;
   unsubscribeNavigation: any;
   allowNavigation: boolean = false;
@@ -761,11 +793,43 @@ export default class KoreChat extends React.Component<
     }, 100);
   };
 
+  private externalLinkHandler = (url: string, item?: any) => {
+    if (this.props.onExternalLinkClick) {
+      this.props.onExternalLinkClick(url, item);
+    }
+  };
+
+  private syncExternalLinkHandler = () => {
+    if (this.props.onExternalLinkClick) {
+      registerExternalLinkHandler(this.externalLinkHandler);
+    } else {
+      unregisterExternalLinkHandler(this.externalLinkHandler);
+    }
+  };
+
+  private handleInstanceSessionReset = () => {
+    clearModuleSessionState();
+    if (this._isChatMounted) {
+      this.setState({
+        messages: [],
+        quickReplies: [],
+        isBotResponseLoading: false,
+        showLoader: false,
+        isReconnecting: false,
+        showBackButtonDialog: false,
+      });
+    }
+  };
+
   componentDidMount() {
+    this.syncExternalLinkHandler();
     if (this.props.fontFamily) {
       TEMPLATE_STYLE_VALUES.FONT_FAMILY = this.props.fontFamily;
     }
-    const botClient = KoreBotClient.getInstance();
+    const botClient = KoreBotClient.getInstance() as ExtendedKoreBotClient;
+    this._unsubscribeSessionReset = botClient?.onSessionReset?.(
+      this.handleInstanceSessionReset,
+    );
     this._unsubscribeConn = NetInfo.addEventListener(state => {
       const {isConnected} = state;
       if (!this.state.isNetConnected && isConnected) {
@@ -837,6 +901,9 @@ export default class KoreChat extends React.Component<
   };
 
   componentWillUnmount() {
+    unregisterExternalLinkHandler(this.externalLinkHandler);
+    this._unsubscribeSessionReset?.();
+    this._unsubscribeSessionReset = undefined;
     this.setisChatMounted(false);
     if (this.keyboardListener) {
       this.keyboardListener.remove();
@@ -862,6 +929,10 @@ export default class KoreChat extends React.Component<
 
   componentDidUpdate(prevProps: KoraChatProps, prevState: KoraChatState) {
     const {messages, text, inverted} = this.props;
+
+    if (this.props.onExternalLinkClick !== prevProps.onExternalLinkClick) {
+      this.syncExternalLinkHandler();
+    }
 
     if (this.props.messages !== prevProps.messages) {
       this.setMessages(messages || []);
@@ -1784,45 +1855,23 @@ export default class KoreChat extends React.Component<
         this.onSend({message: {text: message}, data, data_type});
         break;
       case 'web_url':
-      case 'url':
-        if (item?.url) {
-          let url = item?.url;
-          if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
-            url = 'http://' + url;
-          }
-          console.log('🔗 [Link Clicked]:', url);
-          Linking.openURL(url);
-        }
-        if (item?.link) {
-          let url = item?.link;
-          if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
-            url = 'http://' + url;
-          }
-          console.log('🔗 [Link Clicked]:', url);
-          Linking.openURL(url);
-        } else if (item?.redirectUrl) {
-          let dweb = item?.redirectUrl?.dweb;
-          let mob = item?.redirectUrl?.mob;
-          let url = mob || dweb || '';
-          if (url?.length > 0) {
-            if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
-              url = 'http://' + url;
-            }
-            Linking.canOpenURL(url).then(supported => {
-              if (!supported) {
-                try {
-                  Linking.openURL(url);
-                } catch (e) {}
-                console.log('No handler for URL:', url);
-              } else {
-                Linking.openURL(url);
-              }
-            });
-          }
-        } else if (item?.value) {
-          Linking.openURL(item?.value);
+      case 'url': {
+        const targetUrl =
+          item?.url ||
+          item?.link ||
+          item?.redirectUrl?.mob ||
+          item?.redirectUrl?.dweb ||
+          item?.value ||
+          '';
+        if (targetUrl && typeof targetUrl === 'string') {
+          handleExternalLinkPress(targetUrl, {
+            ...item,
+            template_type,
+            source: 'template_button',
+          });
         }
         break;
+      }
       case 'action':
         break;
 
@@ -1838,7 +1887,10 @@ export default class KoreChat extends React.Component<
       default:
         if (typeof item === 'string') {
           if (template_type == TEMPLATE_TYPES.IMAGE_MESSAGE) {
-            Linking.openURL(item);
+            handleExternalLinkPress(item, {
+              template_type,
+              source: 'image_message',
+            });
           } else {
             this.onSend({message: {text: item}});
           }

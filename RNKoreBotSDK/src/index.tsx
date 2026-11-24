@@ -14,19 +14,26 @@ export {default as BotTemplate} from '../bot-sdk/templates/BotTemplate';
 //import BotTemplate from '../bot-sdk/templates/BotTemplate';
 
 import KoreChat from '../bot-sdk/chat/KoreChat';
-import { applyKoreBotClientPatches } from '../bot-sdk/utils/patchKoreBotClient';
+import { applyKoreBotClientPatches, resetSession } from '../bot-sdk/utils/patchKoreBotClient';
 
 // Public socket/configuration API used by host applications.
 applyKoreBotClientPatches();
-export { applyKoreBotClientPatches };
+export { applyKoreBotClientPatches, resetSession };
 export {default as KoreBotClient, RTM_EVENT, APP_STATE} from 'rn-kore-bot-socket-lib-v79';
 export type {BotConfigModel} from '../bot-sdk/models/BotConfigModel';
 
 export {default as QuickReplies} from '../bot-sdk/templates/QuickReplies';
 export {default as PdfDownloadTemplate} from '../bot-sdk/templates/PdfDownloadTemplate';
 export {default as InternalAppNavigationTemplate} from '../bot-sdk/templates/InternalAppNavigationTemplate';
-export {parseInternalAppNavigationText} from '../bot-sdk/utils/helpers';
-export type {ParsedInternalAppNavigation} from '../bot-sdk/utils/helpers';
+export {default as LiveAgentTemplate} from '../bot-sdk/templates/LiveAgentTemplate';
+export type {ExternalLinkClickHandler} from '../bot-sdk/utils/ExternalLinkHelper';
+export {parseInternalAppNavigationText, extractLiveAgentInfo} from '../bot-sdk/utils/helpers';
+export type {
+  ParsedInternalAppNavigation,
+  LiveAgentMessageInfo,
+  LiveAgentSender,
+  LiveAgentSenderUser,
+} from '../bot-sdk/utils/helpers';
 export {
   default as DisplayClaimsTemplate,
   formatCamelCaseToLabel,

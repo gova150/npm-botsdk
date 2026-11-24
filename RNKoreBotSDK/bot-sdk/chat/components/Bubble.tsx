@@ -23,6 +23,7 @@ import {
   isSameDay,
   getTemplateType,
   parseInternalAppNavigationText,
+  extractLiveAgentInfo,
 } from '../../utils/helpers';
 import {BotChatContext} from '../BotChatContext';
 import {TEMPLATE_TYPES} from '../../constants/Constant';
@@ -493,6 +494,21 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
       }
     }
 
+    if (
+      type === TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE ||
+      type === TEMPLATE_TYPES.SYSTEM_TEMPLATE
+    ) {
+      const liveAgentInfo = extractLiveAgentInfo(this.props.currentMessage);
+      if (liveAgentInfo) {
+        payloadProps = {
+          ...payloadProps,
+          template_type: liveAgentInfo.templateType,
+          text: liveAgentInfo.text || payloadProps?.text,
+          sender: liveAgentInfo.sender || payloadProps?.sender,
+        };
+      }
+    }
+
     return {
       ...payloadProps,
       onListItemClick: this.props.onListItemClick,
@@ -611,6 +627,11 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
         </View>
       );
     } else {
+      const liveAgentInfo = extractLiveAgentInfo(this.props.currentMessage);
+      const displayName =
+        (liveAgentInfo?.senderType === 'user' && liveAgentInfo?.screenName) ||
+        botName;
+
       return (
         <View
           style={{
@@ -629,7 +650,7 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
               fontFamily: fontFamily,
               marginRight: 6,
             }}>
-            {botName}
+            {displayName}
           </Text>
           <Time
             createdOn={createdOn}
@@ -643,9 +664,11 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
   };
 
   private isBotTextMessage = () => {
+    const tType = getTemplateType(this.props.currentMessage?.message);
+    const liveAgentInfo = extractLiveAgentInfo(this.props.currentMessage);
     return (
       this.props.currentMessage?.type === 'bot_response' &&
-      getTemplateType(this.props.currentMessage?.message) === TEMPLATE_TYPES.TEXT
+      (tType === TEMPLATE_TYPES.TEXT || liveAgentInfo?.senderType === 'user')
     );
   };
 
@@ -658,13 +681,18 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
     const {position, containerStyle, wrapperStyle, bottomContainerStyle} =
       this.props;
     const theme = this.context as ThemeType;
+    const liveAgentInfo = extractLiveAgentInfo(this.props.currentMessage);
+    const isLiveAgentSystem =
+      liveAgentInfo?.senderType === 'system' || position === 'center';
+
     return (
       <View
         style={[
           styles[position].container,
           containerStyle && containerStyle[position],
         ]}>
-        {theme?.v3?.body?.time_stamp?.show !== false &&
+        {!isLiveAgentSystem &&
+          theme?.v3?.body?.time_stamp?.show !== false &&
           theme?.v3?.body?.time_stamp?.position !== 'bottom' &&
           this.renderTime()}
 
@@ -702,7 +730,8 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
             </Animated.View>
           </TouchableWithoutFeedback>
         </View>
-        {theme?.v3?.body?.time_stamp?.show &&
+        {!isLiveAgentSystem &&
+          theme?.v3?.body?.time_stamp?.show &&
           theme?.v3?.body?.time_stamp?.position === 'bottom' &&
           this.isBotTextMessage() &&
           this.renderTime()}
@@ -775,8 +804,14 @@ const styles = {
   center: StyleSheet.create({
     containerToNext: {},
     containerToPrevious: {},
-    container: {},
-    wrapper: {},
+    container: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    wrapper: {
+      width: '100%',
+      alignItems: 'center',
+    },
     bottom: {},
   }),
 };

@@ -42,7 +42,11 @@ import PdfDataResponseTemplate from './PdfDataResponseTemplate';
 import InternalAppNavigationTemplate from './InternalAppNavigationTemplate';
 import DisplayClaimsTemplate from './DisplayClaimsTemplate';
 import ClaimMoreDetailsTemplate from './ClaimMoreDetailsTemplate';
-import {parseInternalAppNavigationText} from '../utils/helpers';
+import LiveAgentTemplate from './LiveAgentTemplate';
+import {
+  extractLiveAgentInfo,
+  parseInternalAppNavigationText,
+} from '../utils/helpers';
 export interface BotTemplateProps {
   templateType: string;
   textContainerStyle?: any;
@@ -140,9 +144,25 @@ export default class BotTemplate extends React.Component<
 
     switch (resolvedType) {
       case TEMPLATE_TYPES.TEXT:
+        return this.renderMessageText(payload, theme, templateType);
       case TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE:
       case TEMPLATE_TYPES.SYSTEM_TEMPLATE:
-        return this.renderMessageText(payload, theme, templateType);
+      case 'system': {
+        const liveAgentInfo = extractLiveAgentInfo(
+          this.props.currentMessage || payload,
+        );
+        if (liveAgentInfo?.senderType === 'user') {
+          return this.renderMessageText(payload, theme, templateType);
+        }
+        return (
+          <LiveAgentTemplate
+            payload={payload}
+            theme={theme}
+            currentMessage={this.props.currentMessage}
+            onListItemClick={this.props.onListItemClick}
+          />
+        );
+      }
       case TEMPLATE_TYPES.BUTTON:
         return <Button payload={payload} theme={theme} onListItemClick={this.props.onListItemClick}/>;
       case TEMPLATE_TYPES.CARD_TEMPLATE:
@@ -309,10 +329,12 @@ export default class BotTemplate extends React.Component<
       );
     }
 
-    return (
-      <Text style={{padding: 10}}>
-        {'This template is under development...'}
-      </Text>
+    return this.renderMessageText(
+      {
+        text: "I can't help with that. However, I can help you with ID cards and claims. What would you like to do?",
+      },
+      theme,
+      TEMPLATE_TYPES.TEXT,
     );
   };
 

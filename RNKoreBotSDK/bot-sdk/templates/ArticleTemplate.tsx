@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   Dimensions,
   Image,
-  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import { getBubbleTheme } from '../theme/themeHelper';
 import Base64Image from '../utils/Base64Converter';
 import { LocalizationManager } from '../constants/Localization';
 import {images} from '../assets';
+import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
 interface ArticleProps extends BaseViewProps {
   payload?: any;
   onListItemClick?: any;
@@ -113,7 +113,13 @@ export default class ArticleTemplate extends BaseView<ArticleProps, ArticleState
                                     <TouchableOpacity 
                                         style={{ alignSelf:'center', flexDirection: 'row', paddingVertical: normalize(5)}}
                                         onPress={() => {
-                                            Linking.openURL(item.button.url);
+                                            if (item?.button?.url) {
+                                                handleExternalLinkPress(item.button.url, {
+                                                    ...item.button,
+                                                    title: item.button?.title || item.title,
+                                                    source: 'article_template',
+                                                });
+                                            }
                                         }}
                                     >
                                         <Image style={{tintColor: bubbleTheme.BUBBLE_RIGHT_BG_COLOR, width: 10, height: 10, alignSelf:'center'}} source={images.article}/>

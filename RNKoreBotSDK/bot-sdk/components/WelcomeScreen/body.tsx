@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   Dimensions,
-  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +12,7 @@ import {BaseViewProps, BaseViewState, WelcomeBaseView} from './WelcomeBaseView';
 import {normalize} from '../../utils/helpers';
 import Color from '../../theme/Color';
 import {SvgIcon} from '../../utils/SvgIcon';
+import {handleExternalLinkPress} from '../../utils/ExternalLinkHelper';
 const windowWidth = Dimensions.get('window').width;
 
 interface BodyProps extends BaseViewProps {}
@@ -200,29 +200,21 @@ export default class WelcomeBody extends WelcomeBaseView<BodyProps, BodyState> {
   private itemClick = (item: any) => {
     switch (item?.type) {
       case 'web_url':
-      case 'url':
-        if (item?.url) {
-          Linking.openURL(item?.url);
-        } else if (item?.redirectUrl) {
-          let dweb = item?.redirectUrl?.dweb;
-          let mob = item?.redirectUrl?.mob;
-          let url = mob || dweb || '';
-          if (url?.length > 0) {
-            Linking.canOpenURL(url).then(supported => {
-              if (!supported) {
-                try {
-                  Linking.openURL(url);
-                } catch (e) {}
-                console.log('No handler for URL:', url);
-              } else {
-                Linking.openURL(url);
-              }
-            });
-          }
-        } else if (item?.value) {
-          Linking.openURL(item?.value);
+      case 'url': {
+        const url =
+          item?.url ||
+          item?.redirectUrl?.mob ||
+          item?.redirectUrl?.dweb ||
+          item?.value ||
+          '';
+        if (url?.length > 0) {
+          handleExternalLinkPress(url, {
+            ...item,
+            source: 'welcome_screen',
+          });
         }
         break;
+      }
     }
   };
 

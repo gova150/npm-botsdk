@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-  Linking,
   StyleSheet,
   View,
   ViewStyle,
@@ -21,6 +20,7 @@ import Color from '../theme/Color';
 import {ThemeContext} from '../theme/ThemeContext';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {getParseList} from '../utils/ParseList';
+import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
 
 interface MessageTextProps extends BaseViewProps {
   optionTitles?: string[];
@@ -43,8 +43,6 @@ interface MessageTextProps extends BaseViewProps {
 }
 
 interface MessageTextState extends BaseViewState {}
-
-const WWW_URL_PATTERN = /^www\./i;
 
 const textStyle: TextStyle = {
   fontSize: 14,
@@ -151,40 +149,7 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
     if (!url || typeof url !== 'string') {
       return;
     }
-    let targetUrl = url.trim();
-    const markdownMatch = targetUrl.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (markdownMatch && markdownMatch[2]) {
-      targetUrl = markdownMatch[2].trim();
-    }
-    if (WWW_URL_PATTERN.test(targetUrl)) {
-      targetUrl = `https://${targetUrl}`;
-    } else if (
-      !targetUrl.startsWith('http://') &&
-      !targetUrl.startsWith('https://') &&
-      !targetUrl.includes('://') &&
-      !targetUrl.startsWith('mailto:') &&
-      !targetUrl.startsWith('tel:')
-    ) {
-      targetUrl = `https://${targetUrl}`;
-    }
-    console.log('🔗 [Link Clicked]:', targetUrl, url !== targetUrl ? `(original: "${url}")` : '');
-    Linking.canOpenURL(targetUrl)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL:', targetUrl, err);
-          });
-        } else {
-          Linking.openURL(targetUrl).catch(err => {
-            console.warn('Cannot open URL via fallback:', targetUrl, err);
-          });
-        }
-      })
-      .catch(() => {
-        Linking.openURL(targetUrl).catch(err => {
-          console.warn('Cannot open URL:', targetUrl, err);
-        });
-      });
+    handleExternalLinkPress(url, { source: 'message_text' });
   };
 
   onPhonePress = (_phone: string) => {
