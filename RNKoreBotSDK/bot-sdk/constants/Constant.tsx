@@ -146,6 +146,8 @@ export const TEMPLATE_TYPES = {
   INTERNAL_APP_NAVIGATION_TEMPLATE: 'internal_app_navigation',
   CUSTOM_TEMPLATE_DISPLAY_CLAIMS: 'customTemplate_displayClaims',
   CLAIM_MORE_DETAILS_TEMPLATE: 'claimMoreDetails_template',
+  AGENT_START_TYPING: 'agent_start_typing',
+  AGENT_STOP_TYPING: 'agent_stop_typing',
 };
 
 export const RENDER_KORA_BUBBLE = 'RENDER_KORA_BUBBLE';

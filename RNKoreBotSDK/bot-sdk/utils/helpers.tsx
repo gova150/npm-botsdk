@@ -463,6 +463,22 @@ export function getTemplateType(message: any) {
   }
 
   if (
+    detectedCustomType === TEMPLATE_TYPES.AGENT_START_TYPING ||
+    (typeof detectedCustomType === 'string' &&
+      detectedCustomType.toLowerCase() === 'agent_start_typing')
+  ) {
+    return TEMPLATE_TYPES.AGENT_START_TYPING;
+  }
+
+  if (
+    detectedCustomType === TEMPLATE_TYPES.AGENT_STOP_TYPING ||
+    (typeof detectedCustomType === 'string' &&
+      detectedCustomType.toLowerCase() === 'agent_stop_typing')
+  ) {
+    return TEMPLATE_TYPES.AGENT_STOP_TYPING;
+  }
+
+  if (
     (msg?.component?.type === 'template' || compPayload?.template_type || compPayload?.payload?.template_type) &&
     (compPayload?.type === 'template' ||
       compPayload?.payload?.template_type ||
@@ -661,6 +677,98 @@ export interface LiveAgentMessageInfo {
   screenName?: string;
 }
 
+const NAMED_HTML_ENTITIES: Record<string, string> = {
+  nbsp: ' ',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+};
+
+/**
+ * Strips HTML markup safely to plain text without executing or exposing
+ * `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<noscript>`,
+ * `<template>`, `<head>`, HTML comments, or container tags (e.g., `<div class="ck-content">`).
+ */
+export function sanitizeHtmlToPlainText(input: any): string {
+  if (input === null || input === undefined) {
+    return '';
+  }
+  const raw = typeof input === 'string' ? input : String(input);
+  if (!raw) {
+    return '';
+  }
+
+  // Fast path if there are no HTML tags or HTML entities
+  if (!raw.includes('<') && !raw.includes('&')) {
+    return raw.trim();
+  }
+
+  let cleaned = raw
+    // Strip dangerous / non-visible tags along with their full inner contents
+    .replace(
+      /<(script|style|iframe|object|embed|noscript|template|head)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,
+      ' ',
+    )
+    // Also strip unclosed trailing dangerous tags if malformed HTML is sent
+    .replace(
+      /<(script|style|iframe|object|embed|noscript|template|head)\b[^>]*>[\s\S]*$/gi,
+      '',
+    )
+    // Strip HTML comments and DOCTYPE declarations
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<!DOCTYPE\b[^>]*>/gi, '')
+    // Preserve readable line breaks for <br> and block-level HTML elements
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<hr\b[^>]*\/?>/gi, '\n')
+    .replace(/<li\b[^>]*>/gi, '\n• ')
+    .replace(
+      /<\/(?:p|div|tr|h[1-6]|blockquote|section|article|header|footer|pre|ul|ol)\s*>/gi,
+      '\n',
+    )
+    // Strip remaining HTML tags (e.g., <div class="ck-content">, <div class\="ck-content\">, <span>, <a>)
+    .replace(/<\/?[a-zA-Z!][a-zA-Z0-9:-]*(?:\s+[^<>]*)?\/?>/g, '');
+
+  // Decode HTML entities after tag stripping so encoded markup (e.g. &lt;script&gt;)
+  // renders safely as literal text and is never re-interpreted as HTML.
+  cleaned = cleaned
+    .replace(/&#(\d+);/g, (_match, dec) => {
+      const code = Number(dec);
+      if (Number.isFinite(code) && code >= 0 && code <= 0x10ffff) {
+        try {
+          return String.fromCodePoint(code);
+        } catch (e) {
+          return '';
+        }
+      }
+      return '';
+    })
+    .replace(/&#x([0-9a-fA-F]+);/g, (_match, hex) => {
+      const code = parseInt(hex, 16);
+      if (Number.isFinite(code) && code >= 0 && code <= 0x10ffff) {
+        try {
+          return String.fromCodePoint(code);
+        } catch (e) {
+          return '';
+        }
+      }
+      return '';
+    })
+    .replace(/&([a-zA-Z]+);/g, (match, name) => {
+      const mapped = NAMED_HTML_ENTITIES[name.toLowerCase()];
+      return mapped !== undefined ? mapped : match;
+    });
+
+  return cleaned
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map(line => line.replace(/[ \t]{2,}/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /**
  * Extracts `live_agent` / `SYSTEM` message metadata, normalizing payload nesting
  * across real-time socket messages, bot history responses, and template payloads.
@@ -732,7 +840,7 @@ export function extractLiveAgentInfo(input: any): LiveAgentMessageInfo | null {
     input?.text ??
     '';
 
-  const text = typeof rawText === 'string' ? rawText : String(rawText || '');
+  const text = sanitizeHtmlToPlainText(rawText);
 
   const rawSenderType = (sender?.type || '').toString().toLowerCase().trim();
   const screenName = sender?.user?.screenName || sender?.user?.name || undefined;
@@ -755,4 +863,353 @@ export function extractLiveAgentInfo(input: any): LiveAgentMessageInfo | null {
     senderType,
     screenName,
   };
+}
+
+const TEXT_ONLY_TEMPLATE_TYPES = new Set<string>([
+  '',
+  TEMPLATE_TYPES.TEXT,
+  TEMPLATE_TYPES.OTHER,
+  TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE,
+  TEMPLATE_TYPES.SYSTEM_TEMPLATE,
+]);
+
+/**
+ * Returns true if a `bot_response` message has an empty text payload
+ * (`component.payload.text === ''` or `cInfo.text` / `cInfo.body === ''`)
+ * and no rich template / attachment content to display.
+ */
+export function isEmptyBotResponseMessage(msgObj: any): boolean {
+  if (!msgObj || msgObj?.type !== 'bot_response') {
+    return false;
+  }
+
+  const msg = Array.isArray(msgObj?.message)
+    ? msgObj.message[0]
+    : msgObj?.message;
+
+  const templateType = (getTemplateType(msgObj?.message) || '').toString().trim();
+  if (!TEXT_ONLY_TEMPLATE_TYPES.has(templateType)) {
+    return false;
+  }
+
+  let compPayload = msg?.component?.payload;
+  if (typeof compPayload === 'string') {
+    const trimmed = compPayload.trim();
+    if (!trimmed) {
+      return true;
+    }
+    try {
+      compPayload = JSON.parse(trimmed);
+    } catch (e) {
+      return sanitizeHtmlToPlainText(trimmed).length === 0;
+    }
+  }
+
+  let innerPayload = compPayload?.payload;
+  if (typeof innerPayload === 'string') {
+    try {
+      innerPayload = JSON.parse(innerPayload);
+    } catch (e) {}
+  }
+
+  const resolvedPayload =
+    innerPayload && typeof innerPayload === 'object' ? innerPayload : compPayload;
+
+  // Preserve messages that carry attachments or interactive/template items
+  const hasRichItems =
+    (Array.isArray(resolvedPayload?.attachments) &&
+      resolvedPayload.attachments.length > 0) ||
+    (Array.isArray(compPayload?.attachments) &&
+      compPayload.attachments.length > 0) ||
+    (Array.isArray(resolvedPayload?.buttons) &&
+      resolvedPayload.buttons.length > 0) ||
+    (Array.isArray(resolvedPayload?.elements) &&
+      resolvedPayload.elements.length > 0) ||
+    (Array.isArray(resolvedPayload?.cards) &&
+      resolvedPayload.cards.length > 0) ||
+    (Array.isArray(resolvedPayload?.quick_replies) &&
+      resolvedPayload.quick_replies.length > 0);
+
+  if (hasRichItems) {
+    return false;
+  }
+
+  const hasPayloadTextField =
+    (compPayload && typeof compPayload === 'object' && 'text' in compPayload) ||
+    (innerPayload && typeof innerPayload === 'object' && 'text' in innerPayload);
+
+  if (hasPayloadTextField) {
+    const payloadText = innerPayload?.text ?? compPayload?.text;
+    return sanitizeHtmlToPlainText(payloadText).length === 0;
+  }
+
+  const cInfoText =
+    msg?.cInfo?.text ??
+    msg?.cInfo?.body ??
+    msgObj?.cInfo?.text ??
+    msgObj?.cInfo?.body;
+
+  if (
+    (msg?.cInfo && ('text' in msg.cInfo || 'body' in msg.cInfo)) ||
+    (msgObj?.cInfo && ('text' in msgObj.cInfo || 'body' in msgObj.cInfo))
+  ) {
+    return sanitizeHtmlToPlainText(cInfoText).length === 0;
+  }
+
+  const fallbackText = msg?.text ?? msgObj?.text;
+  return sanitizeHtmlToPlainText(fallbackText).length === 0;
+}
+
+export const BUBBLE_BREAK_MARKER = '@@QQ-BubbleBreak-@@QQ';
+
+/**
+ * Replaces `@@QQ-BubbleBreak-@@QQ` markers with a space and trims extra whitespace,
+ * useful for non-bubble consumers such as Text-to-Speech.
+ */
+export function stripBubbleBreakMarker(input: any): string {
+  if (typeof input !== 'string') {
+    return '';
+  }
+  return input
+    .split(BUBBLE_BREAK_MARKER)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .join(' ');
+}
+
+function parseJsonSafe(value: any): any {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || (trimmed[0] !== '{' && trimmed[0] !== '[')) {
+    return value;
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    return value;
+  }
+}
+
+function clonePayloadWithSegmentText(
+  messageObj: any,
+  segmentText: string,
+  isLastSegment: boolean,
+): any {
+  const msgArray = Array.isArray(messageObj?.message)
+    ? messageObj.message
+    : messageObj?.message
+    ? [messageObj.message]
+    : [];
+  const firstMsg = msgArray[0];
+
+  const cloned: any = {
+    ...messageObj,
+  };
+
+  if (typeof cloned.text === 'string') {
+    cloned.text = segmentText;
+  }
+
+  if (cloned.cInfo && typeof cloned.cInfo === 'object') {
+    cloned.cInfo = {
+      ...cloned.cInfo,
+      ...('text' in cloned.cInfo ? {text: segmentText} : {}),
+      ...('body' in cloned.cInfo ? {body: segmentText} : {}),
+    };
+  }
+
+  if (firstMsg && typeof firstMsg === 'object') {
+    const nextFirstMsg: any = {
+      ...firstMsg,
+      ...('text' in firstMsg ? {text: segmentText} : {}),
+    };
+
+    if (firstMsg.cInfo && typeof firstMsg.cInfo === 'object') {
+      nextFirstMsg.cInfo = {
+        ...firstMsg.cInfo,
+        ...('text' in firstMsg.cInfo ? {text: segmentText} : {}),
+        ...('body' in firstMsg.cInfo ? {body: segmentText} : {}),
+      };
+    }
+
+    if (firstMsg.component && typeof firstMsg.component === 'object') {
+      const nextComponent: any = {...firstMsg.component};
+      const rawCompPayload = firstMsg.component.payload;
+      const parsedCompPayload = parseJsonSafe(rawCompPayload);
+
+      if (parsedCompPayload && typeof parsedCompPayload === 'object') {
+        const nextCompPayload: any = {...parsedCompPayload};
+        const rawInnerPayload = parsedCompPayload.payload;
+        const parsedInnerPayload = parseJsonSafe(rawInnerPayload);
+
+        if (parsedInnerPayload && typeof parsedInnerPayload === 'object') {
+          const nextInnerPayload: any = {
+            ...parsedInnerPayload,
+            text: segmentText,
+          };
+          if (!isLastSegment) {
+            delete nextInnerPayload.buttons;
+            delete nextInnerPayload.quick_replies;
+            delete nextInnerPayload.elements;
+            delete nextInnerPayload.cards;
+            delete nextInnerPayload.attachments;
+          }
+          nextCompPayload.payload = nextInnerPayload;
+        }
+
+        if (
+          'text' in nextCompPayload ||
+          !(parsedInnerPayload && typeof parsedInnerPayload === 'object')
+        ) {
+          nextCompPayload.text = segmentText;
+        }
+
+        if (!isLastSegment) {
+          delete nextCompPayload.buttons;
+          delete nextCompPayload.quick_replies;
+          delete nextCompPayload.elements;
+          delete nextCompPayload.cards;
+          delete nextCompPayload.attachments;
+        }
+
+        nextComponent.payload = nextCompPayload;
+      } else {
+        nextComponent.payload = segmentText;
+      }
+
+      nextFirstMsg.component = nextComponent;
+    }
+
+    cloned.message = [nextFirstMsg, ...msgArray.slice(1)];
+  }
+
+  return cloned;
+}
+
+/**
+ * Splits a `bot_response` message containing `@@QQ-BubbleBreak-@@QQ` into an
+ * ordered (top-to-bottom / chronological) array of separate bubble messages,
+ * omitting the delimiter itself and any empty segments.
+ */
+export function splitBotResponseOnBubbleBreak(
+  messageObj: any,
+  options?: {preserveStreamMessageId?: boolean},
+): any[] {
+  if (!messageObj) {
+    return [];
+  }
+  if (messageObj?.type !== 'bot_response') {
+    return [messageObj];
+  }
+
+  const firstMsg = Array.isArray(messageObj?.message)
+    ? messageObj.message[0]
+    : messageObj?.message;
+
+  const compPayload = parseJsonSafe(firstMsg?.component?.payload);
+  const innerPayload =
+    compPayload && typeof compPayload === 'object'
+      ? parseJsonSafe(compPayload?.payload)
+      : undefined;
+
+  const rawText =
+    (innerPayload && typeof innerPayload === 'object'
+      ? innerPayload?.text
+      : undefined) ??
+    (compPayload && typeof compPayload === 'object'
+      ? compPayload?.text
+      : typeof compPayload === 'string'
+      ? compPayload
+      : undefined) ??
+    firstMsg?.cInfo?.text ??
+    firstMsg?.cInfo?.body ??
+    messageObj?.cInfo?.text ??
+    messageObj?.cInfo?.body ??
+    firstMsg?.text ??
+    messageObj?.text;
+
+  if (typeof rawText !== 'string' || !rawText.includes(BUBBLE_BREAK_MARKER)) {
+    return [messageObj];
+  }
+
+  const segments = rawText
+    .split(BUBBLE_BREAK_MARKER)
+    .map((part) => part.trim())
+    .filter(
+      (part) => part.length > 0 && sanitizeHtmlToPlainText(part).length > 0,
+    );
+
+  if (segments.length === 0) {
+    return [];
+  }
+
+  const parsedTimeMillis = Number(messageObj?.timeMillis);
+  const baseTimeMillis =
+    Number.isFinite(parsedTimeMillis) && parsedTimeMillis > 0
+      ? parsedTimeMillis
+      : Date.now();
+  const baseMessageId = messageObj?.messageId;
+  const preserveStreamMessageId = options?.preserveStreamMessageId === true;
+
+  return segments.map((segmentText, index) => {
+    const isLastSegment = index === segments.length - 1;
+    const itemId =
+      index === 0 && messageObj?.itemId ? messageObj.itemId : getItemId();
+    const nextMsg = clonePayloadWithSegmentText(
+      messageObj,
+      segmentText,
+      isLastSegment,
+    );
+
+    nextMsg.itemId = itemId;
+    nextMsg.timeMillis =
+      segments.length === 1
+        ? messageObj?.timeMillis ?? baseTimeMillis
+        : baseTimeMillis + index;
+
+    if (messageObj?._id) {
+      nextMsg._id =
+        index === 0 ? messageObj._id : `${messageObj._id}_part_${index}`;
+    } else {
+      nextMsg._id = itemId;
+    }
+
+    if (baseMessageId != null && segments.length > 1) {
+      if (preserveStreamMessageId) {
+        nextMsg.messageId = isLastSegment
+          ? baseMessageId
+          : `${baseMessageId}_part_${index}_${baseTimeMillis}`;
+      } else if (index > 0) {
+        nextMsg.messageId = `${baseMessageId}_part_${index}`;
+      }
+    }
+
+    return nextMsg;
+  });
+}
+
+/**
+ * Returns true if the template type is an agent typing indicator event
+ * (`agent_start_typing` or `agent_stop_typing`), which should be ignored in UI.
+ */
+export function isAgentTypingTemplate(templateType?: string): boolean {
+  const normalized = (templateType || '').toString().trim().toLowerCase();
+  return (
+    normalized === TEMPLATE_TYPES.AGENT_START_TYPING ||
+    normalized === TEMPLATE_TYPES.AGENT_STOP_TYPING
+  );
+}
+
+/**
+ * Single predicate to determine if a message should be excluded from
+ * chat state, history, and UI rendering (agent typing events or empty `bot_response` text messages).
+ */
+export function shouldIgnoreChatMessage(messageObj: any): boolean {
+  if (!messageObj) {
+    return false;
+  }
+  const tType = getTemplateType(messageObj?.message ?? messageObj);
+  return isAgentTypingTemplate(tType) || isEmptyBotResponseMessage(messageObj);
 }

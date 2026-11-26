@@ -6,12 +6,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ParsedText from 'react-native-parsed-text';
 import Color from '../theme/Color';
 import {botStyles, TEMPLATE_STYLE_VALUES, leftBubbleStyles} from '../theme/styles';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {TEMPLATE_TYPES, BubbleTheme, ButtonTheme} from '../constants/Constant';
 import {getWindowWidth} from '../charts';
-import {parseInternalAppNavigationText} from '../utils/helpers';
+import {getParseList} from '../utils/ParseList';
+import {
+  parseInternalAppNavigationText,
+  sanitizeHtmlToPlainText,
+} from '../utils/helpers';
 
 export interface InternalAppNavigationButtonItem {
   type?: string;
@@ -215,6 +220,11 @@ export default class InternalAppNavigationTemplate extends BaseView<
       bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
     const bodyBtnColor =
       bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
+    const linkColor =
+      bodyBtn?.border_color ||
+      bodyBtn?.borderColor ||
+      bodyBtnBg ||
+      '#002259';
 
     const isBackgroundInverted = payload?.variation === 'backgroundInverted';
     const isTextInverted = payload?.variation === 'textInverted';
@@ -244,6 +254,13 @@ export default class InternalAppNavigationTemplate extends BaseView<
         borderRadius: 8,
       };
 
+    const formattedTitle =
+      typeof title === 'string'
+        ? sanitizeHtmlToPlainText(title)
+        : title
+        ? String(title)
+        : '';
+
     return (
       <View
         pointerEvents="auto"
@@ -255,8 +272,8 @@ export default class InternalAppNavigationTemplate extends BaseView<
             backgroundColor: cardBgColor,
           },
         ]}>
-        {title ? (
-          <Text
+        {formattedTitle ? (
+          <ParsedText
             style={[
               styles.titleText,
               {
@@ -268,11 +285,10 @@ export default class InternalAppNavigationTemplate extends BaseView<
                 lineHeight: 20,
                 marginBottom: buttons.length > 0 ? 16 : 0,
               },
-            ]}>
-            {typeof title === 'string'
-              ? title.replace(/<br\s*\/?>/gi, '\n').trim()
-              : title}
-          </Text>
+            ]}
+            parse={getParseList(theme, linkColor)}>
+            {formattedTitle}
+          </ParsedText>
         ) : null}
 
         {buttons.length > 0 ? (

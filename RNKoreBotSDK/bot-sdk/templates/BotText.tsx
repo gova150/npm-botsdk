@@ -11,6 +11,7 @@ import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import ParsedText from 'react-native-parsed-text';
 import {getParseList} from '../utils/ParseList';
 import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
+import {sanitizeHtmlToPlainText} from '../utils/helpers';
 
 //const DEFAULT_OPTION_TITLES = ['Call', 'Text', 'Cancel'];
 
@@ -137,7 +138,13 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
 
     const bubbleTheme = getBubbleTheme(theme);
 
-    return text ? (
+    const sanitizedText = text ? sanitizeHtmlToPlainText(text) : '';
+    const formattedText =
+      this.props.isFilterApply && sanitizedText
+        ? sanitizedText.replace(/\s\s+/g, '\n').trim()
+        : sanitizedText;
+
+    return formattedText ? (
       <View style={{flexWrap: 'wrap', marginBottom: 5, marginEnd: 30}}>
         <View
           pointerEvents={this.isViewDisable() ? 'none' : 'auto'}
@@ -168,9 +175,7 @@ export default class BotText extends BaseView<BotTextProps, BotTextState> {
               },
             ]}
             parse={getParseList(theme, brandingBtnBorder)}>
-            {this.props.isFilterApply
-              ? text.toString().replace(/<br\s*\/?>/gi, '\n').replace(/\s\s+/g, '\n').trim()
-              : text.toString().replace(/<br\s*\/?>/gi, '\n').trim()}
+            {formattedText}
           </ParsedText>
         </View>
       </View>

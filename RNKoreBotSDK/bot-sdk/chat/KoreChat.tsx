@@ -81,6 +81,7 @@ type ExtendedKoreBotClient = ReturnType<typeof KoreBotClient.getInstance> & {
 };
 import {TEMPLATE_STYLE_VALUES} from '../theme/styles';
 import {
+  BUBBLE_BREAK_MARKER,
   getDrawableByExt,
   getItemId,
   getTemplateType,
@@ -88,6 +89,10 @@ import {
   isWhiteStatusBar,
   normalize,
   renderImage,
+  sanitizeHtmlToPlainText,
+  shouldIgnoreChatMessage,
+  splitBotResponseOnBubbleBreak,
+  stripBubbleBreakMarker,
 } from '../utils/helpers';
 import {
   handleExternalLinkPress,
@@ -1083,27 +1088,93 @@ export default class KoreChat extends React.Component<
           const prev = messages[idx];
           const prevPayload = prev?.message?.[0]?.component?.payload;
           const prevText = (prevPayload?.text ?? '') || '';
+          const prevRawText = prev?._rawStreamText ?? prevText;
           const prevCInfo = prev?.message?.[0]?.cInfo;
           const prevBody = (prevCInfo?.body ?? '') || '';
+          const accumulatedText = prevRawText + (streamText ?? '');
           const nextMessages = messages.slice();
-          const nextMessage = { ...prev };
+          const nextMessage: any = { ...prev };
           const nextMsgEntry = nextMessage.message?.[0] ? { ...nextMessage.message[0] } : null;
           if (nextMsgEntry?.component?.payload) {
-            nextMsgEntry.component = { ...nextMsgEntry.component, payload: { ...nextMsgEntry.component.payload, text: prevText + (streamText ?? '') } };
-            if (nextMsgEntry.cInfo) nextMsgEntry.cInfo = { ...nextMsgEntry.cInfo, body: prevBody + (streamText ?? '') };
+            nextMsgEntry.component = {
+              ...nextMsgEntry.component,
+              payload: { ...nextMsgEntry.component.payload, text: accumulatedText },
+            };
+            if (nextMsgEntry.cInfo) {
+              nextMsgEntry.cInfo = { ...nextMsgEntry.cInfo, body: prevBody + (streamText ?? '') };
+            }
             nextMessage.message = [nextMsgEntry];
+
+            if (accumulatedText.includes(BUBBLE_BREAK_MARKER)) {
+              const trailingAfterMarker = accumulatedText.slice(
+                accumulatedText.lastIndexOf(BUBBLE_BREAK_MARKER) + BUBBLE_BREAK_MARKER.length,
+              );
+              const splitParts = splitBotResponseOnBubbleBreak(nextMessage, {
+                preserveStreamMessageId: true,
+              });
+              if (splitParts.length > 0 && (splitParts.length > 1 || endChunk)) {
+                const lastPart = splitParts[splitParts.length - 1];
+                if (!endChunk && trailingAfterMarker.trim().length === 0) {
+                  lastPart._rawStreamText = accumulatedText;
+                } else {
+                  delete lastPart._rawStreamText;
+                }
+                const reversedParts = [...splitParts].reverse();
+                nextMessages.splice(idx, 1, ...reversedParts);
+                return nextMessages;
+              }
+              if (!endChunk && splitParts.length === 1) {
+                const displayPart = splitParts[0];
+                displayPart._rawStreamText = accumulatedText;
+                nextMessages[idx] = displayPart;
+                return nextMessages;
+              }
+            }
+
+            delete nextMessage._rawStreamText;
             nextMessages[idx] = nextMessage;
             return nextMessages;
           }
         }
 
-        const modifiedMessages = [{ ...newMessages, itemId }];
-        return KoreChat.append(messages, modifiedMessages);
+        const streamHasContent =
+          (streamText != null && String(streamText).trim().length > 0) ||
+          (endChunk && completeResponse != null && String(completeResponse).trim().length > 0);
+        if (!streamHasContent) {
+          return messages;
+        }
+        const rawInitialText =
+          typeof streamText === 'string' ? streamText : undefined;
+        const initialParts = splitBotResponseOnBubbleBreak(
+          { ...newMessages, itemId },
+          { preserveStreamMessageId: true },
+        ).reverse();
+        if (initialParts.length === 0) {
+          return messages;
+        }
+        if (
+          !endChunk &&
+          rawInitialText &&
+          rawInitialText.includes(BUBBLE_BREAK_MARKER)
+        ) {
+          const trailingAfterMarker = rawInitialText.slice(
+            rawInitialText.lastIndexOf(BUBBLE_BREAK_MARKER) +
+              BUBBLE_BREAK_MARKER.length,
+          );
+          if (trailingAfterMarker.trim().length === 0) {
+            initialParts[0]._rawStreamText = rawInitialText;
+          }
+        }
+        return KoreChat.append(messages, initialParts);
       });
       if (endChunk && completeResponse != null) {
         const ttsPayload = { ...newMessages, message: [{ component: { payload: { payload: { text: completeResponse }, text: completeResponse } } }] };
         setTimeout(() => this.textToSpeech(ttsPayload), 1000);
       }
+      return;
+    }
+
+    if (shouldIgnoreChatMessage(newMessages)) {
       return;
     }
 
@@ -1135,12 +1206,14 @@ export default class KoreChat extends React.Component<
         },
       ];
     } else {
-      modifiedMessages = [
-        {
-          ...newMessages,
-          itemId: itemId,
-        },
-      ];
+      modifiedMessages = splitBotResponseOnBubbleBreak({
+        ...newMessages,
+        itemId: itemId,
+      }).reverse();
+    }
+
+    if (modifiedMessages.length === 0) {
+      return;
     }
 
     if (modifiedMessages.length === 1 && !newMessages?.message?.[0]?.component?.payload?.attachments){
@@ -1149,13 +1222,16 @@ export default class KoreChat extends React.Component<
         this.setState({showTemplateBottomSheet: true, messageBottomSheet: message})
         return;
       }
+    }
 
-      if (message.type === 'bot_response'){
-        if (message.fromAgent == true){
-          isAgentConnect = true;
-        }else{
-          isAgentConnect = false;
-        }  
+    if (
+      !newMessages?.message?.[0]?.component?.payload?.attachments &&
+      newMessages?.type === 'bot_response'
+    ) {
+      if (newMessages.fromAgent == true) {
+        isAgentConnect = true;
+      } else {
+        isAgentConnect = false;
       }
     }
     
@@ -1300,6 +1376,9 @@ export default class KoreChat extends React.Component<
         if (tType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
           return;
         }
+        if (shouldIgnoreChatMessage(botResponse)) {
+          return;
+        }
         const payload = component.payload?.payload || component?.payload;
         if (tType === TEMPLATE_TYPES.TEXT) {
           message = payload?.text;
@@ -1322,6 +1401,9 @@ export default class KoreChat extends React.Component<
           message = message
             .replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, '')
             .trim();
+        }
+        if (typeof message === 'string') {
+          message = sanitizeHtmlToPlainText(stripBubbleBreakMarker(message));
         }
         if (message) {
           this.speakMessage(message);
@@ -1366,7 +1448,8 @@ export default class KoreChat extends React.Component<
       if (Array.isArray(nextMessages)) {
         nextMessages = nextMessages.filter(
           (m: any) =>
-            getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE,
+            getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE &&
+            !shouldIgnoreChatMessage(m),
         );
       }
       historyMessages = nextMessages.length;
@@ -3522,10 +3605,18 @@ export default class KoreChat extends React.Component<
   }
 
   private onHistoryLoaded = (historyMessages: any[]) => {
-    const cleanHistory = (historyMessages || []).filter((msg: any) => {
-      const tType = getTemplateType(msg?.message);
-      return tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE;
-    });
+    const cleanHistory = (historyMessages || [])
+      .filter((msg: any) => {
+        const tType = getTemplateType(msg?.message);
+        return (
+          tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE &&
+          !shouldIgnoreChatMessage(msg)
+        );
+      })
+      .reduce<any[]>(
+        (acc, msg) => acc.concat(splitBotResponseOnBubbleBreak(msg).reverse()),
+        [],
+      );
     let newMessages = this.getMessages().concat(cleanHistory);
     newMessages = newMessages.filter(
       (item, index, self) =>

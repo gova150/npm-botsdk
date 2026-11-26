@@ -27,7 +27,11 @@ export {default as PdfDownloadTemplate} from '../bot-sdk/templates/PdfDownloadTe
 export {default as InternalAppNavigationTemplate} from '../bot-sdk/templates/InternalAppNavigationTemplate';
 export {default as LiveAgentTemplate} from '../bot-sdk/templates/LiveAgentTemplate';
 export type {ExternalLinkClickHandler} from '../bot-sdk/utils/ExternalLinkHelper';
-export {parseInternalAppNavigationText, extractLiveAgentInfo} from '../bot-sdk/utils/helpers';
+export {
+  parseInternalAppNavigationText,
+  extractLiveAgentInfo,
+  sanitizeHtmlToPlainText,
+} from '../bot-sdk/utils/helpers';
 export type {
   ParsedInternalAppNavigation,
   LiveAgentMessageInfo,

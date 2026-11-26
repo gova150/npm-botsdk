@@ -24,6 +24,8 @@ import {
   getTemplateType,
   parseInternalAppNavigationText,
   extractLiveAgentInfo,
+  isAgentTypingTemplate,
+  shouldIgnoreChatMessage,
 } from '../../utils/helpers';
 import {BotChatContext} from '../BotChatContext';
 import {TEMPLATE_TYPES} from '../../constants/Constant';
@@ -407,9 +409,15 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
       let payload = data.message[0].component.payload;
 
       if (payload.payload && payload.payload.template_type) {
-        if (TEMPLATE_TYPES.HIDDEN_DIALOG === payload.payload.template_type) {
+        if (
+          TEMPLATE_TYPES.HIDDEN_DIALOG === payload.payload.template_type ||
+          isAgentTypingTemplate(payload.payload.template_type)
+        ) {
           return true;
         }
+      }
+      if (isAgentTypingTemplate(payload.template_type)) {
+        return true;
       }
     }
 
@@ -675,6 +683,9 @@ export default class Bubble extends React.Component<BubbleProps, BubbleState> {
   render() {
     let templateType = getTemplateType(this.props.currentMessage?.message);
     if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      return null;
+    }
+    if (shouldIgnoreChatMessage(this.props.currentMessage)) {
       return null;
     }
 

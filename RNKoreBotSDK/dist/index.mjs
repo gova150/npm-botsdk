@@ -404,7 +404,9 @@ var TEMPLATE_TYPES = {
   PDF_DATA_RESPONSE: "pdf_dataResponse",
   INTERNAL_APP_NAVIGATION_TEMPLATE: "internal_app_navigation",
   CUSTOM_TEMPLATE_DISPLAY_CLAIMS: "customTemplate_displayClaims",
-  CLAIM_MORE_DETAILS_TEMPLATE: "claimMoreDetails_template"
+  CLAIM_MORE_DETAILS_TEMPLATE: "claimMoreDetails_template",
+  AGENT_START_TYPING: "agent_start_typing",
+  AGENT_STOP_TYPING: "agent_stop_typing"
 };
 var RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 var KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -1343,6 +1345,12 @@ function getTemplateType(message) {
   if (detectedCustomType === TEMPLATE_TYPES.SYSTEM_TEMPLATE || typeof detectedCustomType === "string" && detectedCustomType.toLowerCase() === "system") {
     return TEMPLATE_TYPES.SYSTEM_TEMPLATE;
   }
+  if (detectedCustomType === TEMPLATE_TYPES.AGENT_START_TYPING || typeof detectedCustomType === "string" && detectedCustomType.toLowerCase() === "agent_start_typing") {
+    return TEMPLATE_TYPES.AGENT_START_TYPING;
+  }
+  if (detectedCustomType === TEMPLATE_TYPES.AGENT_STOP_TYPING || typeof detectedCustomType === "string" && detectedCustomType.toLowerCase() === "agent_stop_typing") {
+    return TEMPLATE_TYPES.AGENT_STOP_TYPING;
+  }
   if ((msg?.component?.type === "template" || compPayload?.template_type || compPayload?.payload?.template_type) && (compPayload?.type === "template" || compPayload?.payload?.template_type || compPayload?.template_type)) {
     const templateType = compPayload?.payload?.template_type || compPayload?.template_type;
     if (templateType === TEMPLATE_TYPES.BUTTON && compPayload?.formData != null) {
@@ -1453,6 +1461,61 @@ function convertToRNStyle(elementStyles) {
   }
   return rnStyle;
 }
+var NAMED_HTML_ENTITIES = {
+  nbsp: " ",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'"
+};
+function sanitizeHtmlToPlainText(input) {
+  if (input === null || input === void 0) {
+    return "";
+  }
+  const raw = typeof input === "string" ? input : String(input);
+  if (!raw) {
+    return "";
+  }
+  if (!raw.includes("<") && !raw.includes("&")) {
+    return raw.trim();
+  }
+  let cleaned = raw.replace(
+    /<(script|style|iframe|object|embed|noscript|template|head)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,
+    " "
+  ).replace(
+    /<(script|style|iframe|object|embed|noscript|template|head)\b[^>]*>[\s\S]*$/gi,
+    ""
+  ).replace(/<!--[\s\S]*?-->/g, "").replace(/<!DOCTYPE\b[^>]*>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<hr\b[^>]*\/?>/gi, "\n").replace(/<li\b[^>]*>/gi, "\n\u2022 ").replace(
+    /<\/(?:p|div|tr|h[1-6]|blockquote|section|article|header|footer|pre|ul|ol)\s*>/gi,
+    "\n"
+  ).replace(/<\/?[a-zA-Z!][a-zA-Z0-9:-]*(?:\s+[^<>]*)?\/?>/g, "");
+  cleaned = cleaned.replace(/&#(\d+);/g, (_match, dec) => {
+    const code = Number(dec);
+    if (Number.isFinite(code) && code >= 0 && code <= 1114111) {
+      try {
+        return String.fromCodePoint(code);
+      } catch (e) {
+        return "";
+      }
+    }
+    return "";
+  }).replace(/&#x([0-9a-fA-F]+);/g, (_match, hex) => {
+    const code = parseInt(hex, 16);
+    if (Number.isFinite(code) && code >= 0 && code <= 1114111) {
+      try {
+        return String.fromCodePoint(code);
+      } catch (e) {
+        return "";
+      }
+    }
+    return "";
+  }).replace(/&([a-zA-Z]+);/g, (match, name) => {
+    const mapped = NAMED_HTML_ENTITIES[name.toLowerCase()];
+    return mapped !== void 0 ? mapped : match;
+  });
+  return cleaned.replace(/\r\n?/g, "\n").split("\n").map((line) => line.replace(/[ \t]{2,}/g, " ").trim()).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
 function extractLiveAgentInfo(input) {
   if (!input) {
     return null;
@@ -1485,7 +1548,7 @@ function extractLiveAgentInfo(input) {
     }
   }
   const rawText = resolvedPayload?.text ?? compPayload?.text ?? msg?.cInfo?.body ?? msg?.text ?? input?.text ?? "";
-  const text = typeof rawText === "string" ? rawText : String(rawText || "");
+  const text = sanitizeHtmlToPlainText(rawText);
   const rawSenderType = (sender?.type || "").toString().toLowerCase().trim();
   const screenName = sender?.user?.screenName || sender?.user?.name || void 0;
   let senderType = "system";
@@ -1505,6 +1568,209 @@ function extractLiveAgentInfo(input) {
     senderType,
     screenName
   };
+}
+var TEXT_ONLY_TEMPLATE_TYPES = /* @__PURE__ */ new Set([
+  "",
+  TEMPLATE_TYPES.TEXT,
+  TEMPLATE_TYPES.OTHER,
+  TEMPLATE_TYPES.LIVE_AGENT_TEMPLATE,
+  TEMPLATE_TYPES.SYSTEM_TEMPLATE
+]);
+function isEmptyBotResponseMessage(msgObj) {
+  if (!msgObj || msgObj?.type !== "bot_response") {
+    return false;
+  }
+  const msg = Array.isArray(msgObj?.message) ? msgObj.message[0] : msgObj?.message;
+  const templateType = (getTemplateType(msgObj?.message) || "").toString().trim();
+  if (!TEXT_ONLY_TEMPLATE_TYPES.has(templateType)) {
+    return false;
+  }
+  let compPayload = msg?.component?.payload;
+  if (typeof compPayload === "string") {
+    const trimmed = compPayload.trim();
+    if (!trimmed) {
+      return true;
+    }
+    try {
+      compPayload = JSON.parse(trimmed);
+    } catch (e) {
+      return sanitizeHtmlToPlainText(trimmed).length === 0;
+    }
+  }
+  let innerPayload = compPayload?.payload;
+  if (typeof innerPayload === "string") {
+    try {
+      innerPayload = JSON.parse(innerPayload);
+    } catch (e) {
+    }
+  }
+  const resolvedPayload = innerPayload && typeof innerPayload === "object" ? innerPayload : compPayload;
+  const hasRichItems = Array.isArray(resolvedPayload?.attachments) && resolvedPayload.attachments.length > 0 || Array.isArray(compPayload?.attachments) && compPayload.attachments.length > 0 || Array.isArray(resolvedPayload?.buttons) && resolvedPayload.buttons.length > 0 || Array.isArray(resolvedPayload?.elements) && resolvedPayload.elements.length > 0 || Array.isArray(resolvedPayload?.cards) && resolvedPayload.cards.length > 0 || Array.isArray(resolvedPayload?.quick_replies) && resolvedPayload.quick_replies.length > 0;
+  if (hasRichItems) {
+    return false;
+  }
+  const hasPayloadTextField = compPayload && typeof compPayload === "object" && "text" in compPayload || innerPayload && typeof innerPayload === "object" && "text" in innerPayload;
+  if (hasPayloadTextField) {
+    const payloadText = innerPayload?.text ?? compPayload?.text;
+    return sanitizeHtmlToPlainText(payloadText).length === 0;
+  }
+  const cInfoText = msg?.cInfo?.text ?? msg?.cInfo?.body ?? msgObj?.cInfo?.text ?? msgObj?.cInfo?.body;
+  if (msg?.cInfo && ("text" in msg.cInfo || "body" in msg.cInfo) || msgObj?.cInfo && ("text" in msgObj.cInfo || "body" in msgObj.cInfo)) {
+    return sanitizeHtmlToPlainText(cInfoText).length === 0;
+  }
+  const fallbackText = msg?.text ?? msgObj?.text;
+  return sanitizeHtmlToPlainText(fallbackText).length === 0;
+}
+var BUBBLE_BREAK_MARKER = "@@QQ-BubbleBreak-@@QQ";
+function stripBubbleBreakMarker(input) {
+  if (typeof input !== "string") {
+    return "";
+  }
+  return input.split(BUBBLE_BREAK_MARKER).map((part) => part.trim()).filter((part) => part.length > 0).join(" ");
+}
+function parseJsonSafe(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || trimmed[0] !== "{" && trimmed[0] !== "[") {
+    return value;
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    return value;
+  }
+}
+function clonePayloadWithSegmentText(messageObj, segmentText, isLastSegment) {
+  const msgArray = Array.isArray(messageObj?.message) ? messageObj.message : messageObj?.message ? [messageObj.message] : [];
+  const firstMsg = msgArray[0];
+  const cloned = {
+    ...messageObj
+  };
+  if (typeof cloned.text === "string") {
+    cloned.text = segmentText;
+  }
+  if (cloned.cInfo && typeof cloned.cInfo === "object") {
+    cloned.cInfo = {
+      ...cloned.cInfo,
+      ..."text" in cloned.cInfo ? { text: segmentText } : {},
+      ..."body" in cloned.cInfo ? { body: segmentText } : {}
+    };
+  }
+  if (firstMsg && typeof firstMsg === "object") {
+    const nextFirstMsg = {
+      ...firstMsg,
+      ..."text" in firstMsg ? { text: segmentText } : {}
+    };
+    if (firstMsg.cInfo && typeof firstMsg.cInfo === "object") {
+      nextFirstMsg.cInfo = {
+        ...firstMsg.cInfo,
+        ..."text" in firstMsg.cInfo ? { text: segmentText } : {},
+        ..."body" in firstMsg.cInfo ? { body: segmentText } : {}
+      };
+    }
+    if (firstMsg.component && typeof firstMsg.component === "object") {
+      const nextComponent = { ...firstMsg.component };
+      const rawCompPayload = firstMsg.component.payload;
+      const parsedCompPayload = parseJsonSafe(rawCompPayload);
+      if (parsedCompPayload && typeof parsedCompPayload === "object") {
+        const nextCompPayload = { ...parsedCompPayload };
+        const rawInnerPayload = parsedCompPayload.payload;
+        const parsedInnerPayload = parseJsonSafe(rawInnerPayload);
+        if (parsedInnerPayload && typeof parsedInnerPayload === "object") {
+          const nextInnerPayload = {
+            ...parsedInnerPayload,
+            text: segmentText
+          };
+          if (!isLastSegment) {
+            delete nextInnerPayload.buttons;
+            delete nextInnerPayload.quick_replies;
+            delete nextInnerPayload.elements;
+            delete nextInnerPayload.cards;
+            delete nextInnerPayload.attachments;
+          }
+          nextCompPayload.payload = nextInnerPayload;
+        }
+        if ("text" in nextCompPayload || !(parsedInnerPayload && typeof parsedInnerPayload === "object")) {
+          nextCompPayload.text = segmentText;
+        }
+        if (!isLastSegment) {
+          delete nextCompPayload.buttons;
+          delete nextCompPayload.quick_replies;
+          delete nextCompPayload.elements;
+          delete nextCompPayload.cards;
+          delete nextCompPayload.attachments;
+        }
+        nextComponent.payload = nextCompPayload;
+      } else {
+        nextComponent.payload = segmentText;
+      }
+      nextFirstMsg.component = nextComponent;
+    }
+    cloned.message = [nextFirstMsg, ...msgArray.slice(1)];
+  }
+  return cloned;
+}
+function splitBotResponseOnBubbleBreak(messageObj, options) {
+  if (!messageObj) {
+    return [];
+  }
+  if (messageObj?.type !== "bot_response") {
+    return [messageObj];
+  }
+  const firstMsg = Array.isArray(messageObj?.message) ? messageObj.message[0] : messageObj?.message;
+  const compPayload = parseJsonSafe(firstMsg?.component?.payload);
+  const innerPayload = compPayload && typeof compPayload === "object" ? parseJsonSafe(compPayload?.payload) : void 0;
+  const rawText = (innerPayload && typeof innerPayload === "object" ? innerPayload?.text : void 0) ?? (compPayload && typeof compPayload === "object" ? compPayload?.text : typeof compPayload === "string" ? compPayload : void 0) ?? firstMsg?.cInfo?.text ?? firstMsg?.cInfo?.body ?? messageObj?.cInfo?.text ?? messageObj?.cInfo?.body ?? firstMsg?.text ?? messageObj?.text;
+  if (typeof rawText !== "string" || !rawText.includes(BUBBLE_BREAK_MARKER)) {
+    return [messageObj];
+  }
+  const segments = rawText.split(BUBBLE_BREAK_MARKER).map((part) => part.trim()).filter(
+    (part) => part.length > 0 && sanitizeHtmlToPlainText(part).length > 0
+  );
+  if (segments.length === 0) {
+    return [];
+  }
+  const parsedTimeMillis = Number(messageObj?.timeMillis);
+  const baseTimeMillis = Number.isFinite(parsedTimeMillis) && parsedTimeMillis > 0 ? parsedTimeMillis : Date.now();
+  const baseMessageId = messageObj?.messageId;
+  const preserveStreamMessageId = options?.preserveStreamMessageId === true;
+  return segments.map((segmentText, index) => {
+    const isLastSegment = index === segments.length - 1;
+    const itemId = index === 0 && messageObj?.itemId ? messageObj.itemId : getItemId();
+    const nextMsg = clonePayloadWithSegmentText(
+      messageObj,
+      segmentText,
+      isLastSegment
+    );
+    nextMsg.itemId = itemId;
+    nextMsg.timeMillis = segments.length === 1 ? messageObj?.timeMillis ?? baseTimeMillis : baseTimeMillis + index;
+    if (messageObj?._id) {
+      nextMsg._id = index === 0 ? messageObj._id : `${messageObj._id}_part_${index}`;
+    } else {
+      nextMsg._id = itemId;
+    }
+    if (baseMessageId != null && segments.length > 1) {
+      if (preserveStreamMessageId) {
+        nextMsg.messageId = isLastSegment ? baseMessageId : `${baseMessageId}_part_${index}_${baseTimeMillis}`;
+      } else if (index > 0) {
+        nextMsg.messageId = `${baseMessageId}_part_${index}`;
+      }
+    }
+    return nextMsg;
+  });
+}
+function isAgentTypingTemplate(templateType) {
+  const normalized = (templateType || "").toString().trim().toLowerCase();
+  return normalized === TEMPLATE_TYPES.AGENT_START_TYPING || normalized === TEMPLATE_TYPES.AGENT_STOP_TYPING;
+}
+function shouldIgnoreChatMessage(messageObj) {
+  if (!messageObj) {
+    return false;
+  }
+  const tType = getTemplateType(messageObj?.message ?? messageObj);
+  return isAgentTypingTemplate(tType) || isEmptyBotResponseMessage(messageObj);
 }
 
 // bot-sdk/chat/components/UserAvatar.tsx
@@ -9135,7 +9401,9 @@ var BotText = class extends BaseView_default {
     const brandingBtnText = buttonTheme?.ACTIVE_TXT_COLOR || "#FFFFFF";
     const brandingBtnBorder = bodyBtn?.border_color || bodyBtn?.borderColor || brandingBtnBg;
     const bubbleTheme = getBubbleTheme(theme);
-    return text ? /* @__PURE__ */ React36.createElement(View24, { style: { flexWrap: "wrap", marginBottom: 5, marginEnd: 30 } }, /* @__PURE__ */ React36.createElement(
+    const sanitizedText = text ? sanitizeHtmlToPlainText(text) : "";
+    const formattedText = this.props.isFilterApply && sanitizedText ? sanitizedText.replace(/\s\s+/g, "\n").trim() : sanitizedText;
+    return formattedText ? /* @__PURE__ */ React36.createElement(View24, { style: { flexWrap: "wrap", marginBottom: 5, marginEnd: 30 } }, /* @__PURE__ */ React36.createElement(
       View24,
       {
         pointerEvents: this.isViewDisable() ? "none" : "auto",
@@ -9167,7 +9435,7 @@ var BotText = class extends BaseView_default {
           ],
           parse: getParseList(theme, brandingBtnBorder)
         },
-        this.props.isFilterApply ? text.toString().replace(/<br\s*\/?>/gi, "\n").replace(/\s\s+/g, "\n").trim() : text.toString().replace(/<br\s*\/?>/gi, "\n").trim()
+        formattedText
       )
     )) : /* @__PURE__ */ React36.createElement(React36.Fragment, null);
   }
@@ -11972,13 +12240,7 @@ var MessageText = class extends BaseView_default {
     if (!text || typeof text !== "string") {
       return text;
     }
-    const entityRegex = /&#(\d+);/g;
-    let parsedText = text.replace(
-      entityRegex,
-      (_match, decimal) => String.fromCodePoint(decimal)
-    );
-    parsedText = parsedText.replace(/<br\s*\/?>/gi, "\n");
-    return parsedText;
+    return sanitizeHtmlToPlainText(text);
   };
   render() {
     const theme = this.props?.theme || this.context;
@@ -12028,7 +12290,8 @@ var MessageText = class extends BaseView_default {
     const position = this.props.position ? this.props.position : "left";
     const bubbleTheme = getBubbleTheme(this.props?.theme);
     const isPassword = this.checkIsPassword(text);
-    return text ? /* @__PURE__ */ React51.createElement(
+    const formattedText = text ? this.parseTextWithIcons(text?.trim?.())?.trim() : "";
+    return formattedText ? /* @__PURE__ */ React51.createElement(
       View39,
       {
         style: this.props.containerStyle ? this.props.containerStyle : [
@@ -12069,7 +12332,7 @@ var MessageText = class extends BaseView_default {
           parse: isPassword ? [] : [...parseList, ...getParseList(theme, brandingBtnBorder)],
           childrenProps: { ...this.props.textProps }
         },
-        this.parseTextWithIcons(text?.trim?.())?.trim()
+        formattedText
       )
     ) : /* @__PURE__ */ React51.createElement(View39, null);
   }
@@ -18112,6 +18375,7 @@ import {
   TouchableOpacity as TouchableOpacity39,
   View as View67
 } from "react-native";
+import ParsedText3 from "react-native-parsed-text";
 var InternalAppNavigationTemplate = class extends BaseView_default {
   constructor(props) {
     super(props);
@@ -18223,6 +18487,7 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
     const bodyBtn = theme?.v3?.body?.buttons || theme?.v3?.body?.button;
     const bodyBtnBg = bodyBtn?.bg_color || bodyBtn?.bgColor || btheme.ACTIVE_BG_COLOR;
     const bodyBtnColor = bodyBtn?.color || bodyBtn?.textColor || btheme.ACTIVE_TXT_COLOR;
+    const linkColor = bodyBtn?.border_color || bodyBtn?.borderColor || bodyBtnBg || "#002259";
     const isBackgroundInverted = payload?.variation === "backgroundInverted";
     const isTextInverted = payload?.variation === "textInverted";
     let buttonBgColor = bodyBtnBg || "#1B365D";
@@ -18242,6 +18507,7 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
     const bubbleRadiusStyle = leftBubbleStyles[theme?.v3?.body?.bubble_style || "balloon"]?.bubble_style || {
       borderRadius: 8
     };
+    const formattedTitle = typeof title === "string" ? sanitizeHtmlToPlainText(title) : title ? String(title) : "";
     return /* @__PURE__ */ React81.createElement(
       View67,
       {
@@ -18255,8 +18521,8 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
           }
         ]
       },
-      title ? /* @__PURE__ */ React81.createElement(
-        Text50,
+      formattedTitle ? /* @__PURE__ */ React81.createElement(
+        ParsedText3,
         {
           style: [
             styles62.titleText,
@@ -18269,9 +18535,10 @@ var InternalAppNavigationTemplate = class extends BaseView_default {
               lineHeight: 20,
               marginBottom: buttons.length > 0 ? 16 : 0
             }
-          ]
+          ],
+          parse: getParseList(theme, linkColor)
         },
-        typeof title === "string" ? title.replace(/<br\s*\/?>/gi, "\n").trim() : title
+        formattedTitle
       ) : null,
       buttons.length > 0 ? /* @__PURE__ */ React81.createElement(View67, { style: styles62.buttonsContainer }, buttons.map(
         (btn, index) => this.renderButton(
@@ -19659,13 +19926,14 @@ var LiveAgentTemplate = class extends BaseView_default {
     const theme = this.props?.theme || this.context;
     const liveAgentInfo = extractLiveAgentInfo(currentMessage || payload);
     const rawText = liveAgentInfo?.text || payload?.text || payload?.payload?.text || currentMessage?.message?.[0]?.component?.payload?.text || "";
-    const displayText = typeof rawText === "string" ? rawText.replace(/<br\s*\/?>/gi, "\n").trim() : String(rawText || "");
+    const displayText = sanitizeHtmlToPlainText(rawText);
     if (!displayText) {
       return null;
     }
     const fontFamily = theme?.v3?.body?.font?.family || TEMPLATE_STYLE_VALUES.FONT_FAMILY || "Inter";
     const createdOn = currentMessage?.createdOn || currentMessage?.created_at || currentMessage?.timeMillis || payload?.createdOn || currentMessage?.message?.[0]?.component?.payload?.createdOn || currentMessage?.message?.[0]?.createdOn || (/* @__PURE__ */ new Date()).toISOString();
-    return /* @__PURE__ */ React85.createElement(View71, { style: styles66.container }, /* @__PURE__ */ React85.createElement(View71, { style: styles66.iconContainer }, /* @__PURE__ */ React85.createElement(LiveAgentHeadsetIcon, { width: 18, height: 20, color: "#333333" })), /* @__PURE__ */ React85.createElement(View71, { style: styles66.textContainer }, /* @__PURE__ */ React85.createElement(
+    const isSystemSender = liveAgentInfo?.senderType === "system";
+    return /* @__PURE__ */ React85.createElement(View71, { style: [styles66.container, isSystemSender && styles66.systemContainer] }, /* @__PURE__ */ React85.createElement(View71, { style: styles66.iconContainer }, /* @__PURE__ */ React85.createElement(LiveAgentHeadsetIcon, { width: 18, height: 20, color: "#333333" })), /* @__PURE__ */ React85.createElement(View71, { style: styles66.textContainer }, /* @__PURE__ */ React85.createElement(
       Text54,
       {
         style: [
@@ -19690,6 +19958,9 @@ var styles66 = StyleSheet64.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center"
+  },
+  systemContainer: {
+    marginTop: 32
   },
   iconContainer: {
     borderRadius: 999,
@@ -19904,6 +20175,11 @@ var BotTemplate = class extends React86.Component {
             onListItemClick: this.props.onListItemClick
           }
         );
+      case TEMPLATE_TYPES.AGENT_START_TYPING:
+      case TEMPLATE_TYPES.AGENT_STOP_TYPING:
+      case "agent_start_typing":
+      case "agent_stop_typing":
+        return null;
     }
     if (resolvedType === "customTemplate_displayClaims" || resolvedType === TEMPLATE_TYPES.CUSTOM_TEMPLATE_DISPLAY_CLAIMS || payload?.template_type === "customTemplate_displayClaims" || payload?.payload?.template_type === "customTemplate_displayClaims") {
       return /* @__PURE__ */ React86.createElement(
@@ -22443,9 +22719,12 @@ var Bubble = class extends React95.Component {
     if (data && data.message && data.message[0] && data.message[0].component && data.message[0].component.type === "template" && data.message[0].component.payload) {
       let payload = data.message[0].component.payload;
       if (payload.payload && payload.payload.template_type) {
-        if (TEMPLATE_TYPES.HIDDEN_DIALOG === payload.payload.template_type) {
+        if (TEMPLATE_TYPES.HIDDEN_DIALOG === payload.payload.template_type || isAgentTypingTemplate(payload.payload.template_type)) {
           return true;
         }
+      }
+      if (isAgentTypingTemplate(payload.template_type)) {
+        return true;
       }
     }
     return false;
@@ -22643,6 +22922,9 @@ var Bubble = class extends React95.Component {
   render() {
     let templateType = getTemplateType(this.props.currentMessage?.message);
     if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+      return null;
+    }
+    if (shouldIgnoreChatMessage(this.props.currentMessage)) {
       return null;
     }
     const { position, containerStyle: containerStyle2, wrapperStyle, bottomContainerStyle } = this.props;
@@ -23006,6 +23288,9 @@ var Message = class extends React96.Component {
     if (currentMessage) {
       const templateType = getTemplateType(currentMessage?.message);
       if (templateType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
+        return null;
+      }
+      if (shouldIgnoreChatMessage(currentMessage)) {
         return null;
       }
       const sameUser = isSameUser(currentMessage, nextMessage);
@@ -27272,27 +27557,81 @@ var KoreChat = class _KoreChat extends React114.Component {
           const prev = messages[idx];
           const prevPayload = prev?.message?.[0]?.component?.payload;
           const prevText = (prevPayload?.text ?? "") || "";
+          const prevRawText = prev?._rawStreamText ?? prevText;
           const prevCInfo = prev?.message?.[0]?.cInfo;
           const prevBody = (prevCInfo?.body ?? "") || "";
+          const accumulatedText = prevRawText + (streamText ?? "");
           const nextMessages = messages.slice();
           const nextMessage = { ...prev };
           const nextMsgEntry = nextMessage.message?.[0] ? { ...nextMessage.message[0] } : null;
           if (nextMsgEntry?.component?.payload) {
-            nextMsgEntry.component = { ...nextMsgEntry.component, payload: { ...nextMsgEntry.component.payload, text: prevText + (streamText ?? "") } };
-            if (nextMsgEntry.cInfo)
+            nextMsgEntry.component = {
+              ...nextMsgEntry.component,
+              payload: { ...nextMsgEntry.component.payload, text: accumulatedText }
+            };
+            if (nextMsgEntry.cInfo) {
               nextMsgEntry.cInfo = { ...nextMsgEntry.cInfo, body: prevBody + (streamText ?? "") };
+            }
             nextMessage.message = [nextMsgEntry];
+            if (accumulatedText.includes(BUBBLE_BREAK_MARKER)) {
+              const trailingAfterMarker = accumulatedText.slice(
+                accumulatedText.lastIndexOf(BUBBLE_BREAK_MARKER) + BUBBLE_BREAK_MARKER.length
+              );
+              const splitParts = splitBotResponseOnBubbleBreak(nextMessage, {
+                preserveStreamMessageId: true
+              });
+              if (splitParts.length > 0 && (splitParts.length > 1 || endChunk)) {
+                const lastPart = splitParts[splitParts.length - 1];
+                if (!endChunk && trailingAfterMarker.trim().length === 0) {
+                  lastPart._rawStreamText = accumulatedText;
+                } else {
+                  delete lastPart._rawStreamText;
+                }
+                const reversedParts = [...splitParts].reverse();
+                nextMessages.splice(idx, 1, ...reversedParts);
+                return nextMessages;
+              }
+              if (!endChunk && splitParts.length === 1) {
+                const displayPart = splitParts[0];
+                displayPart._rawStreamText = accumulatedText;
+                nextMessages[idx] = displayPart;
+                return nextMessages;
+              }
+            }
+            delete nextMessage._rawStreamText;
             nextMessages[idx] = nextMessage;
             return nextMessages;
           }
         }
-        const modifiedMessages2 = [{ ...newMessages, itemId }];
-        return _KoreChat.append(messages, modifiedMessages2);
+        const streamHasContent = streamText != null && String(streamText).trim().length > 0 || endChunk && completeResponse != null && String(completeResponse).trim().length > 0;
+        if (!streamHasContent) {
+          return messages;
+        }
+        const rawInitialText = typeof streamText === "string" ? streamText : void 0;
+        const initialParts = splitBotResponseOnBubbleBreak(
+          { ...newMessages, itemId },
+          { preserveStreamMessageId: true }
+        ).reverse();
+        if (initialParts.length === 0) {
+          return messages;
+        }
+        if (!endChunk && rawInitialText && rawInitialText.includes(BUBBLE_BREAK_MARKER)) {
+          const trailingAfterMarker = rawInitialText.slice(
+            rawInitialText.lastIndexOf(BUBBLE_BREAK_MARKER) + BUBBLE_BREAK_MARKER.length
+          );
+          if (trailingAfterMarker.trim().length === 0) {
+            initialParts[0]._rawStreamText = rawInitialText;
+          }
+        }
+        return _KoreChat.append(messages, initialParts);
       });
       if (endChunk && completeResponse != null) {
         const ttsPayload = { ...newMessages, message: [{ component: { payload: { payload: { text: completeResponse }, text: completeResponse } } }] };
         setTimeout(() => this.textToSpeech(ttsPayload), 1e3);
       }
+      return;
+    }
+    if (shouldIgnoreChatMessage(newMessages)) {
       return;
     }
     const hasRealAttachments = Array.isArray(newMessages?.message?.[0]?.component?.payload?.attachments) ? newMessages?.message?.[0]?.component?.payload?.attachments.length > 0 : newMessages?.message?.[0]?.component?.payload?.attachments && newMessages?.message?.[0]?.component?.payload?.attachments !== "attachments" && newMessages?.message?.[0]?.component?.payload?.attachments !== "postback" && newMessages?.message?.[0]?.component?.payload?.attachments !== "";
@@ -27316,12 +27655,13 @@ var KoreChat = class _KoreChat extends React114.Component {
         }
       ];
     } else {
-      modifiedMessages = [
-        {
-          ...newMessages,
-          itemId
-        }
-      ];
+      modifiedMessages = splitBotResponseOnBubbleBreak({
+        ...newMessages,
+        itemId
+      }).reverse();
+    }
+    if (modifiedMessages.length === 0) {
+      return;
     }
     if (modifiedMessages.length === 1 && !newMessages?.message?.[0]?.component?.payload?.attachments) {
       let message = modifiedMessages[0];
@@ -27329,12 +27669,12 @@ var KoreChat = class _KoreChat extends React114.Component {
         this.setState({ showTemplateBottomSheet: true, messageBottomSheet: message });
         return;
       }
-      if (message.type === "bot_response") {
-        if (message.fromAgent == true) {
-          isAgentConnect = true;
-        } else {
-          isAgentConnect = false;
-        }
+    }
+    if (!newMessages?.message?.[0]?.component?.payload?.attachments && newMessages?.type === "bot_response") {
+      if (newMessages.fromAgent == true) {
+        isAgentConnect = true;
+      } else {
+        isAgentConnect = false;
       }
     }
     this.setMessages(_KoreChat.append(this.state.messages, modifiedMessages));
@@ -27442,6 +27782,9 @@ var KoreChat = class _KoreChat extends React114.Component {
         if (tType === TEMPLATE_TYPES.PDF_DATA_RESPONSE) {
           return;
         }
+        if (shouldIgnoreChatMessage(botResponse)) {
+          return;
+        }
         const payload = component.payload?.payload || component?.payload;
         if (tType === TEMPLATE_TYPES.TEXT) {
           message = payload?.text;
@@ -27458,6 +27801,9 @@ var KoreChat = class _KoreChat extends React114.Component {
       if (message) {
         if (typeof message === "string" && message.includes("$navigationStart$")) {
           message = message.replace(/\$navigationStart\$(.*?)\$navigationEnd\$/gis, "").trim();
+        }
+        if (typeof message === "string") {
+          message = sanitizeHtmlToPlainText(stripBubbleBreakMarker(message));
         }
         if (message) {
           this.speakMessage(message);
@@ -27492,7 +27838,7 @@ var KoreChat = class _KoreChat extends React114.Component {
       let nextMessages = typeof messagesOrUpdater === "function" ? messagesOrUpdater(prevState.messages || []) : messagesOrUpdater;
       if (Array.isArray(nextMessages)) {
         nextMessages = nextMessages.filter(
-          (m) => getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE
+          (m) => getTemplateType(m?.message) !== TEMPLATE_TYPES.PDF_DATA_RESPONSE && !shouldIgnoreChatMessage(m)
         );
       }
       historyMessages = nextMessages.length;
@@ -29280,8 +29626,11 @@ var KoreChat = class _KoreChat extends React114.Component {
   onHistoryLoaded = (historyMessages2) => {
     const cleanHistory = (historyMessages2 || []).filter((msg) => {
       const tType = getTemplateType(msg?.message);
-      return tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE;
-    });
+      return tType !== TEMPLATE_TYPES.PDF_DATA_RESPONSE && !shouldIgnoreChatMessage(msg);
+    }).reduce(
+      (acc, msg) => acc.concat(splitBotResponseOnBubbleBreak(msg).reverse()),
+      []
+    );
     let newMessages = this.getMessages().concat(cleanHistory);
     newMessages = newMessages.filter(
       (item, index, self) => index === self.findIndex((m) => m.timeMillis === item.timeMillis)
@@ -29794,6 +30143,7 @@ export {
   hidePdfDownloadLoader,
   parseInternalAppNavigationText,
   resetSession,
+  sanitizeHtmlToPlainText,
   showPdfDownloadLoader,
   useLazyCommunications,
   useLazySound

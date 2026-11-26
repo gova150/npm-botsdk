@@ -3,7 +3,10 @@ import {StyleSheet, Text, View} from 'react-native';
 import BaseView, {BaseViewProps, BaseViewState} from './BaseView';
 import {TEMPLATE_STYLE_VALUES} from '../theme/styles';
 import {getWindowWidth} from '../charts';
-import {extractLiveAgentInfo} from '../utils/helpers';
+import {
+  extractLiveAgentInfo,
+  sanitizeHtmlToPlainText,
+} from '../utils/helpers';
 import {LiveAgentHeadsetIcon} from '../assets/composebarIcons';
 import Time from '../chat/components/Time';
 import {ThemeContext} from '../theme/ThemeContext';
@@ -34,10 +37,7 @@ export default class LiveAgentTemplate extends BaseView<
       currentMessage?.message?.[0]?.component?.payload?.text ||
       '';
 
-    const displayText =
-      typeof rawText === 'string'
-        ? rawText.replace(/<br\s*\/?>/gi, '\n').trim()
-        : String(rawText || '');
+    const displayText = sanitizeHtmlToPlainText(rawText);
 
     if (!displayText) {
       return null;
@@ -57,8 +57,10 @@ export default class LiveAgentTemplate extends BaseView<
       currentMessage?.message?.[0]?.createdOn ||
       new Date().toISOString();
 
+    const isSystemSender = liveAgentInfo?.senderType === 'system';
+
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, isSystemSender && styles.systemContainer]}>
         <View style={styles.iconContainer}>
           <LiveAgentHeadsetIcon width={18} height={20} color="#333333" />
         </View>
@@ -91,6 +93,9 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  systemContainer: {
+    marginTop: 32,
   },
   iconContainer: {
     borderRadius: 999,

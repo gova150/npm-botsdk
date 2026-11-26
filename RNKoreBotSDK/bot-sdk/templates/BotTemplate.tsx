@@ -295,6 +295,11 @@ export default class BotTemplate extends React.Component<
               onListItemClick={this.props.onListItemClick}
             />
           );
+      case TEMPLATE_TYPES.AGENT_START_TYPING:
+      case TEMPLATE_TYPES.AGENT_STOP_TYPING:
+      case 'agent_start_typing':
+      case 'agent_stop_typing':
+          return null;
     }
 
     if (

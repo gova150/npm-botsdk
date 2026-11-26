@@ -21,6 +21,7 @@ import {ThemeContext} from '../theme/ThemeContext';
 import {getBubbleTheme, getButtonTheme} from '../theme/themeHelper';
 import {getParseList} from '../utils/ParseList';
 import {handleExternalLinkPress} from '../utils/ExternalLinkHelper';
+import {sanitizeHtmlToPlainText} from '../utils/helpers';
 
 interface MessageTextProps extends BaseViewProps {
   optionTitles?: string[];
@@ -211,12 +212,7 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
     if (!text || typeof text !== 'string') {
       return text;
     }
-    const entityRegex = /&#(\d+);/g;
-    let parsedText = text.replace(entityRegex, (_match, decimal) =>
-      String.fromCodePoint(decimal),
-    );
-    parsedText = parsedText.replace(/<br\s*\/?>/gi, '\n');
-    return parsedText;
+    return sanitizeHtmlToPlainText(text);
   };
 
   render() {
@@ -297,8 +293,11 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
     const bubbleTheme = getBubbleTheme(this.props?.theme);
 
     const isPassword = this.checkIsPassword(text);
+    const formattedText = text
+      ? this.parseTextWithIcons(text?.trim?.())?.trim()
+      : '';
 
-    return text ? (
+    return formattedText ? (
       <View
         style={
           this.props.containerStyle
@@ -348,7 +347,7 @@ class MessageText extends BaseView<MessageTextProps, MessageTextState> {
           ]}
           parse={isPassword ? [] : [...parseList, ...getParseList(theme, brandingBtnBorder)]}
           childrenProps={{...this.props.textProps}}>
-          {this.parseTextWithIcons(text?.trim?.())?.trim()}
+          {formattedText}
         </ParsedText>
       </View>
     ) : (

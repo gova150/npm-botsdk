@@ -93,6 +93,8 @@ declare const TEMPLATE_TYPES: {
     INTERNAL_APP_NAVIGATION_TEMPLATE: string;
     CUSTOM_TEMPLATE_DISPLAY_CLAIMS: string;
     CLAIM_MORE_DETAILS_TEMPLATE: string;
+    AGENT_START_TYPING: string;
+    AGENT_STOP_TYPING: string;
 };
 declare const RENDER_KORA_BUBBLE = "RENDER_KORA_BUBBLE";
 declare const KORA_ITEM_CLICK = "KORA_ITEM_CLICK";
@@ -1229,6 +1231,12 @@ interface LiveAgentMessageInfo {
     screenName?: string;
 }
 /**
+ * Strips HTML markup safely to plain text without executing or exposing
+ * `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<noscript>`,
+ * `<template>`, `<head>`, HTML comments, or container tags (e.g., `<div class="ck-content">`).
+ */
+declare function sanitizeHtmlToPlainText(input: any): string;
+/**
  * Extracts `live_agent` / `SYSTEM` message metadata, normalizing payload nesting
  * across real-time socket messages, bot history responses, and template payloads.
  */
@@ -1717,4 +1725,4 @@ declare class CustomVoiceRecognition {
 }
 declare const customVoiceRecognition: CustomVoiceRecognition;
 
-export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, ExternalLinkClickHandler, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, LiveAgentMessageInfo, LiveAgentSender, LiveAgentSenderUser, LiveAgentTemplate, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, ParsedInternalAppNavigation, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractLiveAgentInfo, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, parseInternalAppNavigationText, resetSession, showPdfDownloadLoader, useLazyCommunications, useLazySound };
+export { BOT_ICON_URL, BRANDING_RESPONSE_FILE, BotConfigModel, BotTemplate, BotTemplateProps, BotTemplateState, BubbleTheme, ButtonTheme, CONNECTION_STATE, ChatHeaderType, ClaimMoreDetailsTemplate, _default as Color, CustomTemplate, CustomViewProps, CustomViewState, customVoiceRecognition as CustomVoiceRecognition, DATE_FORMAT, DEFAULT_PLACEHOLDER, DisplayClaimsTemplate, ExternalLinkClickHandler, FILE_CONTEXT, FallbackCommunications, FallbackCommunicationsAPI, FallbackSound, FallbackSoundAPI, HEADER_ICON, HeaderIconsId, IThemeType, InputToolbar, InternalAppNavigationTemplate, KORA_ITEM_CLICK, LIMIT_MESSAGE, LazyCommunications, LazySound, LiveAgentMessageInfo, LiveAgentSender, LiveAgentSenderUser, LiveAgentTemplate, MAX_COMPOSER_HEIGHT, MAX_FILE_NAME_LENGTH, MAX_INPUT_TEXT_LENGTH, MAX_SOURCE_LIMIT, MAX_TOOL_BAR_HEIGHT, MIN_COMPOSER_HEIGHT, MIN_HEADER_HEIGHT, MIN_TOOL_BAR_HEIGHT, ParsedInternalAppNavigation, PdfDataResponseTemplate, PdfDownloadTemplate, QuickReplies, RENDER_KORA_BUBBLE, SHOW_BUTTONS_LIMIT, TEMPLATE_TYPES, TIME_FORMAT, URL_VERSION, UUID, WelcomeHeaderConstants, applyKoreBotClientPatches, attach_menu_buttons, KoreChat as default, downloadPdfDataResponse, extractLiveAgentInfo, extractPdfCards, formatCamelCaseToLabel, getBrandingButtonColor, hidePdfDownloadLoader, onListItemClickProps, parseInternalAppNavigationText, resetSession, sanitizeHtmlToPlainText, showPdfDownloadLoader, useLazyCommunications, useLazySound };
